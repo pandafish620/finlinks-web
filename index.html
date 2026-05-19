@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>融链科技 | FinLink - 跨境 SME 的 AI 智能外汇审计与资金管理专家</title>
+    <title>FinLink 融链科技 | 跨境金融降本增效专家</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        .lang-en { display: none; } /* 默认隐藏英文 */
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased">
@@ -15,16 +16,22 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-2">
                 <span class="text-2xl font-black tracking-wider text-blue-600">FinLink</span>
-                <span class="text-sm font-medium text-slate-400 border-l border-slate-300 pl-2">融链科技</span>
+                <span class="text-sm font-medium text-slate-400 border-l border-slate-300 pl-2 lang-zh">融链科技</span>
             </div>
-            <nav class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
-                <a href="#painpoints" class="hover:text-blue-600 transition">行业痛点</a>
-                <a href="#features" class="hover:text-blue-600 transition">核心功能</a>
-                <a href="#security" class="hover:text-blue-600 transition">安全合规</a>
-            </nav>
-            <div>
+            
+            <div class="flex items-center space-x-6">
+                <nav class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
+                    <a href="#painpoints" class="hover:text-blue-600 transition"><span class="lang-zh">利润黑箱</span><span class="lang-en">Pain Points</span></a>
+                    <a href="#features" class="hover:text-blue-600 transition"><span class="lang-zh">核心能力</span><span class="lang-en">Solutions</span></a>
+                    <a href="#partners" class="hover:text-blue-600 transition"><span class="lang-zh">生态兼容</span><span class="lang-en">Network</span></a>
+                </nav>
+                
+                <button onclick="toggleLanguage()" class="inline-flex items-center px-3 py-1 text-xs font-semibold text-slate-700 bg-slate-100 rounded-full hover:bg-slate-200 transition cursor-pointer">
+                    🌐 <span id="lang-btn-text" class="ml-1">English</span>
+                </button>
+                
                 <a href="#contact" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition shadow-sm">
-                    申请演示
+                    <span class="lang-zh">申请演示</span><span class="lang-en">Request Demo</span>
                 </a>
             </div>
         </div>
@@ -34,45 +41,85 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="max-w-3xl mx-auto text-center">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 mb-6">
-                    🚀 Next-Gen FinTech Framework
+                    🚀 Next-Gen FinTech Infrastructure
                 </span>
-                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 mb-6">
-                    让每一笔跨境资金<br class="hidden sm:inline">
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">精准降本，全链透明</span>
+                
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 mb-6 leading-tight">
+                    <div class="lang-zh">
+                        揪出跨境隐性点差<br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">把被偷走的利润拿回来</span>
+                    </div>
+                    <div class="lang-en">
+                        Stop Overpaying for FX<br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Reclaim Your Hidden Margin</span>
+                    </div>
                 </h1>
+                
                 <p class="text-lg text-slate-600 mb-8 max-w-xl mx-auto">
-                    融链 FinLink 利用前沿人工智能技术，为全球中小出海企业（SME）提供实时外汇审计、TCA 交易成本分析与智能资金路径规划。
+                    <span class="lang-zh">融链 FinLink 依托智能化数据引擎，为出海企业提供实时汇率体检、交易成本分析（TCA）与多渠道资金路径最优规划。</span>
+                    <span class="lang-en">FinLink empowers global SMEs to analyze transaction costs (TCA), detect hidden FX markups, and optimize cross-border payment routing in real time.</span>
                 </p>
+                
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
                     <a href="#contact" class="px-6 py-3 text-base font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition shadow-md text-center">
-                        免费为您做一笔汇率审计
-                    </a>
-                    <a href="#features" class="px-6 py-3 text-base font-medium text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition text-center">
-                        了解技术架构
+                        <span class="lang-zh">免费获取外汇点差体检报告</span><span class="lang-en">Get Free FX Cost Analysis</span>
                     </a>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="painpoints" class="py-16 border-t border-slate-100 bg-white">
+    <section id="partners" class="py-8 bg-white border-y border-slate-200/60">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-xs font-semibold uppercase tracking-wider text-slate-400 mb-6">
+                <span class="lang-zh">系统已全线兼容支持的全球金融基础设施与多币种清算网络</span>
+                <span class="lang-en">Supported Financial Networks & Ecosystem Partners</span>
+            </p>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-8 items-center justify-items-center opacity-65 grayscale hover:grayscale-0 transition duration-300">
+                <div class="text-lg font-bold tracking-tight text-slate-700">HSBC Bank</div>
+                <div class="text-lg font-bold tracking-tight text-slate-700">Citibank</div>
+                <div class="text-lg font-bold tracking-tight text-slate-700">OANDA API</div>
+                <div class="text-lg font-bold tracking-tight text-slate-700">Airwallex Network</div>
+                <div class="text-lg font-bold tracking-tight text-slate-700">PingPong Node</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="painpoints" class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-12">
-                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">你是否也在遭遇跨境结汇的“隐性黑箱”？</h2>
-                <p class="mt-2 text-slate-500">传统离岸账户与中介，正在悄悄蚕食你辛苦赚来的利润。</p>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900">
+                    <span class="lang-zh">为什么你的出海结汇成本一直高居不下？</span>
+                    <span class="lang-en">The Hidden Drain on Your Cross-Border Revenue</span>
+                </h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                    <div class="text-xl font-bold text-slate-900 mb-2">01. 虚高的点差（Spread）</div>
-                    <p class="text-slate-600 text-sm leading-relaxed">银行和支付机构给你的汇率，往往隐含了高达 0.5% - 2% 的隐性点差，而你对此一无所知。</p>
+                    <div class="text-lg font-bold text-slate-900 mb-2">
+                        <span class="lang-zh">1. 隐性汇率加点 (Spread)</span><span class="lang-en">1. Hidden FX Markups</span>
+                    </div>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        <span class="lang-zh">通道方给你的价格并不是国际中间汇率。每结汇100万美金，往往有高达数千美金的利润在“不知情加点”中蒸发。</span>
+                        <span class="lang-en">Providers rarely offer the real mid-market rate. Thousands of dollars slip away in undisclosed markups per million traded.</span>
+                    </p>
                 </div>
                 <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                    <div class="text-xl font-bold text-slate-900 mb-2">02. 滞后的到账时效</div>
-                    <p class="text-slate-600 text-sm leading-relaxed">资金在中间行流转层层扣费，且缺乏实时状态跟踪，导致外贸工厂资金周转压力巨大。</p>
+                    <div class="text-lg font-bold text-slate-900 mb-2">
+                        <span class="lang-zh">2. 跨行层层扣费黑箱</span><span class="lang-en">2. Intermediate Fee Opaque</span>
+                    </div>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        <span class="lang-zh">中间行扣费、电报费缺乏预先透明度，账面资金和实际到账永远对不上，财务人员核销头疼不已。</span>
+                        <span class="lang-en">Intermediary bank charges lack pre-transparency, complicating reconciliation for accounting teams.</span>
+                    </p>
                 </div>
                 <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                    <div class="text-xl font-bold text-slate-900 mb-2">03. 复杂的合规风控</div>
-                    <p class="text-slate-600 text-sm leading-relaxed">由于缺乏专业的汇率审计与合规水单整理工具，企业随时面临银行账户被冻结的合规风险。</p>
+                    <div class="text-lg font-bold text-slate-900 mb-2">
+                        <span class="lang-zh">3. 缺乏独立交易分析</span><span class="lang-en">3. No Independent Verification</span>
+                    </div>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        <span class="lang-zh">过去你只能被迫信任服务商提供的数据。FinLink 充当独立的第三方裁判，用技术还你纯粹的价格知情权。</span>
+                        <span class="lang-en">SMEs used to rely solely on statements from biased vendors. FinLink acts as an independent referee to protect your data.</span>
+                    </p>
                 </div>
             </div>
         </div>
@@ -80,78 +127,67 @@
 
     <section id="features" class="py-16 bg-slate-50 border-t border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-3xl font-bold text-slate-900">AI 驱动的数字金融基础设施</h2>
-                <p class="mt-2 text-slate-500">北京乾卉科技团队倾力打造，用算法和数据为您的出海资产护航。</p>
-            </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div class="flex flex-col justify-center">
-                    <div class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-2">Feature 01</div>
-                    <h3 class="text-2xl font-bold text-slate-900 mb-4">多模态 AI 外汇流水实时审计</h3>
-                    <p class="text-slate-600 mb-6 leading-relaxed">
-                        无需手动对账。只需将银行回单或结汇流水上传，FinLink 核心 AI 引擎自动识别并进行交易成本分析（TCA），精准揪出结汇过程中的每一分隐性扣费。
+                    <span class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-2">Engine 01</span>
+                    <h3 class="text-2xl font-bold text-slate-900 mb-4">
+                        <span class="lang-zh">智能账单体检系统 (TCA Engine)</span>
+                        <span class="lang-en">Automated Transaction Cost Analysis</span>
+                    </h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                        <span class="lang-zh">一键批量导入或拖拽上传外汇流水、网银结汇截图。多模态解析引擎将自动对齐交易发生那一秒的全球银行间同业真汇率，瞬间输出费用差异报告。</span>
+                        <span class="lang-en">Simply upload your bank receipts or multi-currency statements. Our framework immediately benchmark records against pinpoint historical mid-market rates.</span>
                     </p>
                 </div>
                 <div class="flex flex-col justify-center">
-                    <div class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-2">Feature 02</div>
-                    <h3 class="text-2xl font-bold text-slate-900 mb-4">国际机构级 API 直连验证</h3>
-                    <p class="text-slate-600 mb-6 leading-relaxed">
-                        我们直连国际权威金融数据源（如 OANDA），全天候比对全球真实银行间同业拆借汇率。让信息不对称彻底成为历史，给中小企业真正的价格知情权。
+                    <span class="text-xs font-bold uppercase tracking-wider text-blue-600 mb-2">Engine 02</span>
+                    <h3 class="text-2xl font-bold text-slate-900 mb-4">
+                        <span class="lang-zh">权威数据直连比对 (Global Feed)</span>
+                        <span class="lang-en">Institutional Data Feed Integration</span>
+                    </h3>
+                    <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                        <span class="lang-zh">直连 OANDA 等国际顶尖机构级数据接口。不仅比对收盘价，更精确校准高频交易波动点，确保分析结果具备无可辩驳的权威性与可信度。</span>
+                        <span class="lang-en">Direct access to real-time premium financial standard feeds, ensuring undeniable precision in pricing dispute resolution.</span>
                     </p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="security" class="py-16 bg-slate-900 text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl font-bold mb-4">金融级数字安全壁垒</h2>
-            <p class="text-slate-400 max-w-xl mx-auto mb-12 text-sm">
-                我们深知每一笔资金流水的敏感性。FinLink 采用全链路端到端加密体系，数据仅用于 AI 逻辑审计，系统不存储任何用户原始账户密钥。
+    <section id="contact" class="py-20 bg-white border-t border-slate-100">
+        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">
+                <span class="lang-zh">申请免费汇率费率体检</span>
+                <span class="lang-en">Unlock Your Free Margin Health Report</span>
+            </h2>
+            <p class="text-slate-500 mb-8 text-sm">
+                <span class="lang-zh">留下您的联系方式，产品专家将在24小时内为您生成专属的《跨境资金交易成本分析报告》。</span>
+                <span class="lang-en">Leave your details below. Our analyst team will provide an unbiased, end-to-end payment cost review within 1 business day.</span>
             </p>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                <div class="border border-slate-800 p-6 rounded-xl bg-slate-800/30">
-                    <div class="text-2xl font-bold text-blue-400 mb-1">AES-256</div>
-                    <div class="text-xs text-slate-400">传输级加密标准</div>
-                </div>
-                <div class="border border-slate-800 p-6 rounded-xl bg-slate-800/30">
-                    <div class="text-2xl font-bold text-blue-400 mb-1">Strict Full</div>
-                    <div class="text-xs text-slate-400">SSL 安全合规</div>
-                </div>
-                <div class="border border-slate-800 p-6 rounded-xl bg-slate-800/30">
-                    <div class="text-2xl font-bold text-blue-400 mb-1">Zero-Trust</div>
-                    <div class="text-xs text-slate-400">零信任安全架构</div>
-                </div>
-                <div class="border border-slate-800 p-6 rounded-xl bg-slate-800/30">
-                    <div class="text-2xl font-bold text-blue-400 mb-1">100%</div>
-                    <div class="text-xs text-slate-400">数据脱敏处理</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="contact" class="py-20 bg-white">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl font-bold text-slate-900 mb-4">开启您的智能降本之旅</h2>
-            <p class="text-slate-500 mb-8 text-sm">请留下您的企业联络方式，我们的资深产品专家将在 24 小时内与您取得联系，并为您送上一份专属的《外汇流水免费审计报告》。</p>
             
-            <form class="space-y-4 text-left border border-slate-200 p-8 rounded-2xl shadow-sm bg-slate-50" onsubmit="alert('融链科技已收到您的申请，产品经理将尽快与您联系！'); return false;">
+            <form class="space-y-4 text-left border border-slate-200 p-8 rounded-2xl shadow-sm bg-slate-50" onsubmit="alert('FinLink received your request. Our product team will follow up via email/phone shortly.'); return false;">
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">企业全称</label>
-                    <input type="text" required placeholder="如：广州某某进出口贸易有限公司" class="w-full px-4 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 transition">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+                        <span class="lang-zh">公司全称</span><span class="lang-en">Company Name</span>
+                    </label>
+                    <input type="text" required placeholder="Company Ltd." class="w-full px-4 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 transition">
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">联系人姓名</label>
-                        <input type="text" required placeholder="张经理" class="w-full px-4 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 transition">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+                            <span class="lang-zh">联系人</span><span class="lang-en">Contact Name</span>
+                        </label>
+                        <input type="text" required placeholder="Alex" class="w-full px-4 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">手机号码 / 微信</label>
-                        <input type="text" required placeholder="13800138000" class="w-full px-4 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 transition">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">
+                            <span class="lang-zh">手机号 / 微信 / Email</span><span class="lang-en">Phone / Email</span>
+                        </label>
+                        <input type="text" required placeholder="+86 / contact@email.com" class="w-full px-4 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-600 transition">
                     </div>
                 </div>
-                <button type="submit" class="w-full py-3 bg-blue-600 text-white font-medium rounded-lg text-sm hover:bg-blue-700 transition shadow-md">
-                    提交申请，免费获取 AI 汇率审计服务
+                <button type="submit" class="w-full py-3 bg-blue-600 text-white font-medium rounded-lg text-sm hover:bg-blue-700 transition shadow-md cursor-pointer">
+                    <span class="lang-zh">提交申请，开始体检</span><span class="lang-en">Submit & Benchmark My Rates</span>
                 </button>
             </form>
         </div>
@@ -159,11 +195,39 @@
 
     <footer class="bg-slate-50 border-t border-slate-200 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-400 space-y-2">
-            <div>&copy; 2026 FinLink 融链科技. All rights reserved.</div>
-            <div>技术支持单位：北京乾卉科技有限公司</div>
-            <div class="tracking-wide">全球统一服务入口：<a href="https://finlinks.io" class="hover:text-blue-600 font-medium">www.finlinks.io</a></div>
+            <div>&copy; 2026 FinLink. All rights reserved.</div>
+            <div class="lang-zh">技术支持主体：北京乾卉科技有限公司</div>
+            <div>Global Gateway: <a href="https://finlinks.io" class="hover:text-blue-600 font-medium">www.finlinks.io</a></div>
         </div>
     </footer>
 
+    <script>
+        let currentLang = 'zh';
+        function toggleLanguage() {
+            const zhElements = document.querySelectorAll('.lang-zh');
+            const enElements = document.querySelectorAll('.lang-en');
+            const btnText = document.getElementById('lang-btn-text');
+            
+            if (currentLang === 'zh') {
+                zhElements.forEach(el => el.style.display = 'none');
+                enElements.forEach(el => el.style.display = 'block');
+                btnText.textContent = '中文';
+                currentLang = 'en';
+            } else {
+                zhElements.forEach(el => el.style.display = 'block');
+                enElements.forEach(el => el.style.display = 'none');
+                btnText.textContent = 'English';
+                currentLang = 'zh';
+            }
+        }
+        // 根据浏览器环境自动判断首选语言
+        window.onload = function() {
+            const userLang = navigator.language || navigator.userLanguage;
+            if (userLang.startsWith('en')) {
+                currentLang = 'zh'; // 反向设置一遍以触发切换
+                toggleLanguage();
+            }
+        };
+    </script>
 </body>
 </html>
