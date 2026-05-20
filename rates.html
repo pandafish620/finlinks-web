@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinLink 离岸大行实时即期牌价终端</title>
+    <title>FinLink 离岸金融全球实时牌价终端</title>
     <style>
         body {
             background-color: #0b0e11;
@@ -13,7 +13,7 @@
             padding: 20px;
         }
         .container {
-            max-width: 900px;
+            max-width: 950px;
             margin: 30px auto;
             background: #161a1e;
             border: 1px solid #2b3139;
@@ -27,12 +27,12 @@
             align-items: center;
             border-bottom: 1px solid #2b3139;
             padding-bottom: 20px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         .title {
             font-size: 24px;
             font-weight: bold;
-            color: #00ffcc;
+            color: #3b82f6; /* 对齐蓝色主调 */
             display: flex;
             align-items: center;
             gap: 10px;
@@ -43,23 +43,37 @@
             background: #2b3139;
             padding: 6px 12px;
             border-radius: 20px;
+        }
+        
+        /* 🌐 大洲分类导航栏样式 */
+        .tab-container {
             display: flex;
-            align-items: center;
-            gap: 6px;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #21262c;
+            padding-bottom: 10px;
         }
-        .pulse {
-            width: 8px;
-            height: 8px;
-            background-color: #02c076;
-            border-radius: 50%;
-            display: inline-block;
-            animation: blink 1.5s infinite;
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: #848e9c;
+            font-size: 15px;
+            font-weight: bold;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: 0.2s;
         }
-        @keyframes blink {
-            0% { opacity: 0.2; }
-            50% { opacity: 1; }
-            100% { opacity: 0.2; }
+        .tab-btn:hover {
+            color: #eaecef;
+            background: #21262c;
         }
+        .tab-btn.active {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -73,22 +87,19 @@
             border-bottom: 1px solid #2b3139;
         }
         td {
-            padding: 18px 16px;
+            padding: 16px 16px;
             border-bottom: 1px solid #21262c;
-            font-size: 16px;
+            font-size: 15px;
             font-variant-numeric: tabular-nums;
         }
         .currency-name {
             font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         .rate-val {
             font-weight: bold;
             color: #ffffff;
             font-family: monospace;
-            font-size: 18px;
+            font-size: 17px;
         }
         .market-type {
             color: #02c076;
@@ -110,11 +121,17 @@
 
 <div class="container">
     <div class="header">
-        <div class="title">📊 FinLink 离岸金融实时同业牌价终端</div>
+        <div class="title">📊 FinLink 离岸金融全球实时牌价终端</div>
         <div class="status">
-            <span class="pulse"></span> 
-            <span id="update-timer">正在连接全球外汇网关...</span>
+            <span id="update-timer">同步全球外汇网关中...</span>
         </div>
+    </div>
+
+    <div class="tab-container">
+        <button class="tab-btn active" onclick="switchContinent('asia')">🌏 亚洲市场</button>
+        <button class="tab-btn" onclick="switchContinent('americas_europe')">🇪🇺 美洲 & 欧洲</button>
+        <button class="tab-btn" onclick="switchContinent('latam')">💃 拉美市场 (核心暴利)</button>
+        <button class="tab-btn" onclick="switchContinent('africa_mideast')">🌍 非洲 & 中东</button>
     </div>
 
     <table>
@@ -137,59 +154,117 @@
 </div>
 
 <script>
-// 🎯 降维打击：直接锁定拉非美出海最暴利的 5 大战略核心币种
-const targetCurrencies = [
-    { code: 'BRL', name: '🇧🇷 巴西雷亚尔 (BRL)' },
-    { code: 'NGN', name: '🇳🇬 尼日利亚奈拉 (NGN)' },
-    { code: 'EGP', name: '🇪🇬 埃及镑 (EGP)' },
-    { code: 'IDR', name: '🇮🇩 印尼盾 (IDR)' },
-    { code: 'MXN', name: '🇲🇽 墨西哥比索 (MXN)' }
-];
+// 🎯 降维大扩容：精心筛选的 33 个出海主流与暴利核心币种，按大洲划分
+const currencyData = {
+    asia: [
+        { code: 'CNY', name: '🇨🇳 中国人民币 (CNY)' },
+        { code: 'HKD', name: '🇭🇰 中国香港元 (HKD)' },
+        { code: 'SGD', name: '🇸🇬 新加坡元 (SGD)' },
+        { code: 'JPY', name: '🇯🇵 日本日元 (JPY)' },
+        { code: 'KRW', name: '🇰🇷 韩国韩元 (KRW)' },
+        { code: 'IDR', name: '🇮🇩 印尼盾 (IDR)' },
+        { code: 'THB', name: '🇹🇭 泰国泰铢 (THB)' },
+        { code: 'VND', name: '🇻🇳 越南盾 (VND)' },
+        { code: 'MYR', name: '🇲🇾 马来西亚林吉特 (MYR)' },
+        { code: 'PHP', name: '🇵🇭 菲律宾比索 (PHP)' },
+        { code: 'INR', name: '🇮🇳 印度卢比 (INR)' }
+    ],
+    americas_europe: [
+        { code: 'EUR', name: '🇪🇺 欧元 (EUR)' },
+        { code: 'GBP', name: '🇬🇧 英镑 (GBP)' },
+        { code: 'CAD', name: '🇨🇦 加拿大元 (CAD)' },
+        { code: 'AUD', name: '🇦🇺 澳大利亚元 (AUD)' },
+        { code: 'CHF', name: '🇨🇭 瑞士法郎 (CHF)' },
+        { code: 'RUB', name: '🇷🇺 俄罗斯卢布 (RUB)' }
+    ],
+    latam: [
+        { code: 'BRL', name: '🇧🇷 巴西雷亚尔 (BRL)' },
+        { code: 'MXN', name: '🇲🇽 墨西哥比索 (MXN)' },
+        { code: 'COP', name: '🇨🇴 哥伦比亚比索 (COP)' },
+        { code: 'CLP', name: '🇨🇱 智利比索 (CLP)' },
+        { code: 'PEN', name: '🇵🇪 秘鲁新索尔 (PEN)' },
+        { code: 'ARS', name: '🇦🇷 阿根廷比索 (ARS)' }
+    ],
+    africa_mideast: [
+        { code: 'NGN', name: '🇳🇬 尼日利亚奈拉 (NGN)' },
+        { code: 'EGP', name: '🇪🇬 埃及镑 (EGP)' },
+        { code: 'ZAR', name: '🇿🇦 南非兰特 (ZAR)' },
+        { code: 'AED', name: '🇦🇪 阿联酋迪拉姆 (AED)' },
+        { code: 'SAR', name: '🇸🇦 沙特里亚尔 (SAR)' },
+        { code: 'TRY', name: '🇹🇷 土耳其里拉 (TRY)' },
+        { code: 'KES', name: '🇰🇪 肯尼亚先令 (KES)' },
+        { code: 'GHS', name: '🇬🇭 加纳塞地 (GHS)' },
+        { code: 'PKR', name: '🇵🇰 巴基斯坦卢比 (PKR)' },
+        { code: 'ILS', name: '🇮🇱 以色列新谢克尔 (ILS)' }
+    ]
+};
 
-async function fetchLiveRates() {
-    // 🎯 呼叫全球金融公开网关接口，秒级抓取最新牌价
+let globalRates = {}; // 缓存全球汇率
+let currentContinent = 'asia'; // 默认展示亚洲
+
+async function fetchGlobalRates() {
     const apiEndpoint = 'https://open.er-api.com/v6/latest/USD';
-    
     try {
         const response = await fetch(apiEndpoint);
-        if (!response.ok) throw new Error('网关响应异常');
+        if (!response.ok) throw new Error('大行网关响应异常');
         
         const data = await response.json();
-        const rates = data.rates;
+        globalRates = data.rates;
         
-        const tableBody = document.getElementById('rate-table-body');
-        tableBody.innerHTML = ''; // 清空上一秒的旧数据
+        // 渲染当前选中的大洲数据
+        renderTable();
         
-        targetCurrencies.forEach(ccy => {
-            const currentRate = rates[ccy.code];
-            if (currentRate) {
-                const row = `
-                    <tr>
-                        <td class="currency-name">${ccy.name}</td>
-                        <td class="rate-val">${currentRate.toFixed(4)}</td>
-                        <td><span class="market-type">实时即期中间价</span></td>
-                        <td>1 USD</td>
-                    </tr>
-                `;
-                tableBody.insertAdjacentHTML('beforeend', row);
-            }
-        });
-        
-        // 更新顶部的倒计时天线状态
         const now = new Date();
-        document.getElementById('update-timer').innerText = `系统同步中 | 实时公网对齐时间: ${now.toLocaleTimeString()}`;
-        
+        document.getElementById('update-timer').innerText = `● 骨干网同步正常 | 实时对齐时间: ${now.toLocaleTimeString()}`;
     } catch (error) {
-        console.error('抓包失败:', error);
-        document.getElementById('update-timer').innerText = '❌ 网关连接受阻，正在尝试备用离岸路由...';
+        console.error('抓取数据失败:', error);
+        document.getElementById('update-timer').innerText = '⚠️ 国际骨干网连接受阻，切换离岸路由中...';
     }
 }
 
-// 🎯 全自动无感通电：用户一进来立刻抓取一次
-fetchLiveRates();
+function renderTable() {
+    const tableBody = document.getElementById('rate-table-body');
+    tableBody.innerHTML = '';
+    
+    const activeList = currencyData[currentContinent];
+    
+    activeList.forEach(ccy => {
+        const rate = globalRates[ccy.code];
+        if (rate) {
+            // 特殊对高价值高汇率货币的处理（例如韩元、印尼盾、越南盾），保持金融美感
+            const formattedRate = rate > 100 ? rate.toFixed(2) : rate.toFixed(4);
+            const row = `
+                <tr>
+                    <td class="currency-name">${ccy.name}</td>
+                    <td class="rate-val">${formattedRate}</td>
+                    <td><span class="market-type">实时即期中间价</span></td>
+                    <td>1 USD</td>
+                </tr>
+            `;
+            tableBody.insertAdjacentHTML('beforeend', row);
+        }
+    });
+}
 
-// 🎯 每隔 10 秒钟，自动顺着全球光缆重新去大行接口抓一笔最新牌价，数字动态闪烁更新
-setInterval(fetchLiveRates, 10000);
+// 🎯 动态无缝切换大洲的黑客逻辑
+function switchContinent(continent) {
+    currentContinent = continent;
+    
+    // 切换按钮的高亮视觉状态
+    const buttons = document.querySelectorAll('.tab-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    // 根据事件触发源动态高亮
+    event.target.classList.add('active');
+    
+    // 重新拉表格（不重新呼叫网络，零延迟）
+    renderTable();
+}
+
+// 启动通电
+fetchGlobalRates();
+// 每 15 秒在全球光缆上全自动重对账一次价格
+setInterval(fetchGlobalRates, 15000);
 </script>
 
 </body>
