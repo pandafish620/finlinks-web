@@ -72,7 +72,7 @@
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
                     <a href="#gateway-form" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-2xl transition shadow-lg shadow-brand-600/20 group">
-                        立即接入新市场收单
+                        立即接入新兴市场收单
                         <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition"></i>
                     </a>
                     <a href="#audit-form" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 text-base font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-2xl transition shadow-sm">
@@ -166,7 +166,7 @@
                     <h3 class="text-xl font-bold text-slate-800 flex items-center justify-center gap-2">
                         ⚡ FinLinks 融链风控中台
                     </h3>
-                    <p class="text-xs text-slate-500 mt-1">直连全球同业批发即期底价 · 毫秒级斩断渠道汇率黑箱</p>
+                    <p class="text-xs text-slate-500 mt-1">直连全球同业批发即期底价 · 毫秒级诊断汇率点差</p>
                 </div>
                 
                 <form id="finlinkForm8" class="space-y-4 text-left">
@@ -265,7 +265,7 @@
         const renderUrl = 'https://finlinks-backend.onrender.com/feishu/webhook'; 
 
         try {
-            msgContainer.innerText = '⚡ 正在直连离岸骨干网清算中...';
+            msgContainer.innerText = '⚡ 正在直连离岸公网清算中...';
             msgContainer.className = 'text-center text-xs font-semibold mt-4 text-slate-400 animate-pulse';
 
             const response = await fetch(renderUrl, {
