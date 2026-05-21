@@ -43,9 +43,9 @@
                     <a href="#gateway-form" class="inline-flex items-center justify-center px-4 h-10 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl transition shadow-sm shadow-brand-600/20">
                         立即体验
                     </a>
-                   <a href="rates.html" target="_blank" class="inline-flex items-center justify-center px-4 h-10 text-sm font-semibold ml-4" style="color: #3b82f6; text-decoration: none; border: 1px solid #3b82f6; border-radius: 4px; transition: 0.3s;" onmouseover="this.style.background='rgba(59, 130, 246, 0.1)'" onmouseout="this.style.background='transparent'">
-    📊 实时汇率 / Live FX Rates
-</a>
+                    <a href="rates.html" target="_blank" class="inline-flex items-center justify-center px-4 h-10 text-sm font-semibold ml-4" style="color: #3b82f6; text-decoration: none; border: 1px solid #3b82f6; border-radius: 4px; transition: 0.3s;" onmouseover="this.style.background='rgba(59, 130, 246, 0.1)'" onmouseout="this.style.background='transparent'">
+                        📊 实时汇率 / Live FX Rates
+                    </a>
                 </div>
             </div>
         </div>
@@ -61,7 +61,7 @@
                     出海企业全球本地化收单技术提供商
                 </h1>
                 <p class="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto mb-10 leading-relaxed">
-                    专为跨境电商打造的一站式新兴市场金融科技引擎。用算法集成全球收款网络，专注于东南亚，非洲，东欧，拉丁美洲等新兴市场的收单。
+                    专为跨境电商打造的一站式新兴 market 金融科技引擎。用算法集成全球收款网络，专注于东南亚，非洲，东欧，拉丁美洲等新兴市场的收单。
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
                     <a href="#gateway-form" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-2xl transition shadow-lg shadow-brand-600/20 group">
@@ -96,7 +96,7 @@
                             一个接口，通达拉美、非洲、东南亚等新兴市场。我们通过服务商生态 API，将您的系统与全球顶级本地清算网络无缝对接。
                         </p>
                         <ul class="space-y-3 text-sm text-slate-600 mb-8">
-                            <li class="flex items-start"><i class="fa-solid fa-circle-check text-emerald-500 mt-1 mr-2.5"></i><span><strong>合规解耦：</strong> 协助您直接在当地持牌机构（如 Flutterwave）开立独立商户号（MID），FinLink 纯技术集成，风险为零。</span></li>
+                            <li class="flex items-start"><i class="fa-solid fa-circle-check text-emerald-500 mt-1 mr-2.5"></i><span><strong>合规解耦：</strong> 协助您直接在当地持牌机构开立独立商户号（MID），FinLink 纯技术集成，风险为零。</span></li>
                             <li class="flex items-start"><i class="fa-solid fa-circle-check text-emerald-500 mt-1 mr-2.5"></i><span><strong>智能路由：</strong> 基于 Python 毫秒级网络探针，通道异常时自动执行无感重试路由，收单成功率拉升至 92%+。</span></li>
                             <li class="flex items-start"><i class="fa-solid fa-circle-check text-emerald-500 mt-1 mr-2.5"></i><span><strong>离岸对冲：</strong> 规避当地本币外汇管制。本地收单，离岸美元/人民币自动下发。</span></li>
                         </ul>
@@ -154,119 +154,51 @@
                 <p class="text-lg text-slate-600">请留下您的企业联系方式，融链客服团队将在24小时内联系您。</p>
             </div>
             
-    <div class="bg-slate-50 border border-slate-200 p-4 sm:p-8 rounded-3xl shadow-inner relative overflow-hidden">
-    <div class="text-center mb-6">
-        <h3 class="text-xl font-bold text-slate-800 flex items-center justify-center gap-2">
-            ⚡ FinLinks 融链风控中台
-        </h3>
-        <p class="text-xs text-slate-500 mt-1">直连全球同业批发即期底价 · 毫秒级斩断渠道汇率黑箱</p>
-    </div>
-    
-    <form id="finlinkForm8" class="space-y-4 text-left">
-        <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">企业公司全称 (Company Name) <span class="text-red-500">*</span></label>
-            <input type="text" id="company_name" name="company_name" placeholder="待填写者输入" required class="w-full p-3 bg-white text-slate-800 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
-        </div>
+            <div class="bg-slate-50 border border-slate-200 p-4 sm:p-8 rounded-3xl shadow-inner relative overflow-hidden">
+                <div class="text-center mb-6">
+                    <h3 class="text-xl font-bold text-slate-800 flex items-center justify-center gap-2">
+                        ⚡ FinLinks 融链风控中台
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-1">直连全球同业批发即期底价 · 毫秒级斩断渠道汇率黑箱</p>
+                </div>
+                
+                <form id="finlinkForm8" class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">企业公司全称 (Company Name) <span class="text-red-500">*</span></label>
+                        <input type="text" id="company_name" name="company_name" placeholder="待填写者输入" required class="w-full p-3 bg-white text-slate-800 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                    </div>
 
-        <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">负责人姓名 (Contact Name) <span class="text-red-500">*</span></label>
-            <input type="text" id="contact_name" name="contact_name" placeholder="待填写者输入" required class="w-full p-3 bg-white text-slate-800 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
-        </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">负责人姓名 (Contact Name) <span class="text-red-500">*</span></label>
+                        <input type="text" id="contact_name" name="contact_name" placeholder="待填写者输入" required class="w-full p-3 bg-white text-slate-800 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                    </div>
 
-        <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">手机号/微信/Email <span class="text-red-500">*</span></label>
-            <input type="text" id="wx_email" name="wx_email" placeholder="待填写者输入" required class="w-full p-3 bg-white text-slate-800 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
-        </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">手机号/微信/Email <span class="text-red-500">*</span></label>
+                        <input type="text" id="wx_email" name="wx_email" placeholder="待填写者输入" required class="w-full p-3 bg-white text-slate-800 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                    </div>
 
-        <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">目标币种 (Target Currency) <span class="text-red-500">*</span></label>
-            <select id="target_currency" name="target_currency" class="w-full p-3 bg-white text-slate-800 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition cursor-pointer">
-                <option value="尼日利亚 (NGN)">🇳🇬 尼日利亚 (NGN - 奈拉)</option>
-                <option value="巴西 (BRL)">🇧🇷 巴西 (BRL - 雷亚尔)</option>
-                <option value="埃及 (EGP)">🇪🇬 埃及 (EGP - 埃及镑)</option>
-                <option value="印尼 (IDR)">🇮🇩 印尼 (IDR - 印尼盾)</option>
-                <option value="墨西哥 (MXN)">🇲🇽 墨西哥 (MXN - 比索)</option>
-                <option value="泰国 (THB)">🇹🇭 泰国 (THB - 泰铢)</option>
-                <option value="越南 (VND)">🇻🇳 越南 (VND - 越南盾)</option>
-                <option value="马来西亚 (MYR)">🇲🇾 马来西亚 (MYR - 林吉特)</option>
-            </select>
-        </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">目标币种 (Target Currency) <span class="text-red-500">*</span></label>
+                        <select id="target_currency" name="target_currency" class="w-full p-3 bg-white text-slate-800 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition cursor-pointer">
+                            <option value="尼日利亚 (NGN)">🇳🇬 尼日利亚 (NGN - 奈拉)</option>
+                            <option value="巴西 (BRL)">🇧🇷 巴西 (BRL - 雷亚尔)</option>
+                            <option value="埃及 (EGP)">🇪🇬 埃及 (EGP - 埃及镑)</option>
+                            <option value="印尼 (IDR)">🇮🇩 印尼 (IDR - 印尼盾)</option>
+                            <option value="墨西哥 (MXN)">🇲🇽 墨西哥 (MXN - 比索)</option>
+                            <option value="泰国 (THB)">🇹🇭 泰国 (THB - 泰铢)</option>
+                            <option value="越南 (VND)">🇻🇳 越南 (VND - 越南盾)</option>
+                            <option value="马来西亚 (MYR)">🇲🇾 马来西亚 (MYR - 林吉特)</option>
+                        </select>
+                    </div>
 
-        <button type="submit" class="w-full mt-2 p-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition shadow-md shadow-indigo-100 flex items-center justify-center gap-2">
-            递交合规审计与外汇开户申请
-        </button>
-    </form>
-</div>
-
-<script>
-document.getElementById('finlinkForm8').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const formData = {
-        company_name: document.getElementById('company_name').value,
-        contact_name: document.getElementById('contact_name').value,
-        wx_email: document.getElementById('wx_email').value,
-        target_currency: document.getElementById('target_currency').value
-    };
-
-    const renderUrl = 'https://finlinks-backend.onrender.com/feishu/webhook'; 
-
-    try {
-        const response = await fetch(renderUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        });
-
-        <script>
-document.getElementById('finlinkForm8').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    // 动态创建或获取页面内嵌提示容器，拒绝弹窗干扰
-    let msgContainer = document.getElementById('form-status-msg');
-    if (!msgContainer) {
-        msgContainer = document.createElement('div');
-        msgContainer.id = 'form-status-msg';
-        msgContainer.className = 'text-center text-xs font-semibold mt-4 transition-all duration-300';
-        document.getElementById('finlinkForm8').appendChild(msgContainer);
-    }
-
-    const formData = {
-        company_name: document.getElementById('company_name').value,
-        contact_name: document.getElementById('contact_name').value,
-        wx_email: document.getElementById('wx_email').value,
-        target_currency: document.getElementById('target_currency').value
-    };
-
-    const renderUrl = 'https://finlinks-backend.onrender.com/feishu/webhook'; 
-
-    try {
-        msgContainer.innerText = '⚡ 正在直连离岸骨干网清算中...';
-        msgContainer.className = 'text-center text-xs font-semibold mt-4 text-slate-400 animate-pulse';
-
-        const response = await fetch(renderUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        });
-        
-        if (response.ok) {
-            // 🎯 放弃 alert()，改成高级内嵌渐显绿字
-            msgContainer.innerText = '✓ 提交成功！FinLinks 智能路由已拦截该出海敞口。审计报告生成中。';
-            msgContainer.className = 'text-center text-xs font-bold mt-4 text-emerald-600 bg-emerald-50 p-2 rounded-xl border border-emerald-200';
-            document.getElementById('finlinkForm8').reset();
-        } else {
-            msgContainer.innerText = '❌ 离岸网络请求直连异常，请重试。';
-            msgContainer.className = 'text-center text-xs font-bold mt-4 text-rose-600 bg-rose-50 p-2 rounded-xl border border-rose-200';
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        msgContainer.innerText = '❌ 跨国网络请求超时，请检查连接。';
-        msgContainer.className = 'text-center text-xs font-bold mt-4 text-rose-600 bg-rose-50 p-2 rounded-xl border border-rose-200';
-    }
-});
-        
-</script>
+                    <button type="submit" class="w-full mt-2 p-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition shadow-md shadow-indigo-100 flex items-center justify-center gap-2">
+                        递交合规审计与外汇开户申请
+                    </button>
+                    
+                    <div id="form-status-msg"></div>
+                </form>
+            </div>
         </div>
     </section>
 
@@ -309,6 +241,47 @@ document.getElementById('finlinkForm8').addEventListener('submit', async functio
             </div>
         </div>
     </footer>
+
+    <script>
+    document.getElementById('finlinkForm8').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const msgContainer = document.getElementById('form-status-msg');
+        
+        const formData = {
+            company_name: document.getElementById('company_name').value,
+            contact_name: document.getElementById('contact_name').value,
+            wx_email: document.getElementById('wx_email').value,
+            target_currency: document.getElementById('target_currency').value
+        };
+
+        const renderUrl = 'https://finlinks-backend.onrender.com/feishu/webhook'; 
+
+        try {
+            msgContainer.innerText = '⚡ 正在直连离岸骨干网清算中...';
+            msgContainer.className = 'text-center text-xs font-semibold mt-4 text-slate-400 animate-pulse';
+
+            const response = await fetch(renderUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            
+            if (response.ok) {
+                msgContainer.innerText = '✓ 提交成功！FinLinks 智能路由已拦截该出海敞口。审计报告生成中。';
+                msgContainer.className = 'text-center text-xs font-bold mt-4 text-emerald-600 bg-emerald-50 p-2 rounded-xl border border-emerald-200';
+                document.getElementById('finlinkForm8').reset();
+            } else {
+                msgContainer.innerText = '❌ 离岸网络请求直连异常，请检查后端服务是否进入冬眠状态。';
+                msgContainer.className = 'text-center text-xs font-bold mt-4 text-rose-600 bg-rose-50 p-2 rounded-xl border border-rose-200';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            msgContainer.innerText = '❌ 跨国网络请求超时，请检查您的公网连通性。';
+            msgContainer.className = 'text-center text-xs font-bold mt-4 text-rose-600 bg-rose-50 p-2 rounded-xl border border-rose-200';
+        }
+    });
+    </script>
 
 </body>
 </html>
