@@ -217,18 +217,55 @@ document.getElementById('finlinkForm8').addEventListener('submit', async functio
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
         });
+
+        <script>
+document.getElementById('finlinkForm8').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // 动态创建或获取页面内嵌提示容器，拒绝弹窗干扰
+    let msgContainer = document.getElementById('form-status-msg');
+    if (!msgContainer) {
+        msgContainer = document.createElement('div');
+        msgContainer.id = 'form-status-msg';
+        msgContainer.className = 'text-center text-xs font-semibold mt-4 transition-all duration-300';
+        document.getElementById('finlinkForm8').appendChild(msgContainer);
+    }
+
+    const formData = {
+        company_name: document.getElementById('company_name').value,
+        contact_name: document.getElementById('contact_name').value,
+        wx_email: document.getElementById('wx_email').value,
+        target_currency: document.getElementById('target_currency').value
+    };
+
+    const renderUrl = 'https://finlinks-backend.onrender.com/feishu/webhook'; 
+
+    try {
+        msgContainer.innerText = '⚡ 正在直连离岸骨干网清算中...';
+        msgContainer.className = 'text-center text-xs font-semibold mt-4 text-slate-400 animate-pulse';
+
+        const response = await fetch(renderUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
         
         if (response.ok) {
-            alert('提交成功！FinLinks 智能路由已拦截该出海敞口。我们将即刻在海外网关中调用最新即期底价，为您生成审计报告。');
+            // 🎯 放弃 alert()，改成高级内嵌渐显绿字
+            msgContainer.innerText = '✓ 提交成功！FinLinks 智能路由已拦截该出海敞口。审计报告生成中。';
+            msgContainer.className = 'text-center text-xs font-bold mt-4 text-emerald-600 bg-emerald-50 p-2 rounded-xl border border-emerald-200';
             document.getElementById('finlinkForm8').reset();
         } else {
-            alert('离岸网络请求直连异常，请重试。');
+            msgContainer.innerText = '❌ 离岸网络请求直连异常，请重试。';
+            msgContainer.className = 'text-center text-xs font-bold mt-4 text-rose-600 bg-rose-50 p-2 rounded-xl border border-rose-200';
         }
     } catch (error) {
         console.error('Error:', error);
-        alert('跨国网络请求超时，请检查连接。');
+        msgContainer.innerText = '❌ 跨国网络请求超时，请检查连接。';
+        msgContainer.className = 'text-center text-xs font-bold mt-4 text-rose-600 bg-rose-50 p-2 rounded-xl border border-rose-200';
     }
 });
+        
 </script>
         </div>
     </section>
