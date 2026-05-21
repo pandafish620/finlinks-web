@@ -154,9 +154,82 @@
                 <p class="text-lg text-slate-600">请留下您的企业联系方式，融链客服团队将在24小时内联系您。</p>
             </div>
             
-            <div class="bg-slate-50 border border-slate-200 p-2 sm:p-4 rounded-3xl shadow-inner relative overflow-hidden">
-                <iframe src="https://my.feishu.cn/share/base/form/shrcnqfW3kNdJ4zBHxeTrEXZ91f" class="w-full h-[530px] border-0 rounded-2xl bg-white shadow-sm" allowfullscreen></iframe>
-            </div>
+    <div class="bg-slate-50 border border-slate-200 p-4 sm:p-8 rounded-3xl shadow-inner relative overflow-hidden">
+    <div class="text-center mb-6">
+        <h3 class="text-xl font-bold text-slate-800 flex items-center justify-center gap-2">
+            ⚡ FinLinks 融链风控中台
+        </h3>
+        <p class="text-xs text-slate-500 mt-1">直连全球同业批发即期底价 · 毫秒级斩断渠道汇率黑箱</p>
+    </div>
+    
+    <form id="finlinkForm8" class="space-y-4 text-left">
+        <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">企业公司全称 (Company Name) <span class="text-red-500">*</span></label>
+            <input type="text" id="company_name" name="company_name" placeholder="待填写者输入" required class="w-full p-3 bg-white text-slate-800 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+        </div>
+
+        <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">负责人姓名 (Contact Name) <span class="text-red-500">*</span></label>
+            <input type="text" id="contact_name" name="contact_name" placeholder="待填写者输入" required class="w-full p-3 bg-white text-slate-800 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+        </div>
+
+        <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">手机号/微信/Email <span class="text-red-500">*</span></label>
+            <input type="text" id="wx_email" name="wx_email" placeholder="待填写者输入" required class="w-full p-3 bg-white text-slate-800 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+        </div>
+
+        <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">目标币种 (Target Currency) <span class="text-red-500">*</span></label>
+            <select id="target_currency" name="target_currency" class="w-full p-3 bg-white text-slate-800 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition cursor-pointer">
+                <option value="尼日利亚 (NGN)">🇳🇬 尼日利亚 (NGN - 奈拉)</option>
+                <option value="巴西 (BRL)">🇧🇷 巴西 (BRL - 雷亚尔)</option>
+                <option value="埃及 (EGP)">🇪🇬 埃及 (EGP - 埃及镑)</option>
+                <option value="印尼 (IDR)">🇮🇩 印尼 (IDR - 印尼盾)</option>
+                <option value="墨西哥 (MXN)">🇲🇽 墨西哥 (MXN - 比索)</option>
+                <option value="泰国 (THB)">🇹🇭 泰国 (THB - 泰铢)</option>
+                <option value="越南 (VND)">🇻🇳 越南 (VND - 越南盾)</option>
+                <option value="马来西亚 (MYR)">🇲🇾 马来西亚 (MYR - 林吉特)</option>
+            </select>
+        </div>
+
+        <button type="submit" class="w-full mt-2 p-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition shadow-md shadow-indigo-100 flex items-center justify-center gap-2">
+            递交合规审计与外汇开户申请
+        </button>
+    </form>
+</div>
+
+<script>
+document.getElementById('finlinkForm8').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        company_name: document.getElementById('company_name').value,
+        contact_name: document.getElementById('contact_name').value,
+        wx_email: document.getElementById('wx_email').value,
+        target_currency: document.getElementById('target_currency').value
+    };
+
+    const renderUrl = 'https://finlinks-backend.onrender.com/feishu/webhook'; 
+
+    try {
+        const response = await fetch(renderUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+            alert('提交成功！FinLinks 智能路由已拦截该出海敞口。我们将即刻在海外网关中调用最新即期底价，为您生成审计报告。');
+            document.getElementById('finlinkForm8').reset();
+        } else {
+            alert('离岸网络请求直连异常，请重试。');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('跨国网络请求超时，请检查连接。');
+    }
+});
+</script>
         </div>
     </section>
 
