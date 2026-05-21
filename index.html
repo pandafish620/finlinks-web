@@ -26,31 +26,38 @@
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased font-sans">
 
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-link-slash text-brand-600 text-2xl"></i>
-                    <span class="text-xl font-black tracking-tight text-brand-900">FinLink<span class="text-brand-600">融链科技</span></span>
-                </div>
-                <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
-                    <a href="#hero" class="hover:text-brand-600 transition">首页</a>
-                    <a href="#services" class="hover:text-brand-600 transition">核心业务</a>
-                    <a href="#ecosystem" class="hover:text-brand-600 transition">合作生态</a>
-                    <a href="#gateway-form" class="hover:text-brand-600 transition">申请接入</a>
-                </div>
-                <div>
-                    <a href="#gateway-form" class="inline-flex items-center justify-center px-4 h-10 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl transition shadow-sm shadow-brand-600/20">
-                        立即体验
-                    </a>
-                    <a href="rates.html" target="_blank" class="inline-flex items-center justify-center px-4 h-10 text-sm font-semibold ml-4" style="color: #3b82f6; text-decoration: none; border: 1px solid #3b82f6; border-radius: 4px; transition: 0.3s;" onmouseover="this.style.background='rgba(59, 130, 246, 0.1)'" onmouseout="this.style.background='transparent'">
-                        📊 实时汇率 / Live FX Rates
-                    </a>
-                </div>
+   <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16 items-center">
+            
+            <div class="flex items-center space-x-1.5 flex-shrink-0">
+                <i class="fa-solid fa-link-slash text-brand-600 text-xl sm:text-2xl"></i>
+                <span class="text-base sm:text-xl font-black tracking-tight text-brand-900">
+                    FinLink<span class="text-brand-600 font-medium text-xs sm:text-sm ml-0.5">融链科技</span>
+                </span>
             </div>
-        </div>
-    </nav>
 
+            <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
+                <a href="#hero" class="hover:text-brand-600 transition">首页</a>
+                <a href="#services" class="hover:text-brand-600 transition">核心业务</a>
+                <a href="#ecosystem" class="hover:text-brand-600 transition">合作生态</a>
+                <a href="#gateway-form" class="hover:text-brand-600 transition">申请接入</a>
+            </div>
+            
+            <div class="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+                <a href="#gateway-form" class="inline-flex items-center justify-center px-2.5 sm:px-4 h-9 sm:h-10 text-xs sm:text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl transition shadow-sm shadow-brand-600/20 whitespace-nowrap">
+                    立即体验
+                </a>
+                
+                <a href="rates.html" target="_blank" class="inline-flex items-center justify-center px-2.5 sm:px-4 h-9 sm:h-10 text-xs sm:text-sm font-semibold rounded-xl transition whitespace-nowrap" style="color: #3b82f6; text-decoration: none; border: 1px solid #3b82f6; transition: 0.3s;" onmouseover="this.style.background='rgba(59, 130, 246, 0.1)'" onmouseout="this.style.background='transparent'">
+                    <span class="sm:hidden">📊 汇率</span>
+                    <span class="hidden sm:inline">📊 实时汇率 / Live FX Rates</span>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</nav>
     <section id="hero" class="relative pt-32 pb-20 overflow-hidden bg-gradient-to-b from-brand-50 via-white to-slate-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center max-w-5xl mx-auto">
