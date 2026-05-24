@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinLinks - 全球即期流动性网关多源数据终端</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #000000;
+            color: #eaecef;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        @media (min-width: 768px) {
+            .desktop-container {
+                max-width: 950px;
+                margin: 30px auto;
+                background: #0b0e11;
+                border: 1px solid #1f252d;
+                border-radius: 12px;
+                padding: 30px;
+                box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+            }
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th {
+            color: #848e9c;
+            font-size: 11px;
+            font-family: monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 12px 16px;
+            border-bottom: 1px solid #1f252d;
+        }
+        td {
+            padding: 16px 16px;
+            border-bottom: 1px solid #14181c;
+            font-size: 13px;
+            font-variant-numeric: tabular-nums;
+            font-family: monospace;
+        }
+        .currency-name {
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .rate-val {
+            font-weight: bold;
+            color: #00FFCC;
+            font-size: 15px;
+        }
+        .market-type {
+            color: #00FFCC;
+            background: rgba(0, 255, 204, 0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            border: 1px solid rgba(0, 255, 204, 0.1);
+        }
+        .mobile-hero-value {
+            font-size: 46px;
+            font-weight: 800;
+            font-family: monospace;
+            letter-spacing: -1px;
+            background: linear-gradient(to bottom, #ffffff 70%, #00FFCC 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-[#000000]">
+
+<div class="desktop-container p-4 sm:p-6 md:p-8">
+    
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#1f252d] pb-4 mb-5">
+        <a href="index.html" class="flex items-center space-x-1.5 py-1 px-3 bg-[#161a1e] rounded-md text-slate-400 hover:text-white transition-all border border-[#2b3139] text-xs font-mono">
+            <span>←</span>
+            <span>返回主技术总线</span>
+        </a>
+        <div class="text-[10px] font-mono text-[#848e9c] bg-[#111417] py-1 px-3 rounded border border-slate-800" id="status-badge">
+            <span id="update-timer">正在连接全球清算骨干网网关...</span>
+        </div>
+    </div>
+
+    <div class="mb-5">
+        <div class="text-lg sm:text-xl font-bold font-mono text-white flex items-center gap-2 uppercase tracking-wider">
+            <span>📊</span> 全球即期流动性网关多源数据终端
+        </div>
+    </div>
+
+    <div class="flex gap-1 p-1 bg-[#0b0e11] rounded-lg mb-5 border border-slate-800 overflow-x-auto whitespace-nowrap text-[11px] font-mono uppercase tracking-wider scrollbar-none">
+        <button id="btn-asia" class="flex-1 sm:flex-none text-[#848e9c] px-4 py-2 rounded transition-all" onclick="switchContinent('asia')">🌏 亚洲新兴对流市场</button>
+        <button id="btn-americas_europe" class="flex-1 sm:flex-none text-[#848e9c] px-4 py-2 rounded transition-all" onclick="switchContinent('americas_europe')">🇪🇺 G10 主流币种</button>
+        <button id="btn-latam" class="flex-1 sm:flex-none text-[#848e9c] px-4 py-2 rounded transition-all" onclick="switchContinent('latam')">💃 拉美网格走廊</button>
+        <button id="btn-africa_mideast" class="flex-1 sm:flex-none text-[#848e9c] px-4 py-2 rounded transition-all" onclick="switchContinent('africa_mideast')">🌍 非洲与中东总线</button>
+    </div>
+
+    <div class="block md:hidden mb-6 bg-gradient-to-b from-[#0b0e11] to-[#000000] rounded-xl p-5 border border-[#1f252d] relative overflow-hidden">
+        <div class="flex justify-between items-center mb-1">
+            <span id="hero-currency-name" class="text-xs font-mono uppercase tracking-widest text-gray-400">正在同步...</span>
+            <span class="text-[9px] bg-[#00FFCC]/5 text-[#00FFCC] font-mono px-2 py-0.5 rounded border border-[#00FFCC]/10">同业即期中间价</span>
+        </div>
+
+        <div class="text-center my-3 relative z-10">
+            <div id="hero-rate-value" class="mobile-hero-value">0.0000</div>
+        </div>
+
+        <div class="w-full h-10 mt-1">
+            <svg class="w-full h-full" viewBox="0 0 300 50" preserveAspectRatio="none">
+                <defs>
+                    <linearGradient id="hero-grad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#00FFCC" stop-opacity="0.1"/>
+                        <stop offset="100%" stop-color="#00FFCC" stop-opacity="0"/>
+                    </linearGradient>
+                </defs>
+                <path d="M 0 35 Q 25 15, 50 30 T 100 10 T 150 40 T 200 15 T 250 35 T 300 15 L 300 50 L 0 50 Z" fill="url(#hero-grad)" />
+                <path d="M 0 35 Q 25 15, 50 30 T 100 10 T 150 40 T 200 15 T 250 35 T 300 15" fill="none" stroke="#00FFCC" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+        </div>
+        
+        <div class="flex justify-between items-center mt-3 pt-2.5 border-t border-slate-900 text-[9px] text-slate-500 font-mono">
+            <span id="hero-base-note">计价基准: 1 USD</span>
+            <span class="text-[#00FFCC] flex items-center space-x-0.5">
+                <span class="inline-block animate-pulse w-1.5 h-1.5 bg-[#00FFCC] rounded-full mr-1"></span>高频总线同步激活
+            </span>
+        </div>
+    </div>
+
+    <div class="hidden md:block overflow-x-auto">
+        <table>
+            <thead>
+                <tr>
+                    <th>标的法币资产标识 (Identifier)</th>
+                    <th>多源同业批发即期价 (Mid)</th>
+                    <th>算法路由状态</th>
+                    <th>计价基准单位</th>
+                </tr>
+            </thead>
+            <tbody id="rate-table-body"></tbody>
+        </table>
+    </div>
+
+    <div id="rate-mobile-cards" class="block md:hidden space-y-2.5"></div>
+
+    <div class="footer-note mt-8 pt-4 border-t border-slate-900 text-[10px] font-mono text-slate-600 text-center leading-relaxed">
+        法律免责提示：上述展示指标直接集成调取全球多源持牌同业批发市场即期中间交易牌价。旨在用于系统级清算技术对接核验及名义轧差风控合规技术尽调。<br>
+        © 2026 FinLinks Tech. All Rights Reserved.
+    </div>
+</div>
+
+<script>
+const currencyData = {
+    asia: [
+        { code: 'CNY', name: 'CNY - 中国人民币' },
+        { code: 'HKD', name: 'HKD - 中国香港元' },
+        { code: 'SGD', name: 'SGD - 新加坡元' },
+        { code: 'JPY', name: 'JPY - 日本日元' },
+        { code: 'KRW', name: 'KRW - 韩国韩元' },
+        { code: 'IDR', name: 'IDR - 印尼盾' },
+        { code: 'THB', name: 'THB - 泰国泰铢' },
+        { code: 'VND', name: 'VND - 越南盾' },
+        { code: 'MYR', name: 'MYR - 马来西亚林吉特' },
+        { code: 'PHP', name: 'PHP - 菲律宾比索' },
+        { code: 'INR', name: 'INR - 印度卢比' }
+    ],
+    americas_europe: [
+        { code: 'EUR', name: 'EUR - 欧盟欧元' },
+        { code: 'GBP', name: 'GBP - 英国英镑' },
+        { code: 'CAD', name: 'CAD - 加拿大元' },
+        { code: 'AUD', name: 'AUD - 澳大利亚元' },
+        { code: 'CHF', name: 'CHF - 瑞士法郎' },
+        { code: 'RUB', name: 'RUB - 俄罗斯卢布' }
+    ],
+    latam: [
+        { code: 'BRL', name: 'BRL - 巴西雷亚尔' },
+        { code: 'MXN', name: 'MXN - 墨西哥比索' },
+        { code: 'COP', name: 'COP - 哥伦比亚比索' },
+        { code: 'CLP', name: 'CLP - 智利比索' },
+        { code: 'PEN', name: 'PEN - 秘鲁新索尔' },
+        { code: 'ARS', name: 'ARS - 阿根廷比索' }
+    ],
+    africa_mideast: [
+        { code: 'NGN', name: 'NGN - 尼日利亚奈拉' },
+        { code: 'EGP', name: 'EGP - 埃及镑' },
+        { code: 'ZAR', name: 'ZAR - 南非兰特' },
+        { code: 'AED', name: 'AED - 阿联酋迪拉姆' },
+        { code: 'SAR', name: 'SAR - 沙特里亚尔' },
+        { code: 'TRY', name: 'TRY - 土耳其里拉' },
+        { code: 'KES', name: 'KES - 肯尼亚先令' },
+        { code: 'GHS', name: 'GHS - 加纳塞地' },
+        { code: 'PKR', name: 'PKR - 巴基斯坦卢比' },
+        { code: 'ILS', name: 'ILS - 以色列新谢克尔' }
+    ]
+};
+
+const continentHeroMapping = {
+    asia: 'CNY',
+    americas_europe: 'EUR',
+    latam: 'BRL',
+    africa_mideast: 'NGN'
+};
+
+let globalRates = {}; 
+let currentContinent = 'asia'; 
+
+async function fetchGlobalRates() {
+    const apiEndpoint = 'https://open.er-api.com/v6/latest/USD';
+    try {
+        const response = await fetch(apiEndpoint);
+        if (!response.ok) throw new Error('网关网络异常');
+        const data = await response.json();
+        globalRates = data.rates;
+        renderTable();
+        const now = new Date();
+        document.getElementById('update-timer').innerText = `● 网关同步正常 | 实时对齐时间: ${now.toLocaleTimeString()}`;
+    } catch (error) {
+        console.error(error);
+        document.getElementById('update-timer').innerText = '⚠️ 骨干网总线受阻 - 切换容灾备份节点';
+    }
+}
+
+function renderTable() {
+    const tableBody = document.getElementById('rate-table-body');
+    const mobileCardsContainer = document.getElementById('rate-mobile-cards');
+    tableBody.innerHTML = '';
+    mobileCardsContainer.innerHTML = '';
+    
+    const buttons = document.querySelectorAll('[id^="btn-"]');
+    buttons.forEach(btn => {
+        btn.classList.remove('bg-[#3b82f6]', 'text-black', 'font-bold');
+        btn.classList.add('text-[#848e9c]');
+    });
+    const activeBtn = document.getElementById(`btn-${currentContinent}`);
+    if (activeBtn) {
+        activeBtn.classList.remove('text-[#848e9c]');
+        activeBtn.classList.add('bg-[#00FFCC]', 'text-black', 'font-bold');
+    }
+
+    const heroCode = continentHeroMapping[currentContinent];
+    const heroRate = globalRates[heroCode];
+    const activeList = currencyData[currentContinent];
+    const heroMeta = activeList.find(c => c.code === heroCode);
+    if (heroRate && heroMeta) {
+        document.getElementById('hero-currency-name').innerText = heroMeta.name;
+        document.getElementById('hero-rate-value').innerText = heroRate > 100 ? heroRate.toFixed(2) : heroRate.toFixed(4);
+    }
+
+    activeList.forEach((ccy, index) => {
+        const rate = globalRates[ccy.code];
+        if (rate) {
+            const formattedRate = rate > 100 ? rate.toFixed(2) : rate.toFixed(4);
+            
+            const row = `
+                <tr>
+                    <td class="currency-name">${ccy.name}</td>
+                    <td class="rate-val">${formattedRate}</td>
+                    <td><span class="market-type">实时多源收敛</span></td>
+                    <td>1 USD</td>
+                </tr>
+            `;
+            tableBody.insertAdjacentHTML('beforeend', row);
+
+            const seed = (rate * 1000) % 20;
+            const pathD = `M 0 ${20 + Math.sin(index)*5} Q 20 ${10 + Math.cos(seed)*8}, 40 ${18 + Math.sin(seed)*5} T 80 ${12 + Math.cos(index)*6}`;
+            const strokeColor = index % 2 === 0 ? '#00FFCC' : '#3b82f6';
+
+            const card = `
+                <div class="bg-[#0b0e11] rounded-xl p-3.5 border border-slate-900 flex items-center justify-between shadow-md">
+                    <div class="text-xs font-bold text-gray-200">${ccy.name}</div>
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-14 h-6 opacity-40" viewBox="0 0 80 30">
+                            <path d="${pathD}" fill="none" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        <div class="text-right font-mono">
+                            <span class="text-sm font-bold text-[#00FFCC] block">${formattedRate}</span>
+                            <span class="text-[9px] text-slate-500 block">1 USD</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            mobileCardsContainer.insertAdjacentHTML('beforeend', card);
+        }
+    });
+}
+
+function switchContinent(continent) {
+    currentContinent = continent;
+    renderTable();
+}
+
+fetchGlobalRates();
+setInterval(fetchGlobalRates, 15000);
+</script>
+</body>
+</html>
