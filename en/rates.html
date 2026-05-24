@@ -5,77 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinLinks - Global Spot Liquidity Gateway Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            background-color: #000000;
-            color: #eaecef;
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        @media (min-width: 768px) {
-            .desktop-container {
-                max-width: 950px;
-                margin: 30px auto;
-                background: #0b0e11;
-                border: 1px solid #1f252d;
-                border-radius: 12px;
-                padding: 30px;
-                box-shadow: 0 12px 40px rgba(0,0,0,0.8);
-            }
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-        th {
-            color: #848e9c;
-            font-size: 11px;
-            font-family: monospace;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 12px 16px;
-            border-bottom: 1px solid #1f252d;
-        }
-        td {
-            padding: 16px 16px;
-            border-bottom: 1px solid #14181c;
-            font-size: 13px;
-            font-variant-numeric: tabular-nums;
-            font-family: monospace;
-        }
-        .currency-name {
-            font-weight: bold;
-            color: #ffffff;
-        }
-        .rate-val {
-            font-weight: bold;
-            color: #00FFCC;
-            font-size: 15px;
-        }
-        .market-type {
-            color: #00FFCC;
-            background: rgba(0, 255, 204, 0.05);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            border: 1px solid rgba(0, 255, 204, 0.1);
-        }
-        .mobile-hero-value {
-            font-size: 46px;
-            font-weight: 800;
-            font-family: monospace;
-            letter-spacing: -1px;
-            background: linear-gradient(to bottom, #ffffff 70%, #00FFCC 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/custom.css">
 </head>
 <body class="bg-[#000000]">
 
-<div class="desktop-container p-4 sm:p-6 md:p-8">
+<div class="desktop-container p-4 sm:p-6 md:p-8 rounded-xl">
     
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#1f252d] pb-4 mb-5">
         <a href="index.html" class="flex items-center space-x-1.5 py-1 px-3 bg-[#161a1e] rounded-md text-slate-400 hover:text-white transition-all border border-[#2b3139] text-xs font-mono">
@@ -105,11 +39,9 @@
             <span id="hero-currency-name" class="text-xs font-mono uppercase tracking-widest text-gray-400">LOADING...</span>
             <span class="text-[9px] bg-[#00FFCC]/5 text-[#00FFCC] font-mono px-2 py-0.5 rounded border border-[#00FFCC]/10">INTERBANK SPOT</span>
         </div>
-
         <div class="text-center my-3 relative z-10">
             <div id="hero-rate-value" class="mobile-hero-value">0.0000</div>
         </div>
-
         <div class="w-full h-10 mt-1">
             <svg class="w-full h-full" viewBox="0 0 300 50" preserveAspectRatio="none">
                 <defs>
@@ -122,9 +54,8 @@
                 <path d="M 0 35 Q 25 15, 50 30 T 100 10 T 150 40 T 200 15 T 250 35 T 300 15" fill="none" stroke="#00FFCC" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
         </div>
-        
         <div class="flex justify-between items-center mt-3 pt-2.5 border-t border-slate-900 text-[9px] text-slate-500 font-mono">
-            <span id="hero-base-note">BASE BASIS: 1 USD</span>
+            <span>BASE BASIS: 1 USD</span>
             <span class="text-[#00FFCC] flex items-center space-x-0.5">
                 <span class="inline-block animate-pulse w-1.5 h-1.5 bg-[#00FFCC] rounded-full mr-1"></span>HIGH-FREQ REFRESH ACTIVE
             </span>
@@ -153,148 +84,72 @@
     </div>
 </div>
 
+<script src="../assets/js/main.js"></script>
 <script>
-const currencyData = {
-    asia: [
-        { code: 'CNY', name: 'CNY - Chinese Yuan' },
-        { code: 'HKD', name: 'HKD - Hong Kong Dollar' },
-        { code: 'SGD', name: 'SGD - Singapore Dollar' },
-        { code: 'JPY', name: 'JPY - Japanese Yen' },
-        { code: 'KRW', name: 'KRW - South Korean Won' },
-        { code: 'IDR', name: 'IDR - Indonesian Rupiah' },
-        { code: 'THB', name: 'THB - Thai Baht' },
-        { code: 'VND', name: 'VND - Vietnamese Dong' },
-        { code: 'MYR', name: 'MYR - Malaysian Ringgit' },
-        { code: 'PHP', name: 'PHP - Philippine Peso' },
-        { code: 'INR', name: 'INR - Indian Rupee' }
-    ],
-    americas_europe: [
-        { code: 'EUR', name: 'EUR - Euro Zone' },
-        { code: 'GBP', name: 'GBP - British Pound' },
-        { code: 'CAD', name: 'CAD - Canadian Dollar' },
-        { code: 'AUD', name: 'AUD - Australian Dollar' },
-        { code: 'CHF', name: 'CHF - Swiss Franc' },
-        { code: 'RUB', name: 'RUB - Russian Ruble' }
-    ],
-    latam: [
-        { code: 'BRL', name: 'BRL - Brazilian Real' },
-        { code: 'MXN', name: 'MXN - Mexican Peso' },
-        { code: 'COP', name: 'COP - Colombian Peso' },
-        { code: 'CLP', name: 'CLP - Chilean Peso' },
-        { code: 'PEN', name: 'PEN - Peruvian Sol' },
-        { code: 'ARS', name: 'ARS - Argentine Peso' }
-    ],
-    africa_mideast: [
-        { code: 'NGN', name: 'NGN - Nigerian Naira' },
-        { code: 'EGP', name: 'EGP - Egyptian Pound' },
-        { code: 'ZAR', name: 'ZAR - South African Rand' },
-        { code: 'AED', name: 'AED - UAE Dirham' },
-        { code: 'SAR', name: 'SAR - Saudi Riyal' },
-        { code: 'TRY', name: 'TRY - Turkish Lira' },
-        { code: 'KES', name: 'KES - Kenyan Shilling' },
-        { code: 'GHS', name: 'GHS - Ghanaian Cedi' },
-        { code: 'PKR', name: 'PKR - Pakistani Rupee' },
-        { code: 'ILS', name: 'ILS - Israeli Shekel' }
-    ]
-};
+    // 注入前端独特的看盘界面异步渲染逻辑
+    const currencyDataEn = {
+        asia: [
+            { code: 'CNY', name: 'CNY - Chinese Yuan' }, { code: 'HKD', name: 'HKD - Hong Kong Dollar' },
+            { code: 'SGD', name: 'SGD - Singapore Dollar' }, { code: 'JPY', name: 'JPY - Japanese Yen' },
+            { code: 'KRW', name: 'KRW - South Korean Won' }, { code: 'IDR', name: 'IDR - Indonesian Rupiah' },
+            { code: 'THB', name: 'THB - Thai Baht' }, { code: 'VND', name: 'VND - Vietnamese Dong' },
+            { code: 'MYR', name: 'MYR - Malaysian Ringgit' }, { code: 'PHP', name: 'PHP - Philippine Peso' },
+            { code: 'INR', name: 'INR - Indian Rupee' }
+        ],
+        americas_europe: [
+            { code: 'EUR', name: 'EUR - Euro Zone' }, { code: 'GBP', name: 'GBP - British Pound' },
+            { code: 'CAD', name: 'CAD - Canadian Dollar' }, { code: 'AUD', name: 'AUD - Australian Dollar' },
+            { code: 'CHF', name: 'CHF - Swiss Franc' }, { code: 'RUB', name: 'RUB - Russian Ruble' }
+        ],
+        latam: [
+            { code: 'BRL', name: 'BRL - Brazilian Real' }, { code: 'MXN', name: 'MXN - Mexican Peso' },
+            { code: 'COP', name: 'COP - Colombian Peso' }, { code: 'CLP', name: 'CLP - Chilean Peso' },
+            { code: 'PEN', name: 'PEN - Peruvian Sol' }, { code: 'ARS', name: 'ARS - Argentine Peso' }
+        ],
+        africa_mideast: [
+            { code: 'NGN', name: 'NGN - Nigerian Naira' }, { code: 'EGP', name: 'EGP - Egyptian Pound' },
+            { code: 'ZAR', name: 'ZAR - South African Rand' }, { code: 'AED', name: 'AED - UAE Dirham' },
+            { code: 'SAR', name: 'SAR - Saudi Riyal' }, { code: 'TRY', name: 'TRY - Turkish Lira' },
+            { code: 'KES', name: 'KES - Kenyan Shilling' }, { code: 'GHS', name: 'GHS - Ghanaian Cedi' },
+            { code: 'PKR', name: 'PKR - Pakistani Rupee' }, { code: 'ILS', name: 'ILS - Israeli Shekel' }
+        ]
+    };
 
-const continentHeroMapping = {
-    asia: 'CNY',
-    americas_europe: 'EUR',
-    latam: 'BRL',
-    africa_mideast: 'NGN'
-};
+    const heroMap = { asia: 'CNY', americas_europe: 'EUR', latam: 'BRL', africa_mideast: 'NGN' };
 
-let globalRates = {}; 
-let currentContinent = 'asia'; 
+    function localRenderEn(rates, continent) {
+        const tableBody = document.getElementById('rate-table-body');
+        const mobileCards = document.getElementById('rate-mobile-cards');
+        tableBody.innerHTML = ''; mobileCards.innerHTML = '';
 
-async function fetchGlobalRates() {
-    const apiEndpoint = 'https://open.er-api.com/v6/latest/USD';
-    try {
-        const response = await fetch(apiEndpoint);
-        if (!response.ok) throw new Error('Gateway connectivity interrupted');
-        const data = await response.json();
-        globalRates = data.rates;
-        renderTable();
-        const now = new Date();
-        document.getElementById('update-timer').innerText = `● SYNC ACTIVE | TIME VALUE: ${now.toLocaleTimeString()}`;
-    } catch (error) {
-        console.error(error);
-        document.getElementById('update-timer').innerText = '⚠️ BACKBONE OBSTRUCTED - FALLBACK ACTIVE';
-    }
-}
-
-function renderTable() {
-    const tableBody = document.getElementById('rate-table-body');
-    const mobileCardsContainer = document.getElementById('rate-mobile-cards');
-    tableBody.innerHTML = '';
-    mobileCardsContainer.innerHTML = '';
-    
-    const buttons = document.querySelectorAll('[id^="btn-"]');
-    buttons.forEach(btn => {
-        btn.classList.remove('bg-[#3b82f6]', 'text-black', 'font-bold');
-        btn.classList.add('text-[#848e9c]');
-    });
-    const activeBtn = document.getElementById(`btn-${currentContinent}`);
-    if (activeBtn) {
-        activeBtn.classList.remove('text-[#848e9c]');
-        activeBtn.classList.add('bg-[#00FFCC]', 'text-black', 'font-bold');
-    }
-
-    const heroCode = continentHeroMapping[currentContinent];
-    const heroRate = globalRates[heroCode];
-    const activeList = currencyData[currentContinent];
-    const heroMeta = activeList.find(c => c.code === heroCode);
-    if (heroRate && heroMeta) {
-        document.getElementById('hero-currency-name').innerText = heroMeta.name;
-        document.getElementById('hero-rate-value').innerText = heroRate > 100 ? heroRate.toFixed(2) : heroRate.toFixed(4);
-    }
-
-    activeList.forEach((ccy, index) => {
-        const rate = globalRates[ccy.code];
-        if (rate) {
-            const formattedRate = rate > 100 ? rate.toFixed(2) : rate.toFixed(4);
-            
-            const row = `
-                <tr>
-                    <td class="currency-name">${ccy.name}</td>
-                    <td class="rate-val">${formattedRate}</td>
-                    <td><span class="market-type">Spot Aggregate</span></td>
-                    <td>1 USD</td>
-                </tr>
-            `;
-            tableBody.insertAdjacentHTML('beforeend', row);
-
-            const seed = (rate * 1000) % 20;
-            const pathD = `M 0 ${20 + Math.sin(index)*5} Q 20 ${10 + Math.cos(seed)*8}, 40 ${18 + Math.sin(seed)*5} T 80 ${12 + Math.cos(index)*6}`;
-            const strokeColor = index % 2 === 0 ? '#00FFCC' : '#3b82f6';
-
-            const card = `
-                <div class="bg-[#0b0e11] rounded-xl p-3.5 border border-slate-900 flex items-center justify-between shadow-md">
-                    <div class="text-xs font-bold text-gray-200">${ccy.name}</div>
-                    <div class="flex items-center space-x-3">
-                        <svg class="w-14 h-6 opacity-40" viewBox="0 0 80 30">
-                            <path d="${pathD}" fill="none" stroke="${strokeColor}" stroke-width="1.5" stroke-linecap="round"/>
-                        </svg>
-                        <div class="text-right font-mono">
-                            <span class="text-sm font-bold text-[#00FFCC] block">${formattedRate}</span>
-                            <span class="text-[9px] text-slate-500 block">1 USD</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            mobileCardsContainer.insertAdjacentHTML('beforeend', card);
+        const heroCode = heroMap[continent];
+        const heroRate = rates[heroCode];
+        if(heroRate) {
+            document.getElementById('hero-currency-name').innerText = heroCode + " Basis";
+            document.getElementById('hero-rate-value').innerText = heroRate > 100 ? heroRate.toFixed(2) : heroRate.toFixed(4);
         }
-    });
-}
 
-function switchContinent(continent) {
-    currentContinent = continent;
-    renderTable();
-}
+        currencyDataEn[continent].forEach((ccy, index) => {
+            const rate = rates[ccy.code];
+            if (rate) {
+                const formatted = rate > 100 ? rate.toFixed(2) : rate.toFixed(4);
+                tableBody.insertAdjacentHTML('beforeend', `<tr><td class="currency-name">${ccy.name}</td><td class="rate-val">${formatted}</td><td><span class="market-type">Spot Aggregate</span></td><td>1 USD</td></tr>`);
+                
+                const seed = (rate * 1000) % 20;
+                const pathD = `M 0 ${20 + Math.sin(index)*5} Q 20 ${10 + Math.cos(seed)*8}, 40 ${18 + Math.sin(seed)*5} T 80 ${12 + Math.cos(index)*6}`;
+                mobileCards.insertAdjacentHTML('beforeend', `<div class="bg-[#0b0e11] rounded-xl p-3.5 border border-slate-900 flex items-center justify-between shadow-md"><div class="text-xs font-bold text-gray-200">${ccy.name}</div><div class="flex items-center space-x-3"><svg class="w-14 h-6 opacity-40" viewBox="0 0 80 30"><path d="${pathD}" fill="none" stroke="${index%2===0?'#00FFCC':'#3b82f6'}" stroke-width="1.5" stroke-linecap="round"/></svg><div class="text-right font-mono"><span class="text-sm font-bold text-[#00FFCC] block">${formatted}</span><span class="text-[9px] text-slate-500 block">1 USD</span></div></div></div>`);
+            }
+        });
+    }
 
-fetchGlobalRates();
-setInterval(fetchGlobalRates, 15000);
+    function switchContinent(continent) {
+        currentContinent = continent;
+        fetchGlobalRates(localRenderEn);
+    }
+
+    // 启动与高频重对账脉搏
+    fetchGlobalRates(localRenderEn);
+    setInterval(() => fetchGlobalRates(localRenderEn), 15000);
 </script>
 </body>
 </html>
