@@ -6,20 +6,7 @@
     <title>FinLinks 融链科技 - 新兴市场跨境支付技术基础设施</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            background-color: #000000;
-            color: #eaecef;
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-        .pulse-glow {
-            animation: pulse 2s infinite alternate;
-        }
-        @keyframes pulse {
-            0% { r: 3px; opacity: 0.4; }
-            100% { r: 7px; opacity: 0.9; }
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/custom.css">
 </head>
 <body class="bg-[#000000] text-slate-200 antialiased">
 
@@ -79,35 +66,8 @@
                 <h2 class="text-2xl font-bold font-mono text-white mb-3 uppercase tracking-wider">多边名义轧差与资金技术路由</h2>
                 <p class="text-xs text-slate-500">基于多源网关的高频探针技术，实现亚洲核心经贸枢纽与全球多高增长本币走廊的数据血管直连。</p>
             </div>
-            
             <div class="w-full bg-[#0b0e11] border border-[#2b3139] rounded-2xl p-4 md:p-8 relative shadow-2xl overflow-hidden flex justify-center">
-                <svg class="w-full max-w-[900px] h-auto" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M150,150 Q180,120 220,130 T300,120 T350,180" fill="none" stroke="#1f252d" stroke-width="1"/>
-                    <path d="M400,350 Q450,380 500,320 T600,400" fill="none" stroke="#1f252d" stroke-width="1"/>
-                    <path d="M700,150 Q750,120 800,180 T900,200" fill="none" stroke="#1f252d" stroke-width="1"/>
-                    
-                    <path d="M750,220 Q500,250 480,360" fill="none" stroke="#00FFCC" stroke-width="1.5" stroke-dasharray="5 5" />
-                    <path d="M750,220 Q400,180 280,380" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4 4" />
-                    <path d="M750,220 Q780,260 800,290" fill="none" stroke="#00FFCC" stroke-width="2" />
-                    <path d="M750,220 Q600,200 530,240" fill="none" stroke="#3b82f6" stroke-width="1.2" />
-
-                    <circle cx="750" cy="220" r="5" fill="#00FFCC" />
-                    <circle cx="750" cy="220" r="12" fill="none" stroke="#00FFCC" stroke-width="1" class="animate-ping" style="animation-duration: 3s;" />
-                    <text x="762" y="216" fill="#ffffff" font-size="10" font-family="monospace" font-weight="bold">亚洲核心网关</text>
-                    
-                    <circle cx="480" cy="360" r="4" fill="#00FFCC" />
-                    <circle cx="480" cy="360" r="4" fill="#00FFCC" class="pulse-glow" />
-                    <text x="492" y="364" fill="#848e9c" font-size="9" font-family="monospace">NGN 奈拉节点</text>
-
-                    <circle cx="280" cy="380" r="4" fill="#3b82f6" />
-                    <text x="240" y="384" fill="#848e9c" font-size="9" font-family="monospace">BRL 雷亚尔节点</text>
-
-                    <circle cx="800" cy="290" r="4" fill="#00FFCC" />
-                    <text x="812" y="294" fill="#848e9c" font-size="9" font-family="monospace">IDR 印尼盾节点</text>
-
-                    <circle cx="530" cy="240" r="4" fill="#3b82f6" />
-                    <text x="520" y="230" fill="#848e9c" font-size="9" font-family="monospace">EGP 埃及镑节点</text>
-                </svg>
+                <img src="../assets/images/world-map.svg" alt="Dynamic Trade Routing Mesh" class="w-full max-w-[900px] h-auto">
             </div>
         </div>
     </section>
@@ -245,51 +205,9 @@
                     FinLinks（融链科技）在法律定性上严格作为金融科技软件技术中台服务商（SaaS & Middleware Provider）运行。本平台不属于持牌银行、非银行金融机构、第三方支付收单中心或金钱服务经营者（MSO）。本系统所展示、推荐及集成的一切虚拟账户、换汇、大宗清算与下发功能，均由合作生态中在各法域合法持牌的第三方金融机构（如 Flutterwave、StoneX 等）独立提供。FinLinks 在任何阶段、任何链路、任何代码逻辑中，均不托管、不拦截、不触碰客户的任何物理实体资金。
                 </div>
             </div>
-            <div class="border-t border-[#1f252d] pt-6 text-center text-slate-600 text-[10px]">
-                Powered by Vercel Edge Network & Programmatic FX Middleware.
-            </div>
         </div>
     </footer>
 
-    <script>
-    document.getElementById('finlinkForm8').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const msgContainer = document.getElementById('form-status-msg');
-        
-        // 🔒 保持像素级原装 4 个字段接口规范
-        const formData = {
-            company_name: document.getElementById('company_name').value,
-            contact_name: document.getElementById('contact_name').value,
-            wx_email: document.getElementById('wx_email').value, 
-            target_currency: document.getElementById('target_currency').value
-        };
-
-        const renderUrl = 'https://finlinks-backend.onrender.com/feishu/webhook'; 
-
-        try {
-            msgContainer.innerText = '⚡ 正在直连离岸公网总线路由...';
-            msgContainer.className = 'text-center text-[11px] font-mono mt-4 text-[#00FFCC] animate-pulse';
-
-            const response = await fetch(renderUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-            
-            if (response.ok) {
-                msgContainer.innerText = '✓ 接入请求已拦截。沙箱安全令牌生成中，技术团队将在24小时内确权。';
-                msgContainer.className = 'text-center text-[11px] font-mono mt-4 text-[#00FFCC] bg-[#00FFCC]/5 p-2 rounded-xl border border-[#00FFCC]/20';
-                document.getElementById('finlinkForm8').reset();
-            } else {
-                msgContainer.innerText = '❌ 远期端网关拒绝，请核实离岸容器健康分配度。';
-                msgContainer.className = 'text-center text-[11px] font-mono mt-4 text-rose-500 bg-rose-950/20 p-2 rounded-xl border border-rose-900/30';
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            msgContainer.innerText = '❌ 跨国骨干网响应超时，请核实您的公网连通性。';
-            msgContainer.className = 'text-center text-[11px] font-mono mt-4 text-rose-500 bg-rose-950/20 p-2 rounded-xl border border-rose-900/30';
-        }
-    });
-    </script>
+    <script src="../assets/js/main.js"></script>
 </body>
 </html>
