@@ -6,20 +6,7 @@
     <title>FinLinks - Emerging Markets Cross-Border Payment Infrastructure</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            background-color: #000000;
-            color: #eaecef;
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-        .pulse-glow {
-            animation: pulse 2s infinite alternate;
-        }
-        @keyframes pulse {
-            0% { r: 3px; opacity: 0.4; }
-            100% { r: 7px; opacity: 0.9; }
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/custom.css">
 </head>
 <body class="bg-[#000000] text-slate-200 antialiased">
 
@@ -77,37 +64,11 @@
         <div class="max-w-6xl mx-auto px-4 text-center">
             <div class="max-w-3xl mx-auto mb-12">
                 <h2 class="text-2xl font-bold font-mono text-white mb-3 uppercase tracking-wider">Dynamic Trade Routing Mesh</h2>
-                <p class="text-xs text-slate-500">Real-time mapping of global institutional nodes and settlement trunks linking Asian hubs directly to emerging国库 corridors.</p>
+                <p class="text-xs text-slate-500">Real-time mapping of global institutional nodes and settlement trunks linking Asian hubs directly to emerging corridors.</p>
             </div>
             
             <div class="w-full bg-[#0b0e11] border border-[#2b3139] rounded-2xl p-4 md:p-8 relative shadow-2xl overflow-hidden flex justify-center">
-                <svg class="w-full max-w-[900px] h-auto" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M150,150 Q180,120 220,130 T300,120 T350,180" fill="none" stroke="#1f252d" stroke-width="1"/>
-                    <path d="M400,350 Q450,380 500,320 T600,400" fill="none" stroke="#1f252d" stroke-width="1"/>
-                    <path d="M700,150 Q750,120 800,180 T900,200" fill="none" stroke="#1f252d" stroke-width="1"/>
-                    
-                    <path d="M750,220 Q500,250 480,360" fill="none" stroke="#00FFCC" stroke-width="1.5" stroke-dasharray="5 5" class="animate-[dash_30s_linear_infinite]" />
-                    <path d="M750,220 Q400,180 280,380" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4 4" />
-                    <path d="M750,220 Q780,260 800,290" fill="none" stroke="#00FFCC" stroke-width="2" />
-                    <path d="M750,220 Q600,200 530,240" fill="none" stroke="#3b82f6" stroke-width="1.2" />
-
-                    <circle cx="750" cy="220" r="5" fill="#00FFCC" />
-                    <circle cx="750" cy="220" r="12" fill="none" stroke="#00FFCC" stroke-width="1" class="animate-ping" style="animation-duration: 3s;" />
-                    <text x="762" y="216" fill="#ffffff" font-size="10" font-family="monospace" font-weight="bold">ASIA HUB</text>
-                    
-                    <circle cx="480" cy="360" r="4" fill="#00FFCC" />
-                    <circle cx="480" cy="360" r="4" fill="#00FFCC" class="pulse-glow" />
-                    <text x="492" y="364" fill="#848e9c" font-size="9" font-family="monospace">NGN Node</text>
-
-                    <circle cx="280" cy="380" r="4" fill="#3b82f6" />
-                    <text x="240" y="384" fill="#848e9c" font-size="9" font-family="monospace">BRL Node</text>
-
-                    <circle cx="800" cy="290" r="4" fill="#00FFCC" />
-                    <text x="812" y="294" fill="#848e9c" font-size="9" font-family="monospace">IDR Node</text>
-
-                    <circle cx="530" cy="240" r="4" fill="#3b82f6" />
-                    <text x="520" y="230" fill="#848e9c" font-size="9" font-family="monospace">EGP Node</text>
-                </svg>
+                <img src="../assets/images/world-map.svg" alt="Dynamic Trade Routing Mesh" class="w-full max-w-[900px] h-auto">
                 <div class="absolute bottom-3 left-4 text-[9px] font-mono text-slate-600">
                     *Graph indicates nominal netting telemetry and clearing trunk routes.
                 </div>
@@ -131,7 +92,7 @@
                         <span class="text-[10px] font-mono font-bold uppercase tracking-widest text-[#00FFCC] block mb-2">Smart Liquidity Routing</span>
                         <h3 class="text-xl font-bold font-mono text-white mb-4">Multi-Source SOR Engine</h3>
                         <p class="text-xs text-slate-400 leading-relaxed">
-                            Python-driven high-frequency endpoints connecting decentralized持牌 clearers. Sub-millisecond clearing execution to bypass structural spreads.
+                            Python-driven high-frequency endpoints connecting decentralized clearers. Sub-millisecond clearing execution to bypass structural spreads.
                         </p>
                     </div>
                 </div>
@@ -248,51 +209,9 @@
                     FinLinks is operating strictly as a software-as-a-service (SaaS) and middleware provider. FinLinks is not a bank, licensed money transmitter, or money service operator (MSO). All onboarding, merchant accounts, settlement, FX execution, and final pay-outs are independently cleared and processed within dedicated corporate bank accounts provided by partner ecosystem institutions (e.g. Flutterwave, StoneX) who maintain full statutory licensure in their respective global jurisdictions. FinLinks never pools, intercepts, or carries merchant balances at any step of the data routing process.
                 </div>
             </div>
-            <div class="border-t border-[#1f252d] pt-6 text-center text-slate-600 text-[10px]">
-                Powered by Vercel Edge Network & Programmatic FX Middleware.
-            </div>
         </div>
     </footer>
 
-    <script>
-    document.getElementById('finlinkForm8').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const msgContainer = document.getElementById('form-status-msg');
-        
-        // 🔒 Exact 4 Core Fields Protocol Alignment
-        const formData = {
-            company_name: document.getElementById('company_name').value,
-            contact_name: document.getElementById('contact_name').value,
-            wx_email: document.getElementById('wx_email').value, 
-            target_currency: document.getElementById('target_currency').value
-        };
-
-        const renderUrl = 'https://finlinks-backend.onrender.com/feishu/webhook'; 
-
-        try {
-            msgContainer.innerText = '⚡ Connecting to infrastructure trunk lines...';
-            msgContainer.className = 'text-center text-[11px] font-mono mt-4 text-[#00FFCC] animate-pulse';
-
-            const response = await fetch(renderUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-            
-            if (response.ok) {
-                msgContainer.innerText = '✓ Success. Integration request cached. Key tokens provisioning.';
-                msgContainer.className = 'text-center text-[11px] font-mono mt-4 text-[#00FFCC] bg-[#00FFCC]/5 p-2 rounded-xl border border-[#00FFCC]/20';
-                document.getElementById('finlinkForm8').reset();
-            } else {
-                msgContainer.innerText = '❌ Upstream endpoint rejection. Verify server allocation status.';
-                msgContainer.className = 'text-center text-[11px] font-mono mt-4 text-rose-500 bg-rose-950/20 p-2 rounded-xl border border-rose-900/30';
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            msgContainer.innerText = '❌ Pipeline timeout. Check global public network state.';
-            msgContainer.className = 'text-center text-[11px] font-mono mt-4 text-rose-500 bg-rose-950/20 p-2 rounded-xl border border-rose-900/30';
-        }
-    });
-    </script>
+    <script src="../assets/js/main.js"></script>
 </body>
 </html>
