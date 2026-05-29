@@ -9,7 +9,7 @@ const BACKEND_ENV = {
     // 🛡️ 自动分流大闸：推送至 GitHub 并触发 Render 编译前记得在此贴入你真实的云端后端域名
     BASE_URL: IS_LOCAL 
         ? "http://127.0.0.1:8000" 
-        : "https://finlinks-backend.onrender.com", 
+        : "https://finlinks-backend-staging.onrender.com", 
     endpoints: {
         balances: "/ledger/balances",
         fx_quote: "/ledger/fx/quote",
