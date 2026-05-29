@@ -269,7 +269,6 @@ async function submitFxConversion(forcedRate = null, forcedTimestamp = null, for
     const buyCurr = document.getElementById("buy-currency").value;
     const sellAmt = parseFloat(document.getElementById("sell-amount").value);
     
-    // 🟢 【原有防线】CBiBank 级前置风控拦截断路大闸 - 100% 完好保活
     const sellConfig = FINLINKS_CURRENCY_MATRIX[sellCurr.toUpperCase()];
     const buyConfig = FINLINKS_CURRENCY_MATRIX[buyCurr.toUpperCase()];
     if ((sellConfig && !sellConfig.isFXEnabled) || (buyConfig && !buyConfig.isFXEnabled)) {
@@ -370,7 +369,7 @@ async function triggerMockPayinCallback() {
     const payerName = nameEl && nameEl.value ? nameEl.value.trim() : "Demo Payer";
 
     if (currency !== "KES" && currency !== "UGX" && currency !== "NGN") {
-        pushAuditLog(`[COLLECTION BLOCKED] 触发 CBiBank 离岸清算防爆闸！拦截未通电币种: ${currency}`);
+        pushAuditLog(`[COLLECTION BLOCKED] 触发离岸清算防爆闸！拦截未通电币种: ${currency}`);
         alert(`【FinLinks 算力中枢风险提示】\n\n币种 [${currency}] 当前受限于离岸外汇管制与流动性结汇死锁，中台已关闭该通道。[功能正在研发中 / To be enabled]`);
         return;
     }
