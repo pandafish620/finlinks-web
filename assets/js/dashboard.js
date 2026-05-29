@@ -1,6 +1,6 @@
 // -*- coding: utf-8 -*-
 // 文件位置：C:\Users\Jacky\Desktop\my_frontend_code\assets\js\dashboard.js
-// 版本说明：v3.1.0-Risk-Shield (多币种泛化收单、300s特赦时钟与10大本币即插即用前端高防盾完全体)
+// 版本说明：v3.2.0-EBANX-Volatile-Core (多币种泛化收单、300s特赦时钟与拉美欧亚高高防盾完全体)
 
 // 🎯 【智能环境嗅探大闸】自动识别本地沙盒 vs 生产/测试云端环境
 const IS_LOCAL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
@@ -19,28 +19,38 @@ const BACKEND_ENV = {
     }
 };
 
-// 🟢 【核心资产：位置一】FinLinks 3.0 全球多币种外汇（FX）与收单（Collection）状态硬对账矩阵
-// 像素级管控 10 大币种在 MVP 阶段的物理通电状态，为上游 UI 提供断路依据
+// 🟢 【核心资产：位置一】FinLinks 3.2.0 全球多币种外汇（FX）与收单（Collection）状态硬对账矩阵
+// 像素级管控 10 大币种在 MVP 阶段的物理通电状态，新增拉美欧亚高利润自由兑换市场
 const FINLINKS_CURRENCY_MATRIX = {
     "KES": { name: "肯尼亚先令", isCollectionEnabled: true,  isFXEnabled: true,  notice: "Fully Active" },
     "UGX": { name: "乌干达先令", isCollectionEnabled: true,  isFXEnabled: true,  notice: "Fully Active" },
     "NGN": { name: "尼日利亚奈拉", isCollectionEnabled: true,  isFXEnabled: true,  notice: "Fully Active" }, 
+    // 🌟 3.2.0 增量通电市场：对接 EBANX 自由兑换高波赛道
+    "BRL": { name: "巴西雷亚尔",   isCollectionEnabled: true,  isFXEnabled: true,  notice: "Fully Active (EBANX)" },
+    "MXN": { name: "墨西哥比索",   isCollectionEnabled: true,  isFXEnabled: true,  notice: "Fully Active (EBANX)" },
+    "TRY": { name: "土耳其里拉",   isCollectionEnabled: true,  isFXEnabled: true,  notice: "Fully Active (EBANX)" },
+    // 存量未通电冷库隔离带保持不变
     "TZS": { name: "坦桑尼亚先令", isCollectionEnabled: false, isFXEnabled: false, notice: "功能正在研发中 / To be enabled" },
     "GHS": { name: "加纳塞地",     isCollectionEnabled: false, isFXEnabled: false, notice: "功能正在研发中 / To be enabled" },
     "ZAR": { name: "南非兰特",     isCollectionEnabled: false, isFXEnabled: false, notice: "功能正在研发中 / To be enabled" },
     "MUR": { name: "毛里求斯卢比", isCollectionEnabled: false, isFXEnabled: false, notice: "功能正在研发中 / To be enabled" },
-    "BRL": { name: "巴西雷亚尔",   isCollectionEnabled: false, isFXEnabled: false, notice: "功能正在研发中 / To be enabled" },
     "ARS": { name: "阿根廷比索",   isCollectionEnabled: false, isFXEnabled: false, notice: "功能正在研发中 / To be enabled" },
     "COP": { name: "哥伦比亚比索", isCollectionEnabled: false, isFXEnabled: false, notice: "功能正在研发中 / To be enabled" }
 };
 
-// 👑 【3.1.0 客户端地缘金融正则风控拦截矩阵】
-// 100% 对齐后端中台规则，在流量跨公网离境前进行本地沙盒洗刷与精准阻断
+// 👑 【3.2.0 客户端地缘金融正则风控拦截矩阵】
+// 100% 对齐后端中台 EBANX 规则，新增自由兑换高波动币种，脏流量离境前执行本地沙盒清洗
 const LOCAL_RAILS_FRONTEND_REGEXP = {
     "NGN": { pattern: /^\d{10}$/, notice: "尼日利亚央行 NUBAN 规范，账号必须是且只能是 10 位纯数字" },
     "KES": { pattern: /^(254|0)?(7|1)\d{8}$/, notice: "肯尼亚 M-Pesa 规范，必须是标准的东非钱包手机号格式 (如 254712345678)" },
     "UGX": { pattern: /^(256|0)?\d{9}$/, notice: "乌干达移动货币规范，必须是标准的乌干达钱包账号/手机号" },
-    "USD": { pattern: /^\d{9,17}$/, notice: "美联储清算网络规范，银行账号通常为 9 到 17 位纯数字" }
+    "USD": { pattern: /^\d{9,17}$/, notice: "美联储清算网络规范，银行账号通常为 9 到 17 位纯数字" },
+    // 🌟 增量重武器 1：拉美巴西 Pix 泛化识别（兼容 11位CPF、14位CNPJ、手机号、标准 UUID）
+    "BRL": { pattern: /^(?:\d{11}|\d{14}|\+?55\d{10,11}|[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})$/, notice: "巴西央行 Pix 规范，必须是合规的 CPF(11位)、CNPJ(14位)、手机号或标准的 UUID 随机密钥" },
+    // 🌟 增量重武器 2：墨西哥 CLABE 银行统一清算内轨
+    "MXN": { pattern: /^\d{18}$/, notice: "墨西哥银行标准 CLABE 规范，收款账号必须是且只能是 18 位纯数字统一清算编码" },
+    // 🌟 增量重武器 3：土耳其国际银联 IBAN 强强清洗格式
+    "TRY": { pattern: /^TR\d{2}\d{5}[A-Z0-9]{17}$/i, notice: "土耳其中央银行 IBAN 规范，收款账号必须以 TR 开头，后跟 24 位纯数字/字母组合（总长 26 位）" }
 };
 
 // 打印当前环境状态，方便调取控制台时一眼判定血管去向
@@ -57,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // 🛡️ 核心自愈：如果本地缓存为空，或者残存着引发 401 熔断的非标准老线指纹
     if (!token || token === "MOCK_DEVELOPER_TOKEN" || token === "admin_sandbox_pass" || !token.includes(".")) {
-        console.log("⚙️ [AUTH PATCH] 检测到非标准测试令牌，正在物理注入合规的沙盒 JWT 伪结构...");
+        console.log("⚙️ [AUTH PATCH] 检测到非标准测试令牌，正在物理注入合规 the 沙盒 JWT 伪结构...");
         
         // 💡 像素级拼装一个标准的 3段式 JWT 模拟令牌 (Header.Payload.Signature)
         const mockHeader = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
@@ -81,13 +91,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // =================================================================
-    // 🔌 【即插即用外挂】UI 交互地缘占位符动态联动注入器
+    // 🔌 【即插即用外挂】UI 交互地缘占位符动态联动注入器 (3.2.0 EBANX 高波扩容版)
     // =================================================================
     const payoutCurrSelect = document.getElementById("payout-curr");
     const payoutAccInput = document.getElementById("payout-acc");
     if (payoutCurrSelect && payoutAccInput) {
         payoutCurrSelect.addEventListener("change", () => {
-            const chosenCurr = payoutCurrSelect.value.toUpperCase().trim();
+            const chosenCurr = payoutAccInput.value ? payoutCurrSelect.value.toUpperCase().trim() : payoutCurrSelect.value.toUpperCase();
             payoutAccInput.style.transition = "all 0.3s ease";
             payoutAccInput.style.borderColor = "#f43f5e"; // 呼吸色提示：代付线
             setTimeout(() => { payoutAccInput.style.borderColor = ""; }, 400);
@@ -97,6 +107,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 case "KES": payoutAccInput.placeholder = "请输入肯尼亚 M-Pesa 手机号 (例如: 254712345678)"; break;
                 case "UGX": payoutAccInput.placeholder = "请输入乌干达钱包账号 (例如: 256771234567)"; break;
                 case "USD": payoutAccInput.placeholder = "请输入 FedWire / ACH 银行账号 (9-17位数字)"; break;
+                // 🌟 拉美欧亚大门开启
+                case "BRL": payoutAccInput.placeholder = "请输入 Pix 密钥: CPF税号(11位)、CNPJ(14位)、手机号或随机 UUID"; break;
+                case "MXN": payoutAccInput.placeholder = "请输入墨西哥银行标准 18 位纯数字 CLABE 统一清算编码"; break;
+                case "TRY": payoutAccInput.placeholder = "请输入以 TR 开头的 26 位土耳其标准国际银行账号"; break;
                 default: payoutAccInput.placeholder = "请输入收款银行账号 / 电子钱包号 (Wallet Number)";
             }
         });
@@ -106,7 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const collectionPhoneInput = document.getElementById("collectionPhone");
     if (collectionCurrSelect && collectionPhoneInput) {
         collectionCurrSelect.addEventListener("change", () => {
-            const chosenCurr = collectionCurrSelect.value.toUpperCase().trim();
+            const chosenCurr = collectionPhoneInput.value ? collectionCurrSelect.value.toUpperCase().trim() : collectionCurrSelect.value.toUpperCase();
             collectionPhoneInput.style.transition = "all 0.3s ease";
             collectionPhoneInput.style.borderColor = "#10b981"; // 呼吸色提示：收单线
             setTimeout(() => { collectionPhoneInput.style.borderColor = ""; }, 400);
@@ -115,6 +129,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 case "KES": collectionPhoneInput.placeholder = "东非 Safaricom 钱包号 (如: 254712345678)"; break;
                 case "UGX": collectionPhoneInput.placeholder = "乌干达移动钱包号 (如: 256771234567)"; break;
                 case "NGN": collectionPhoneInput.placeholder = "请输入 10 位虚拟账号或关联手机号"; break;
+                // 🌟 拉美欧亚代收联动
+                case "BRL": collectionPhoneInput.placeholder = "巴西本地付款方 Pix 映射账号凭证"; break;
+                case "MXN": collectionPhoneInput.placeholder = "墨西哥本地 SPEI 清算或 OXXO 关联账户"; break;
+                case "TRY": collectionPhoneInput.placeholder = "土耳其本地账户号 / 电子钱包 ID"; break;
                 default: collectionPhoneInput.placeholder = "请输入付款人本地账户凭证/手机号";
             }
         });
@@ -368,17 +386,19 @@ async function triggerMockPayinCallback() {
     const phoneNumber = phoneEl && phoneEl.value ? phoneEl.value.trim() : "254712345678";
     const payerName = nameEl && nameEl.value ? nameEl.value.trim() : "Demo Payer";
 
-    if (currency !== "KES" && currency !== "UGX" && currency !== "NGN") {
+    if (currency !== "KES" && currency !== "UGX" && currency !== "NGN" && currency !== "BRL" && currency !== "MXN" && currency !== "TRY") {
         pushAuditLog(`[COLLECTION BLOCKED] 触发离岸清算防爆闸！拦截未通电币种: ${currency}`);
         alert(`【FinLinks 算力中枢风险提示】\n\n币种 [${currency}] 当前受限于离岸外汇管制与流动性结汇死锁，中台已关闭该通道。[功能正在研发中 / To be enabled]`);
         return;
     }
 
     // 🟢 【即插即用外挂拦截点】收单时先人肉测距本地地缘正则防爆盾，不符合直接就地强退拒签
-    const cleanPhone = phoneNumber.replace(/\s+/g, "").replace(/-/g, "");
+    const cleanPhone = phoneNumber.replace(/\s+/g, "").replace(/-/g, "").replace(/\./g, "");
     if (LOCAL_RAILS_FRONTEND_REGEXP[currency]) {
         const rule = LOCAL_RAILS_FRONTEND_REGEXP[currency];
-        if (!rule.pattern.test(cleanPhone)) {
+        // TRY 国际 IBAN 强制转换大写参与比对
+        const targetVal = currency === "TRY" ? cleanPhone.toUpperCase() : cleanPhone;
+        if (!rule.pattern.test(targetVal)) {
             pushAuditLog(`[PAYIN REJECTED] 客户端拦截：收单账号/手机号格式排异`);
             showPremiumNotification("⚠️ 客户端数据不合规", `该币种${rule.notice}`, "rose", true);
             return;
@@ -388,7 +408,7 @@ async function triggerMockPayinCallback() {
     pushAuditLog(`[PAYIN OUTFLOW] 正在向中台发起有源收单确权申请... 币种: ${currency} | 金额: ${amount}`);
     
     try {
-        const url = `${BACKEND_ENV.BASE_URL}${BACKEND_ENV.endpoints.payin_callback}?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(phoneNumber)}&payer_name=${encodeURIComponent(payerName)}&routing_via=PAWAPAY`;
+        const url = `${BACKEND_ENV.BASE_URL}${BACKEND_ENV.endpoints.payin_callback}?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(phoneNumber)}&payer_name=${encodeURIComponent(payerName)}&routing_via=EBANX`;
         
         const response = await fetch(url, { 
             method: "POST", 
@@ -443,7 +463,7 @@ async function executeLivePayoutDisbursal() {
 
     const beneficiaryName = elName.value.trim();
     const beneficiaryAcc = elAcc.value.trim();
-    const currency = elCurr.value;
+    const currency = elCurr.value.toUpperCase();
     const amount = parseFloat(elAmt.value);
 
     if (!beneficiaryName || !beneficiaryAcc || !amount || amount <= 0) {
@@ -452,10 +472,11 @@ async function executeLivePayoutDisbursal() {
     }
 
     // 🟢 【即插即用外挂拦截点】代付下发前，执行客户端 10 大新兴本币账号格式初审，脏流量绝不出网
-    const cleanAcc = beneficiaryAcc.replace(/\s+/g, "").replace(/-/g, "");
+    const cleanAcc = beneficiaryAcc.replace(/\s+/g, "").replace(/-/g, "").replace(/\./g, "");
     if (LOCAL_RAILS_FRONTEND_REGEXP[currency]) {
         const rule = LOCAL_RAILS_FRONTEND_REGEXP[currency];
-        if (!rule.pattern.test(cleanAcc)) {
+        const targetVal = currency === "TRY" ? cleanAcc.toUpperCase() : cleanAcc;
+        if (!rule.pattern.test(targetVal)) {
             pushAuditLog(`[PAYOUT ABORTED] 客户端拦截：代付方本地卡号/钱包格式错配！`);
             showPremiumNotification("⚠️ 填单信息不合规", `当前选择的结算本币为 [${currency}]。<br><span class="text-rose-400 font-bold">${rule.notice}</span>`, "rose", true);
             return;
@@ -684,6 +705,17 @@ function debounce(func, delay) {
     };
 }
 
+// 🟢 外挂全局清洗拦截，1 毫秒纯净校正 DOM，去除第三方影子挂靠乌龙
+function initTechVendorNarrative() {
+    const allTextNodes = document.createNodeIterator(document.body, NodeFilter.SHOW_TEXT);
+    let currNode;
+    while (currNode = allTextNodes.nextNode()) {
+        if (currNode.nodeValue.includes("CBiBank")) {
+            currNode.nodeValue = currNode.nodeValue.replace(/CBiBank\s*级防爆架构|CBiBank\s*级别地缘金融合规边界审查/g, "金融级标准");
+        }
+    }
+}
+
 function openFxModal() {
     const modal = document.getElementById("fx-modal");
     if (modal) modal.classList.remove("pointer-events-none", "opacity-0");
@@ -744,3 +776,6 @@ window.syncFXTargetVisibility = function(selectedCurrency) {
 
 // 👑 【确权置顶总线】显式挂载核心代付核销函数至全局 window，彻底绝杀 HTML 扣击未定义排异
 window.executeLivePayoutDisbursal = executeLivePayoutDisbursal;
+
+// 注入最后的安全初始化自愈
+document.addEventListener("DOMContentLoaded", initTechVendorNarrative);
