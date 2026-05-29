@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinLinks 3.0 - 全球多通道聚合商户控制台</title>
+    <title>FinLinks 3.2.0 - 全球多通道聚合商户控制台</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="../assets/css/custom.css">
     <style>
@@ -17,8 +17,9 @@
 
     <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0">
         <div>
-            <div class="px-6 py-6 border-b border-slate-800 flex items-center space-x-2">
-                <span class="text-xl font-extrabold tracking-wider text-emerald-400">FinLinks <span class="text-xs font-normal text-slate-500">3.0</span></span>
+            <div class="px-6 py-6 border-b border-slate-800 flex items-center justify-between">
+                <span class="text-xl font-extrabold tracking-wider text-emerald-400">FinLinks <span class="text-xs font-normal text-slate-500">3.2.0</span></span>
+                <a href="dashboard_en.html" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 hover:text-emerald-400 transition font-mono">EN</a>
             </div>
             <nav class="mt-6 px-4 space-y-1.5">
                 <button onclick="switchTab('overview')" id="btn-overview" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition sidebar-active">
@@ -34,7 +35,7 @@
                     <span>⚖️ 自动化总账对账</span>
                 </button>
                 <button class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-500 cursor-not-allowed" disabled>
-                    <span>🛡️ 合规资质归档 (KYB)</span>
+                    <span>🛡️ 🛡️ 合规资质归档 (KYB)</span>
                 </button>
             </nav>
         </div>
@@ -48,7 +49,7 @@
 
     <div class="flex-1 flex flex-col overflow-hidden">
         <header class="h-16 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between px-8 shrink-0">
-            <div class="text-sm font-semibold text-slate-400">安全级别：<span class="text-emerald-400">金融级刚性风控架构</span></div>
+            <div class="text-sm font-semibold text-slate-400">安全级别：<span class="text-emerald-400 font-bold" id="security-status-badge">金融级标准</span></div>
             <div class="flex space-x-4">
                 <a href="rates.html" class="text-xs text-slate-400 hover:text-emerald-400 flex items-center">📡 实时汇率遥测</a>
                 <button onclick="openFxModal()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 py-1.5 rounded-lg text-xs transition">执行即期换汇 (FX Swap)</button>
@@ -91,12 +92,14 @@
                                     <option value="" disabled selected>选择结算本地币种...</option>
                                     <option value="KES" data-mode="Mobile Money (Safaricom M-Pesa)">KES - 肯尼亚先令 (东非 M-Pesa 直连)</option>
                                     <option value="UGX" data-mode="Mobile Money (MTN / Airtel)">UGX - 乌干达先令 (东非 MTN 核心网)</option>
-                                    <option value="TZS" data-mode="Mobile Money (Vodacom / Tigo)">TZS - 坦桑尼亚先令 [功能正在研发中 / To be enabled]</option>
                                     <option value="NGN" data-mode="Instant Bank Transfer (Virtual Account)">NGN - 尼日利亚奈拉 (动态虚拟账号转账)</option>
+                                    <option value="BRL" data-mode="Pix Instant QR / Key Code (EBANX)">BRL - 巴西雷亚尔 (Pix 实时网关通电)</option>
+                                    <option value="MXN" data-mode="SPEI / OXXO Bus (EBANX)">MXN - 墨西哥比索 (CLABE 核心网通电)</option>
+                                    <option value="TRY" data-mode="Turkey Local Wallet (Frankfurter)">TRY - 土耳其里拉 (里拉自由大盘通电)</option>
+                                    <option value="TZS" data-mode="Mobile Money (Vodacom / Tigo)">TZS - 坦桑尼亚先令 [功能正在研发中 / To be enabled]</option>
                                     <option value="GHS" data-mode="Mobile Money (MTN / Telecel)">GHS - 加纳塞地 [功能正在研发中 / To be enabled]</option>
                                     <option value="ZAR" data-mode="Instant EFT (Capitec Pay / Stitch)">ZAR - 南非兰特 [功能正在研发中 / To be enabled]</option>
                                     <option value="MUR" data-mode="MauCAS Instant Net Network">MUR - 毛里求斯卢比 [功能正在研发中 / To be enabled]</option>
-                                    <option value="BRL" data-mode="PIX Instant QR / Key Code">BRL - 巴西雷亚尔 [功能正在研发中 / To be enabled]</option>
                                     <option value="ARS" data-mode="Transferencias 3.0 (Mercado Pago)">ARS - 阿根廷比索 [功能正在研发中 / To be enabled]</option>
                                     <option value="COP" data-mode="PSE Online Rail Payment">COP - 哥伦比亚比索 [功能正在研发中 / To be enabled]</option>
                                 </select>
@@ -109,8 +112,8 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">付款人本地账户凭证/手机号 (Payer Account)</label>
-                                <input type="text" id="collectionPhone" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none" placeholder="254712345678">
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">付款人本地账户凭证/手机号/秘钥 (Payer Account/Key)</label>
+                                <input type="text" id="collectionPhone" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none" placeholder="请输入对应地缘清算凭证号">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">付款人合规全称 (Payer Full Name)</label>
@@ -128,28 +131,31 @@
             <section id="pane-payout" class="tab-pane hidden space-y-6">
                 <div>
                     <h1 class="text-2xl font-extrabold tracking-tight text-rose-400">自主出金代付工作台 (Payout Control)</h1>
-                    <p class="text-slate-400 text-xs mt-1">向非洲当地放款银行或 Mobile Money 电子钱包下发代付清算指令。</p>
+                    <p class="text-slate-400 text-xs mt-1">向非洲、拉美及欧亚本地银行、Pix实时网络或电子钱包下发跨境代付清算指令。</p>
                 </div>
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-xl">
                     <span class="block font-bold text-sm text-slate-300 mb-4">单笔紧急代付下发表单</span>
                     <div class="space-y-3">
                         <input type="text" id="payout-name" placeholder="受益人姓名 (Beneficiary Name)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
-                        <input type="text" id="payout-acc" placeholder="收款银行账号 / 电子钱包号 (Wallet Number)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
+                        <input type="text" id="payout-acc" placeholder="请先选择交割本币解锁地缘格式校验..." class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
                         <div class="grid grid-cols-2 gap-4">
                             <select id="payout-curr" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
-                                <option value="USD">USD (美元)</option>
+                                <option value="" disabled selected>选择币种...</option>
+                                <option value="USD">USD (美元本地清算)</option>
                                 <option value="KES">KES (肯尼亚先令 - M-Pesa 离岸放款)</option>
                                 <option value="UGX">UGX (乌干达先令 - MTN 移动打款)</option>
-                                <option value="NGN">NGN (尼日利亚奈拉 - 虚拟账号转账)</option>
+                                <option value="NGN">NGN (尼日利亚奈拉 - NUBAN 虚拟转账)</option>
+                                <option value="BRL">BRL (巴西雷亚尔 - EBANX Pix网关)</option>
+                                <option value="MXN">MXN (墨西哥比索 - EBANX CLABE总线)</option>
+                                <option value="TRY">TRY (土耳其里拉 - 国际 IBAN 清算)</option>
                                 <option value="TZS">TZS (坦桑尼亚先令) [功能正在研发中]</option>
                                 <option value="GHS">GHS (加纳塞地) [功能正在研发中]</option>
                                 <option value="ZAR">ZAR (南非兰特) [功能正在研发中]</option>
                                 <option value="MUR">MUR (毛里求斯卢比) [功能正在研发中]</option>
-                                <option value="BRL">BRL (巴西雷亚尔 - PIX 清算) [功能正在研发中]</option>
                                 <option value="ARS">ARS (阿根廷比索) [功能正在研发中]</option>
-                                <option value="COP">COP (哥白尼亚比索) [功能正在研发中]</option>
+                                <option value="COP">COP (哥伦比亚比索) [功能正在研发中]</option>
                             </select>
-                            <input type="number" id="payout-amount" placeholder="清算金额" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
+                            <input type="number" id="payout-amount" placeholder="清算金额 (Amount)" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
                         </div>
                         <button onclick="executeLivePayoutDisbursal()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded text-xs tracking-wider transition">核销并下发代付信号</button>
                     </div>
@@ -173,7 +179,7 @@
         <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
             <div class="modal-content py-6 text-left px-6">
                 <div class="flex justify-between items-center pb-4 border-b border-slate-800">
-                    <p class="text-md font-bold text-emerald-400">即期多边轧差外汇兑换</p>
+                    <p class="text-md font-bold text-emerald-400">即期多边轧差外汇兑换 (FX Swap)</p>
                     <div class="modal-close cursor-pointer z-50" onclick="closeFxModal()">
                         <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18"><path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/></svg>
                     </div>
@@ -187,17 +193,19 @@
                             <option value="KES">KES (肯尼亚先令)</option>
                             <option value="UGX">UGX (乌干达先令)</option>
                             <option value="NGN">NGN (尼日利亚奈拉)</option>
+                            <option value="BRL">BRL (巴西雷亚尔)</option>
+                            <option value="MXN">MXN (墨西哥比索)</option>
+                            <option value="TRY">TRY (土耳其里拉)</option>
                             <option value="TZS">TZS (坦桑尼亚先令) [研发中]</option>
                             <option value="GHS">GHS (加纳塞地) [研发中]</option>
                             <option value="ZAR">ZAR (南非兰特) [研发中]</option>
                             <option value="MUR">MUR (毛里求斯卢比) [研发中]</option>
-                            <option value="BRL">BRL (巴西雷亚尔) [研发中]</option>
                             <option value="ARS">ARS (阿根廷比索) [研发中]</option>
                             <option value="COP">COP (哥伦比亚比索) [研发中]</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">卖出名义金额</label>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">卖出名义金额 (Sell Amount)</label>
                         <input type="number" id="sell-amount" placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
                     </div>
                     
@@ -208,18 +216,20 @@
                             <option value="KES">KES (肯尼亚先令)</option>
                             <option value="UGX">UGX (乌干达先令)</option>
                             <option value="NGN">NGN (尼日利亚奈拉)</option>
+                            <option value="BRL">BRL (巴西雷亚尔)</option>
+                            <option value="MXN">MXN (墨西哥比索)</option>
+                            <option value="TRY">TRY (土耳其里拉)</option>
                             <option value="TZS">TZS (坦桑尼亚先令) [研发中]</option>
                             <option value="GHS">GHS (加纳塞地) [研发中]</option>
                             <option value="ZAR">ZAR (南非兰特) [研发中]</option>
                             <option value="MUR">MUR (毛里求斯卢比) [研发中]</option>
-                            <option value="BRL">BRL (巴西雷亚尔) [研发中]</option>
                             <option value="ARS">ARS (阿根廷比索) [研发中]</option>
                             <option value="COP">COP (哥伦比亚比索) [研发中]</option>
                         </select>
                     </div>
                     <div class="bg-slate-950 p-3 rounded border border-slate-800 text-xs text-slate-400">
-                        <span class="block">SOR 实时最优询价: <span class="text-slate-200 font-mono">1 标密币 = 等待用户输入...</span></span>
-                        <span class="block mt-1">即期滑点保护控制: <span class="text-emerald-400">已锁定 (0.01% - 10s TTL)</span></span>
+                        <span class="block" id="fx-live-wire-widget">SOR 实时最优询价: <span class="text-slate-400 animate-pulse">📡 等待操盘手输入名义交割资产金额...</span></span>
+                        <span class="block mt-1">即期滑点保护控制: <span class="text-emerald-400">已锁定 (0.01% - 10s TTL 保护)</span></span>
                     </div>
                 </div>
                 
