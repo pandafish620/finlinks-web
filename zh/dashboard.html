@@ -119,7 +119,7 @@
                         </div>
 
                         <button onclick="triggerMockPayinCallback()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded text-xs tracking-wider transition uppercase shadow-lg">
-                            ⚡ 注入一笔 5000 NGN 收单流量 (原始模拟器报文)
+                            ⚡ 发起穿透式收单确权电报
                         </button>
                     </form>
                 </div>
@@ -137,8 +137,17 @@
                         <input type="text" id="payout-acc" placeholder="收款银行账号 / 电子钱包号 (Wallet Number)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
                         <div class="grid grid-cols-2 gap-4">
                             <select id="payout-curr" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
-                                <option value="NGN">NGN (尼日利亚)</option>
                                 <option value="USD">USD (美元)</option>
+                                <option value="KES">KES (肯尼亚先令 - M-Pesa 离岸放款)</option>
+                                <option value="UGX">UGX (乌干达先令 - MTN 移动打款)</option>
+                                <option value="NGN">NGN (尼日利亚奈拉 - 虚拟账号转账)</option>
+                                <option value="TZS">TZS (坦桑尼亚先令) [功能正在研发中]</option>
+                                <option value="GHS">GHS (加纳塞地) [功能正在研发中]</option>
+                                <option value="ZAR">ZAR (南非兰特) [功能正在研发中]</option>
+                                <option value="MUR">MUR (毛里求斯卢比) [功能正在研发中]</option>
+                                <option value="BRL">BRL (巴西雷亚尔 - PIX 清算) [功能正在研发中]</option>
+                                <option value="ARS">ARS (阿根廷比索) [功能正在研发中]</option>
+                                <option value="COP">COP (哥白尼亚比索) [功能正在研发中]</option>
                             </select>
                             <input type="number" id="payout-amount" placeholder="清算金额" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
                         </div>
@@ -153,10 +162,9 @@
                     FinLinks 核心自动化全量审计与行为遥测流
                 </h3>
                 <div id="audit-log-box" class="bg-slate-950 rounded-lg p-4 font-mono text-[11px] text-slate-400 h-36 overflow-y-auto space-y-1">
-                    <div>[SYSTEM] 全球多通道智能路由聚合底座通电成功。剪枝防御机制并线闭环。</div>
+                    <div>[SYSTEM] 全球多通道智能路由聚合底座通电成功。CBiBank 级剪枝防御机制与 10s/300s 双轨制时钟锁正式并线。</div>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -210,8 +218,8 @@
                         </select>
                     </div>
                     <div class="bg-slate-950 p-3 rounded border border-slate-800 text-xs text-slate-400">
-                        <span class="block">SOR 实时最优询价: <span class="text-slate-200 font-mono">1 标的币 = 等待用户输入...</span></span>
-                        <span class="block mt-1">即期滑点保护控制: <span class="text-emerald-400">已锁定 (0.01%)</span></span>
+                        <span class="block">SOR 实时最优询价: <span class="text-slate-200 font-mono">1 标密币 = 等待用户输入...</span></span>
+                        <span class="block mt-1">即期滑点保护控制: <span class="text-emerald-400">已锁定 (0.01% - 10s TTL)</span></span>
                     </div>
                 </div>
                 
