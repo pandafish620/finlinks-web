@@ -297,11 +297,9 @@
     <script src="../assets/js/finlinks_config.js"></script>
 
     <script>
-        // 👑 刚性注入物理网关根路径，彻底熔断 BASE_URL 未定义异常
         window.IS_LOCAL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
         window.BASE_URL = window.IS_LOCAL ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
 
-        // 🛡️ 抢占高频日志与弹窗命名空间，防止主控模块未加载完成前提前点击导致函数休克
         window.pushAuditLog = window.pushAuditLog || function(msg) {
             const box = document.getElementById('audit-log-box');
             if (box) {
@@ -315,7 +313,6 @@
             alert(`[${title}] ${text.replace(/<[^>]*>/g, '')}`);
         };
 
-        // 🛡️ 业务卡片切流延迟缓存器，全盘免疫 ReferenceError
         window.switchTab = window.switchTab || function(tab) { console.log(`>>> [DELAY] 核心中枢加热中，延迟切流至: ${tab}`); };
         window.triggerMockReconciliation = window.triggerMockReconciliation || function() { console.log(">>> [DELAY] 延迟发射对账信号..."); };
         window.triggerMockPayinCallback = window.triggerMockPayinCallback || function() { console.log(">>> [DELAY] 延迟发射入金报文..."); };
@@ -325,33 +322,23 @@
     <script type="module" src="../assets/js/dashboard.js"></script>
 
     <script type="module">
-        // 🚀 血管 A：生擒离岸出金代付算子
         import { executeLivePayoutDisbursal as rawPayoutDisbursal } from '../assets/js/payout_dispatcher.js';
-        
-        // 🚀 血管 B：生擒完美咬合后端 Query 模型的外汇平账与询价算子
-        import { triggerLiveQuote, submitFxConversion as rawSubmitFx } from '../assets/js/fx_processor.js';
+        import { triggerLiveQuote as rawLiveQuote, submitFxConversion as rawSubmitFx } from '../assets/js/fx_processor.js';
 
-        // 👑 【绝杀 pushAuditLog is not a function】：包装代付映射器，动态将 window 上的特权函数注水传入
+        // 包装代付映射器，动态将全局空间里的公共治理函数注水传入
         window.executeLivePayoutDisbursal = function() {
-            // 从当前的全局主权空间中，精准榨取满血的公共治理函数，拒绝传入未定义的局部变量
-            const logFunc = window.pushAuditLog;
-            const notifyFunc = window.showPremiumNotification;
-            const refreshFunc = window.fetchBalances;
-            
             if (typeof rawPayoutDisbursal === "function") {
-                rawPayoutDisbursal(logFunc, notifyFunc, refreshFunc);
+                rawPayoutDisbursal(window.pushAuditLog, window.showPremiumNotification, window.fetchBalances);
             }
         };
 
-        // 👑 【无损平账】：外挂换汇双重保险总线，既承接 onclick 动作，又彻底咬合后端 Query String 模型
         window.triggerLiveQuote = function() {
-            if (typeof triggerLiveQuote === "function") {
+            if (typeof rawLiveQuote === "function") {
                 rawLiveQuote(window.pushAuditLog, window.showPremiumNotification);
             }
         };
 
         window.submitFxConversion = function() {
-            // 动态抓取当前模态框视图中用户选中的地缘金融要素
             const sellCurrency = document.getElementById("sell-currency").value;
             const buyCurrency = document.getElementById("buy-currency").value;
             const sellAmount = parseFloat(document.getElementById("sell-amount").value);
@@ -362,19 +349,19 @@
             const routingVia = document.getElementById("fx-modal").dataset.routingVia || "PAWAPAY";
 
             if (!sellAmount || sellAmount <= 0 || fxRate <= 0) {
-                alert("⚠️ 固价合同无效或金额不合规，请重新点击换汇锁定盘口！");
+                alert("⚠️ 结算金额或实时锁定汇率未就位，请等待倒计时条刷青！");
                 return;
             }
 
             window.pushAuditLog(`[EXECUTE CONVERT] 签署交割令！正在将 6 大参数灌入后端 Query 血管...`);
 
             const queryParams = new URLSearchParams({
-                sell_currency: sellCurrency,
+                sell_currency: sellCurrency.toUpperCase(),
                 sell_amount: sellAmount,
-                buy_currency: buyCurrency,
+                buy_currency: buyCurrency.toUpperCase(),
                 fx_rate: fxRate,
                 routing_via: routingVia.toUpperCase(),
-                quote_timestamp: quoteTimestamp
+                quote_timestamp: quoteTimestamp || (Date.now() / 1000)
             });
 
             const token = localStorage.getItem("finlinks_auth_token");
@@ -404,7 +391,7 @@
             });
         };
         
-        console.log(">>> [BUS SUCCESS] 4 大死锁漏洞彻底净化完毕！分布式中台全面通电咬合！");
+        console.log(">>> [BUS SUCCESS] 4 大死锁漏洞彻底净化完毕！中控大厅全面恢复通电渲染！");
     </script>
 </body>
 </html>

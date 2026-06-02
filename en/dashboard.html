@@ -333,7 +333,7 @@
             alert(`[${title}] ${text.replace(/<[^>]*>/g, '')}`);
         };
 
-        window.switchTab = window.switchTab || function(tab) { console.log(`>>> [DELAY] Core hub warming up, view delayed to: ${tab}`); };
+        window.switchTab = window.switchTab || function(tab) { console.log(`>>> [DELAY] View delayed to: ${tab}`); };
         window.triggerMockReconciliation = window.triggerMockReconciliation || function() { console.log(">>> [DELAY] Reconciliation buffering..."); };
         window.triggerMockPayinCallback = window.triggerMockPayinCallback || function() { console.log(">>> [DELAY] Payin callback buffering..."); };
         window.handleLogout = window.handleLogout || function() { console.log(">>> [DELAY] Logout routing buffering..."); };
@@ -345,7 +345,6 @@
         import { executeLivePayoutDisbursal as rawPayoutDisbursal } from '../assets/js/payout_dispatcher.js';
         import { triggerLiveQuote as rawLiveQuote, submitFxConversion as rawSubmitFx } from '../assets/js/fx_processor.js';
 
-        // Secure module function wrapper to clear pushAuditLog undefined exceptions
         window.executeLivePayoutDisbursal = function() {
             if (typeof rawPayoutDisbursal === "function") {
                 rawPayoutDisbursal(window.pushAuditLog, window.showPremiumNotification, window.fetchBalances);
@@ -369,19 +368,19 @@
             const routingVia = document.getElementById("fx-modal").dataset.routingVia || "PAWAPAY";
 
             if (!sellAmount || sellAmount <= 0 || fxRate <= 0) {
-                alert("⚠️ Invalid contract quote or volume parameters. Please re-quote to lock rate!");
+                alert("⚠️ Invalid contract quote parameters. Please re-quote!");
                 return;
             }
 
             window.pushAuditLog(`[EXECUTE CONVERT] Order signed! Compiling 6 attributes into Query pipeline...`);
 
             const queryParams = new URLSearchParams({
-                sell_currency: sellCurrency,
+                sell_currency: sellCurrency.toUpperCase(),
                 sell_amount: sellAmount,
-                buy_currency: buyCurrency,
+                buy_currency: buyCurrency.toUpperCase(),
                 fx_rate: fxRate,
                 routing_via: routingVia.toUpperCase(),
-                quote_timestamp: quoteTimestamp
+                quote_timestamp: quoteTimestamp || (Date.now() / 1000)
             });
 
             const token = localStorage.getItem("finlinks_auth_token");
@@ -411,7 +410,7 @@
             });
         };
         
-        console.log(">>> [BUS SUCCESS] English view matrix and multi-file routing constraints successfully synchronized!");
+        console.log(">>> [BUS SUCCESS] English pipeline synchronized. Balances rendering thread fully unblocked!");
     </script>
 </body>
 </html>
