@@ -307,11 +307,101 @@
     <script type="module" src="../assets/js/dashboard.js"></script>
 
     <script type="module">
+        // 🚀 血管 A：直奔专属出金舱，生擒离岸跨境代付算子
         import { executeLivePayoutDisbursal } from '../assets/js/payout_dispatcher.js';
-        // 强行把从 payout_dispatcher.js 里生擒出来的出金算子焊死在全局 onclick 触发线上
-        window.executeLivePayoutDisbursal = executeLivePayoutDisbursal;
         
-        console.log(">>> [BUS SUCCESS] 选项卡与核心算子血缘彻底烫平！全盘免除 Syntax/Reference 崩溃死锁！");
+        // 🚀 血管 B：精准变轨，直轰外汇平账舱，解构捕获 100% 咬合后端的原始询价与平账算子
+        import { triggerLiveQuote, submitFxConversion as originalSubmitFx } from '../assets/js/fx_processor.js';
+
+        // 🧱 强行打破 ES 模块封装铁闸，将不需要变轨的算子直接焊死在 window 全局总线上
+        window.executeLivePayoutDisbursal = executeLivePayoutDisbursal;
+        window.triggerLiveQuote = triggerLiveQuote;
+        
+        // 👑 【核心重炮级自愈外挂】：动态榨取 DOM，封装为后端严格期待的 Query String 参数流，绝杀 422 熔断
+        window.submitFxConversion = function() {
+            // 1. 动态抓取当前模态框视图中用户选中的货币和卖出名义金额
+            const sellCurrency = document.getElementById("sell-currency").value;
+            const buyCurrency = document.getElementById("buy-currency").value;
+            const sellAmount = parseFloat(document.getElementById("sell-amount").value);
+            
+            // 2. 动态抓取询价成功（/fx/quote）后，由底层写入隐藏域中的 10秒固价合同凭证（时间戳戳记）
+            const quoteTimestamp = parseFloat(document.getElementById("fx-quote-timestamp").value || "0");
+            
+            // 3. 动态抓取当前模态框内存暂存或 Ticker 渲染的最优执行汇率与 SOR 渠道
+            const fxRate = parseFloat(document.getElementById("fx-modal").dataset.currentRate || 
+                                     document.querySelector(".fx-rate-display")?.innerText || "0");
+            const routingVia = document.getElementById("fx-modal").dataset.routingVia || "PAWAPAY";
+
+            // 4. 前置防御性空指针拦截
+            if (!sellAmount || sellAmount <= 0 || fxRate <= 0) {
+                alert("⚠️ 固价合同无效或金额不合规，请重新点击换汇锁定盘口！");
+                return;
+            }
+
+            // 5. 激活黑金遥测流提示
+            if (typeof window.pushAuditLog === "function") {
+                window.pushAuditLog(`[EXECUTE CONVERT] 签署交割令！正在将 6 大参数灌入后端 Query 血管...`);
+            }
+
+            // 👑 绝杀 422 终极核心点：完美封装成后端 Query 参数链条，Body 保持纯净的空置状态
+            const queryParams = new URLSearchParams({
+                sell_currency: sellCurrency,
+                sell_amount: sellAmount,
+                buy_currency: buyCurrency,
+                fx_rate: fxRate,
+                routing_via: routingVia.toUpperCase(),
+                quote_timestamp: quoteTimestamp
+            });
+
+            const token = localStorage.getItem("finlinks_auth_token");
+            const targetUrl = `${window.BASE_URL || 'https://finlinks-backend.onrender.com'}/ledger/fx/convert?${queryParams.toString()}`;
+
+            // 🚀 发射交割电报
+            fetch(targetUrl, {
+                method: "POST",
+                headers: { 
+                    "Authorization": `Bearer ${token}`,
+                    "accept": "application/json"
+                }
+            })
+            .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, body: data })))
+            .then(res => {
+                if (res.ok && res.body.status === "success") {
+                    if (typeof window.pushAuditLog === "function") {
+                        window.pushAuditLog(`[CLEARING SUCCESS] 🎉 外汇轧差大胜！交割单流水号: ${res.body.fx_batch_ref}`);
+                    }
+                    if (typeof window.showPremiumNotification === "function") {
+                        window.showPremiumNotification(
+                            "📥 跨币种轧差交割成功",
+                            `卖出核销: <span class="text-rose-400 font-bold">-${res.body.exchange_details.sell}</span><br>` +
+                            `买入注入: <span class="text-emerald-400 font-bold">+${res.body.exchange_details.buy}</span>`,
+                            "emerald", false
+                        );
+                    }
+                    
+                    // 物理闭合模态窗口并无损冲刷大厅资产持仓看板，完美确保无遗漏
+                    document.getElementById("fx-modal").classList.add("pointer-events-none", "opacity-0");
+                    document.getElementById("sell-amount").value = "";
+                    
+                    // 动态调用全局提权刷盘算子
+                    if (typeof window.fetchBalances === "function") {
+                        window.fetchBalances();
+                    }
+                } else {
+                    // 👑 深入穿透 FastAPI 标准错误字典，绝杀 [object Object] 乱码遮蔽
+                    const detail = res.body.detail;
+                    const errorMsg = Array.isArray(detail) ? detail.map(e => `[${e.loc.join(".")}] ${e.msg}`).join(" | ") : (detail || "中台拒绝交割");
+                    
+                    if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[FX REJECTED] 交割失败原因: ${errorMsg}`);
+                    if (typeof window.showPremiumNotification === "function") window.showPremiumNotification("⚠️ 轧差核销熔断", errorMsg, "rose", true);
+                }
+            })
+            .catch(catchErr => {
+                if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[FX TIMEOUT] 物理网络通道夭折: ${catchErr.message}`);
+            });
+        };
+        
+        console.log(">>> [BUS SUCCESS] 跨文件双血管全量并线大功告成！外汇 Query 契约完美将会师。");
     </script>
 </body>
 </html>

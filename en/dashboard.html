@@ -325,10 +325,101 @@
     <script type="module" src="../assets/js/dashboard.js"></script>
 
     <script type="module">
+        // 🚀 Pipeline A: Ingest disbursal controller from independent payout dispatcher
         import { executeLivePayoutDisbursal } from '../assets/js/payout_dispatcher.js';
-        window.executeLivePayoutDisbursal = executeLivePayoutDisbursal;
         
-        console.log(">>> [BUS SUCCESS] Geopolitical view constraints fully resolved. English dashboard Live!");
+        // 🚀 Pipeline B: Recalibrate route directly into fx_processor.js to secure spot exchange elements
+        import { triggerLiveQuote, submitFxConversion as originalSubmitFx } from '../assets/js/fx_processor.js';
+
+        // 🧱 Securely anchor split modules onto the global window runtime environment without overriding
+        window.executeLivePayoutDisbursal = executeLivePayoutDisbursal;
+        window.triggerLiveQuote = triggerLiveQuote;
+        
+        // 👑 [CORE AUTONOMOUS BYPASS]: Eradicate null & EBANX type mismatches by 100% aligning with backend Query Schema
+        window.submitFxConversion = function() {
+            // 1. Extract the nominal exchange values currently selected in the modal viewport
+            const sellCurrency = document.getElementById("sell-currency").value;
+            const buyCurrency = document.getElementById("buy-currency").value;
+            const sellAmount = parseFloat(document.getElementById("sell-amount").value);
+            
+            // 2. Fetch the locked 10-second contract quote reference (created_at timestamp) stored in the hidden buffer
+            const quoteTimestamp = parseFloat(document.getElementById("fx-quote-timestamp").value || "0");
+            
+            // 3. Dynamically capture the optimal rate matrix and SOR routing channel from memory or active ticker
+            const fxRate = parseFloat(document.getElementById("fx-modal").dataset.currentRate || 
+                                     document.querySelector(".fx-rate-display")?.innerText || "0");
+            const routingVia = document.getElementById("fx-modal").dataset.routingVia || "PAWAPAY";
+
+            // 4. Pre-flight defensive validation limits
+            if (!sellAmount || sellAmount <= 0 || fxRate <= 0) {
+                alert("⚠️ Invalid contract quote or volume parameters. Please re-quote to lock interbank rate!");
+                return;
+            }
+
+            // 5. Activate behavioral telemetry stream before launching the request parameters
+            if (typeof window.pushAuditLog === "function") {
+                window.pushAuditLog(`[EXECUTE CONVERT] Order signed! Compiling 6 primary attributes into URL Query pipeline...`);
+            }
+
+            // 👑 Absolute 422 Mitigation Point: Restructure standard payload into URL query string parameters explicitly
+            const queryParams = new URLSearchParams({
+                sell_currency: sellCurrency,
+                sell_amount: sellAmount,
+                buy_currency: buyCurrency,
+                fx_rate: fxRate,
+                routing_via: routingVia.toUpperCase(),
+                quote_timestamp: quoteTimestamp
+            });
+
+            const token = localStorage.getItem("finlinks_auth_token");
+            const targetUrl = `${window.BASE_URL || 'https://finlinks-backend.onrender.com'}/ledger/fx/convert?${queryParams.toString()}`;
+
+            // 🚀 Fire settlement dispatcher: Keep request body purely void to bypass FastAPI body validation checks!
+            fetch(targetUrl, {
+                method: "POST",
+                headers: { 
+                    "Authorization": `Bearer ${token}`,
+                    "accept": "application/json"
+                }
+            })
+            .then(response => response.json().then(data => ({ ok: response.ok, status: response.status, body: data })))
+            .then(res => {
+                if (res.ok && res.body.status === "success") {
+                    if (typeof window.pushAuditLog === "function") {
+                        window.pushAuditLog(`[CLEARING SUCCESS] 🎉 FX Netting successful! Batch journal reference: ${res.body.fx_batch_ref}`);
+                    }
+                    if (typeof window.showPremiumNotification === "function") {
+                        window.showPremiumNotification(
+                            "📥 Multilateral Netting Complete",
+                            `Deducted Debit: <span class="text-rose-400 font-bold">-${res.body.exchange_details.sell}</span><br>` +
+                            `Injected Credit: <span class="text-emerald-400 font-bold">+${res.body.exchange_details.buy}</span>`,
+                            "emerald", false
+                        );
+                    }
+                    
+                    // Smoothly close the active FX swap viewport frame and flush live holdings dashboard
+                    document.getElementById("fx-modal").classList.add("pointer-events-none", "opacity-0");
+                    document.getElementById("sell-amount").value = "";
+                    
+                    // Trigger live balance refresh asynchronously via bridged window reference
+                    if (typeof window.fetchBalances === "function") {
+                        window.fetchBalances();
+                    }
+                } else {
+                    // 👑 Penetrate standard FastAPI validation array structures to prevent [object Object] obfuscation
+                    const detail = res.body.detail;
+                    const errorMsg = Array.isArray(detail) ? detail.map(e => `[${e.loc.join(".")}] ${e.msg}`).join(" | ") : (detail || "Clearing request denied by mid-tier gateway");
+                    
+                    if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[FX REJECTED] Settlement failed: ${errorMsg}`);
+                    if (typeof window.showPremiumNotification === "function") window.showPremiumNotification("⚠️ Clearing Exception", errorMsg, "rose", true);
+                }
+            })
+            .catch(catchErr => {
+                if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[FX TIMEOUT] Network pipeline disrupted: ${catchErr.message}`);
+            });
+        };
+        
+        console.log(">>> [BUS SUCCESS] English view alignment & multi-file routing (payout/fx) fully live with 422 fixes!");
     </script>
 </body>
 </html>
