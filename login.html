@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!-- -*- coding: utf-8 -*- -->
+<!-- 文件位置：根目录/login.html (FinLinks 公网最高特权登录门禁) -->
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinLinks 5.2.0 - 安全认证控制塔</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; }
+    </style>
+</head>
+<body class="font-sans antialiased flex items-center justify-center h-screen bg-slate-950">
+
+    <div class="w-full max-w-md p-8 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl space-y-6">
+        <!-- 门禁标志顶层头部 -->
+        <div class="text-center space-y-2">
+            <h1 class="text-2xl font-extrabold tracking-wider text-emerald-400 font-mono">FinLinks <span class="text-xs font-normal text-slate-500">5.2.0</span></h1>
+            <p class="text-slate-400 text-xs font-medium">全球多通道聚合商户控制台安全门禁</p>
+        </div>
+
+        <!-- 登录实弹表单 -->
+        <form id="loginForm" onsubmit="handleLiveLogin(event)" class="space-y-4">
+            <div>
+                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">商户主权认证邮箱 (Email)</label>
+                <input type="email" id="loginEmail" value="zhangxiaoyu620@hotmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" required placeholder="请输入您的法人电子邮箱">
+            </div>
+            <div>
+                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">安全访问密匙 (Password)</label>
+                <input type="password" id="loginPassword" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" required placeholder="请输入您的安全密码">
+            </div>
+
+            <!-- 动态黑金防爆提示框 -->
+            <div id="login-msg-box" class="hidden text-[11px] font-mono p-3 bg-slate-950 rounded border border-slate-800 transition"></div>
+
+            <button type="submit" id="loginBtn" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-lg text-xs tracking-wider transition uppercase shadow-lg shadow-emerald-500/10">
+                🔒 击发实弹确权登录
+            </button>
+        </form>
+    </div>
+
+    <!-- ⚡ 核心异步认证总线逻辑（完美咬合云端/本地双轨制宿主） -->
+    <script type="module">
+        // 动态网关嗅探抗体
+        const IS_LOCAL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+        const BASE_URL = IS_LOCAL ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
+
+        window.handleLiveLogin = async function(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const msgBox = document.getElementById('login-msg-box');
+            const btn = document.getElementById('loginBtn');
+
+            // 激活黑金提示流
+            msgBox.classList.remove('hidden', 'text-rose-400', 'text-emerald-400');
+            msgBox.classList.add('text-amber-400');
+            msgBox.innerText = "[AUTHENTICATING] 正在向云端中台击发确权报文...";
+            btn.disabled = true;
+
+            try {
+                // 100% 字节级对齐后端的 /auth/login 数据血缘
+                const response = await fetch(`${BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: email, password: password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || "后端鉴权熔断拒绝放行");
+                }
+
+                // 👑 核心大捷点：生擒 JWT 黄金令牌并狠狠砸进当前公网域名的本地缓存！
+                localStorage.setItem('finlinks_auth_token', data.access_token);
+                
+                msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded border border-emerald-500/30 text-emerald-400";
+                msgBox.innerText = "[SUCCESS] 黄金令牌落盘成功！正在强行切流进入多币种持仓大厅...";
+
+                // 秒级安全护送切流到资产大厅
+                setTimeout(() => {
+                    window.location.href = 'zh/dashboard.html';
+                }, 1000);
+
+            } catch (err) {
+                msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded border border-rose-500/30 text-rose-400";
+                msgBox.innerText = `[ERROR] 登录熔断: ${err.message}`;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
