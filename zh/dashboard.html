@@ -297,33 +297,37 @@
     <script src="../assets/js/finlinks_config.js"></script>
 
     <script type="module">
-        // 🚀 从你的核心数据血管中，导入在沙箱内部被隔离的清算算子
-        // 注意：确保你的 ../assets/js/dashboard.js 里的对应函数头部都加了 "export" 关键字！
+        // 🚀 血管 A：从核心视图大厅导入状态控制算子
         import { 
             switchTab, 
             triggerMockReconciliation, 
-            executeLivePayoutDisbursal,
             triggerMockPayinCallback,
             handleLogout
         } from '../assets/js/dashboard.js';
 
-        // 👑 物理提权：打破 ES Module 沙箱封印，强行将函数灌注进浏览器的最高主权 window 对象！
+        // 🚀 血管 B：精准变轨，直奔专属清算舱，强行解构离岸跨境出金代付算子！
+        import { 
+            executeLivePayoutDisbursal 
+        } from '../assets/js/payout_dispatcher.js';
+
+        // 👑 物理提权：打破 ES Module 沙箱封印，全量灌注进浏览器的最高主权 window 对象！
         window.switchTab = switchTab;
         window.triggerMockReconciliation = triggerMockReconciliation;
-        window.executeLivePayoutDisbursal = executeLivePayoutDisbursal;
         window.triggerMockPayinCallback = triggerMockPayinCallback;
         window.handleLogout = handleLogout;
+        
+        // 💸 绝杀断路：将独立血管中的代付算子强行并在全局按钮onclick触发线上！
+        window.executeLivePayoutDisbursal = executeLivePayoutDisbursal;
 
         // 📡 补充换汇模态窗口的独立控制总线，绝杀 openFxModal / closeFxModal 报错
         window.openFxModal = function() {
             const modal = document.getElementById('fx-modal');
             if (modal) {
                 modal.classList.remove('opacity-0', 'pointer-events-none');
-                // 如果 dashboard.js 内部配置了 initFxQuote 锁价时钟血管，在此处顺带点火
                 if (typeof window.initFxQuote === 'function') {
                     window.initFxQuote();
                 } else {
-                    console.log(">>> [WARMUP] 即期多边轧差换汇窗口已捕获，正在索取最优基准盘...");
+                    console.log(">>> [WARMUP] FX Spot Netting frame engaged, pulling optimal rate matrix...");
                 }
             }
         };
@@ -335,7 +339,5 @@
             }
         };
         
-        console.log(">>> [BUS SUCCESS] 全局血管并线大功告成！HTML 与 dashboard.js 核心契约全面恢复通电咬合！");
+        console.log(">>> [BUS SUCCESS] 跨文件双血管全量并线大功告成！大厅正式通电咬合！");
     </script>
-</body>
-</html>

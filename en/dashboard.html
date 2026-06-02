@@ -315,23 +315,28 @@
     <!-- 1. Native configuration loader -->
     <script src="../assets/js/finlinks_config.js"></script>
 
-    <!-- 2. Secure Module Bridge Interface: Eradicating ReferenceErrors across geographic views -->
     <script type="module">
-        // 🚀 Ingesting inner core functions from encapsulated module scope
+        // 🚀 Pipeline A: Ingest view controllers from core dashboard script
         import { 
             switchTab, 
             triggerMockReconciliation, 
-            executeLivePayoutDisbursal,
             triggerMockPayinCallback,
             handleLogout
         } from '../assets/js/dashboard.js';
 
-        // 👑 Global Elevation: Bridging private module functions directly onto the top-tier window context
+        // 🚀 Pipeline B: Recalibrate route directly into independent disbursal dispatcher!
+        import { 
+            executeLivePayoutDisbursal 
+        } from '../assets/js/payout_dispatcher.js';
+
+        // 👑 Global Elevation: Bridging handlers securely onto the top-tier window context
         window.switchTab = switchTab;
         window.triggerMockReconciliation = triggerMockReconciliation;
-        window.executeLivePayoutDisbursal = executeLivePayoutDisbursal;
         window.triggerMockPayinCallback = triggerMockPayinCallback;
         window.handleLogout = handleLogout;
+        
+        // 💸 Lock physical disbursal trigger to eliminate SyntaxError exceptions
+        window.executeLivePayoutDisbursal = executeLivePayoutDisbursal;
 
         // 📡 Secondary execution loop for spot deal validation frames
         window.openFxModal = function() {
@@ -353,7 +358,7 @@
             }
         };
         
-        console.log(">>> [BUS SUCCESS] English pipeline synchronized. DOM bindings & core dashboard.js modules perfectly bridged!");
+        console.log(">>> [BUS SUCCESS] English pipeline synchronized. DOM bindings & split modules perfectly bridged!");
     </script>
 </body>
 </html>
