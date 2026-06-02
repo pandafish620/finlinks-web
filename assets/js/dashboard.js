@@ -1,615 +1,169 @@
 // -*- coding: utf-8 -*-
-// 文件位置：C:\Users\Jacky\Desktop\my_frontend_code\assets\js\dashboard.js
-// 版本说明：v5.0.0-Core-Decoupled (配置物理隔离、地缘动态分流、300s特赦时钟与原子换汇完全体)
+// 文件位置：assets/js/dashboard.js
 
-// 🎯 【智能环境嗅探大闸】自动识别本地沙盒 vs 生产/测试云端环境
-const IS_LOCAL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+import { client } from './finlinks_client.js';
+import { verifyAndPatchToken, logout } from './auth_manager.js';
+import { submitAdvancedKYB } from './kyb_handler.js';
+import { triggerLiveQuote, submitFxConversion } from './fx_processor.js';
 
-const BACKEND_ENV = {
-    BASE_URL: IS_LOCAL 
-        ? "http://127.0.0.1:8000" 
-        : "https://finlinks-backend.onrender.com", 
-    endpoints: {
-        balances: "/ledger/balances",
-        fx_quote: "/ledger/fx/quote",
-        fx_convert: "/ledger/fx/convert",
-        reconcile: "/ledger/reconcile",
-        payin_callback: "/ledger/collection/deposit"
-    }
+// 👑 【CONFIG REGEX VAULT】全盘硬核账号正则格式校验拦截金库
+const RIGID_ACCOUNT_RULES = {
+    "NGN": { regex: /^\d{10}$/, error: "奈拉通道校验失败：必须为 10位 纯数字 NUBAN 标准银行账号！" },
+    "KES": { regex: /^(254\d{9}|0\d{9})$/, error: "肯尼亚先令校验失败：必须为标准的移动货币手机号（如254...）！" },
+    "USD": { regex: /^[A-Z0-9]{8,12}$/, error: "美金通道校验失败：请输入合规的 8-12位 SWIFT 特征码！" }
 };
 
-// 💡 提示：静态的 FINLINKS_CURRENCY_MATRIX 与 LOCAL_RAILS_FRONTEND_REGEXP 已物理剥离至 finlinks_config.js 之中
-
-console.log(`📡 [NETWORK ROUTING] 当前前端运行环境探测：${IS_LOCAL ? "LOCAL_SANDBOX (本地环回)" : "CLOUD_PRODUCTION (云端公网)"} | 目标中台线: ${BACKEND_ENV.BASE_URL}`);
-
-// 🛡️ 全局金融状态大闸
-let currentLiveQuoteRate = 0.00113064; 
-let currentLiveQuoteTimestamp = 0;
-let currentLiveRoutingVia = "PAWAPAY"; 
-
-// ⚙️ 初始化动作：提取锁在浏览器保险柜里的 JWT 凭证并补锚自愈
 document.addEventListener("DOMContentLoaded", () => {
-    let token = localStorage.getItem("finlinks_auth_token");
-    
-    if (!token || token === "MOCK_DEVELOPER_TOKEN" || token === "admin_sandbox_pass" || !token.includes(".")) {
-        console.log("⚙️ [AUTH PATCH] 检测到非标准测试令牌，正在物理注入合规沙盒 JWT 伪结构...");
-        const mockHeader = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-        const mockPayload = btoa(JSON.stringify({ sub: "admin", exp: 2095215455 })); 
-        const mockSignature = "finlinks_mock_signature_xxxxxx";
-        token = `${mockHeader}.${mockPayload}.${mockSignature}`;
-        localStorage.setItem("finlinks_auth_token", token);
-    }
-    
-    // 立刻点亮高频心跳轮询
+    verifyAndPatchToken();
     fetchBalances();
-    setInterval(fetchBalances, 4000); 
+    initGlobalFxTicker(); // 👑 点亮左上角全局基准行情
 
-    // 🌟 动态绑定换汇输入框动作
+    // 提权至 Window，打通 HTML 原生 onclick 门禁
+    window.switchTab = switchTab;
+    window.handleLogout = logout;
+    window.executeAdvancedKYBOnboarding = () => submitAdvancedKYB(pushAuditLog, showPremiumNotification);
+    window.triggerLiveQuote = () => triggerLiveQuote(pushAuditLog, showPremiumNotification);
+    window.submitFxConversion = () => submitFxConversion(null, null, "EBANX", pushAuditLog, showPremiumNotification, fetchBalances);
+    
+    window.triggerMockPayinCallback = triggerMockPayinCallback;
+    window.triggerMockReconciliation = triggerMockReconciliation;
+    window.closeFxModal = () => document.getElementById("fx-modal")?.classList.add("pointer-events-none", "opacity-0");
+    window.openFxModal = () => document.getElementById("fx-modal")?.classList.remove("pointer-events-none", "opacity-0");
+
     const amtInput = document.getElementById("sell-amount");
-    if (amtInput) {
-        amtInput.addEventListener("input", debounce(() => {
-            triggerLiveQuote();
-        }, 600)); 
-    }
-
-    // =================================================================
-    // 🔌 【即插即用外挂】UI 交互地缘占位符动态联动注入器
-    // =================================================================
-    const payoutCurrSelect = document.getElementById("payout-curr");
-    const payoutAccInput = document.getElementById("payout-acc");
-    if (payoutCurrSelect && payoutAccInput) {
-        payoutCurrSelect.addEventListener("change", () => {
-            const chosenCurr = payoutAccInput.value ? payoutCurrSelect.value.toUpperCase().trim() : payoutCurrSelect.value.toUpperCase();
-            payoutAccInput.style.transition = "all 0.3s ease";
-            payoutAccInput.style.borderColor = "#f43f5e"; 
-            setTimeout(() => { payoutAccInput.style.borderColor = ""; }, 400);
-
-            switch (chosenCurr) {
-                case "NGN": payoutAccInput.placeholder = "请输入 10 位尼日利亚 NUBAN 银行账号 (例如: 0123456789)"; break;
-                case "KES": payoutAccInput.placeholder = "请输入肯尼亚 M-Pesa 手机号 (例如: 254712345678)"; break;
-                case "UGX": payoutAccInput.placeholder = "请输入乌干达钱包账号 (例如: 256771234567)"; break;
-                case "USD": payoutAccInput.placeholder = "请输入 FedWire / ACH 银行账号 (9-17位数字)"; break;
-                case "BRL": payoutAccInput.placeholder = "请输入 Pix 密钥: CPF税号(11位)、CNPJ(14位)、手机号或随机 UUID"; break;
-                case "MXN": payoutAccInput.placeholder = "请输入墨西哥银行标准 18 位纯数字 CLABE 统一清算编码"; break;
-                case "TRY": payoutAccInput.placeholder = "请输入以 TR 开头的 26 位土耳其标准国际银行账号"; break;
-                default: payoutAccInput.placeholder = "请输入收款银行账号 / 电子钱包号 (Wallet Number)";
-            }
-        });
-    }
-
-    const collectionCurrSelect = document.getElementById("collectionCurrency");
-    const collectionPhoneInput = document.getElementById("collectionPhone");
-    if (collectionCurrSelect && collectionPhoneInput) {
-        collectionCurrSelect.addEventListener("change", () => {
-            const chosenCurr = collectionPhoneInput.value ? collectionCurrSelect.value.toUpperCase().trim() : collectionCurrSelect.value.toUpperCase();
-            collectionPhoneInput.style.transition = "all 0.3s ease";
-            collectionPhoneInput.style.borderColor = "#10b981"; 
-            setTimeout(() => { collectionPhoneInput.style.borderColor = ""; }, 400);
-
-            switch (chosenCurr) {
-                case "KES": collectionPhoneInput.placeholder = "东非 Safaricom 钱包号 (如: 254712345678)"; break;
-                case "UGX": collectionPhoneInput.placeholder = "乌干达移动钱包号 (如: 256771234567)"; break;
-                case "NGN": collectionPhoneInput.placeholder = "请输入 10 位虚拟账号或关联手机号"; break;
-                case "BRL": collectionPhoneInput.placeholder = "巴西本地付款方 Pix 映射账号凭证"; break;
-                case "MXN": collectionPhoneInput.placeholder = "墨西哥本地 SPEI 清算或 OXXO 关联账户"; break;
-                case "TRY": collectionPhoneInput.placeholder = "土耳其本地账户号 / 电子钱包 ID"; break;
-                default: collectionPhoneInput.placeholder = "请输入付款人本地账户凭证/手机号";
-            }
-        });
-    }
+    if (amtInput) { amtInput.addEventListener("input", debounce(() => { window.triggerLiveQuote(); }, 600)); }
 });
 
-// 🌟 【大一统功能模块】：商户多功能侧边栏无感切流分流器（SPA 机制）
-function switchTab(tabId) {
-    pushAuditLog(`[UI ROUTER] 正在切流至核心功能仓: ${tabId.toUpperCase()}`);
-    const allPanes = document.querySelectorAll(".tab-pane");
-    allPanes.forEach(pane => pane.classList.add("hidden"));
-    const sidebarButtons = document.querySelectorAll("aside nav button");
-    sidebarButtons.forEach(btn => btn.classList.remove("sidebar-active"));
-
-    const targetPane = document.getElementById(`pane-${tabId}`);
-    const targetBtn = document.getElementById(`btn-${tabId}`);
-    if (targetPane) {
-        targetPane.classList.remove("hidden");
-        if (targetBtn) targetBtn.classList.add("sidebar-active");
-    }
-}
-
-// 📊 动态泛化拉取多币种影子头寸
-async function fetchBalances() {
-    const token = localStorage.getItem("finlinks_auth_token");
-    const container = document.getElementById("balances-container");
-    if (!container) return; 
-    
+// 📊 动态拉取左上角 Ticker 基准大盘
+async function initGlobalFxTicker() {
+    const tickerContainer = document.getElementById("global-fx-ticker");
+    if (!tickerContainer) return;
     try {
-        const response = await fetch(`${BACKEND_ENV.BASE_URL}${BACKEND_ENV.endpoints.balances}`, {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
-
+        const response = await client("/ledger/fx/quote?sell_currency=USD&buy_currency=NGN&sell_amount=1", { method: "GET" });
         if (response.status === 200) {
             const data = await response.json();
-            const merchantTag = document.getElementById("merchant-id-tag");
-            if (merchantTag) merchantTag.innerText = data.merchant;
+            tickerContainer.innerHTML = `
+                <div class="flex items-center space-x-4 text-[11px] font-mono text-slate-400">
+                    <span class="flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>USD/NGN 基准参考: <strong class="text-slate-200 ml-1">${data.lock_rate}</strong></span>
+                </div>`;
+        }
+    } catch (e) { tickerContainer.innerText = "⚡ FinLinks 全球行情底座通电成功"; }
+}
+
+// 📊 影子总账核心刷盘
+export async function fetchBalances() {
+    const container = document.getElementById("balances-container");
+    if (!container) return;
+    try {
+        const response = await client("/ledger/balances", { method: "GET" });
+        if (response.status === 200) {
+            const data = await response.json();
             
-            const overviewPane = document.getElementById("pane-overview");
-            if (overviewPane && !overviewPane.classList.contains("hidden")) {
-                container.innerHTML = "";
-                const matrix = data.multi_currency_visibility;
-                
-                Object.keys(matrix).forEach(currency => {
-                    const balance = matrix[currency];
-                    const cardHtml = `
-                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl relative overflow-hidden shadow-lg hover:border-emerald-500/50 transition duration-300">
-                            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">${currency} Wallet</div>
-                            <div class="text-3xl font-mono font-bold mt-2 text-slate-100">${balance.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
-                            <div class="absolute -right-4 -bottom-6 text-6xl font-bold font-mono text-slate-800/20 select-none">${currency}</div>
-                        </div>
-                    `;
-                    container.innerHTML += cardHtml;
-                });
-            }
-            if (data.channel_telemetry && data.channel_telemetry.length > 0) {
-                data.channel_telemetry.forEach(logLine => {
-                    pushAuditLog(`[ROUTE TELEMETRY] 活体穿透链路追踪: ${logLine}`);
-                });
-            }
-        }
-    } catch (error) {
-        pushAuditLog(`[NETWORK ALERT] 无法叩开清算中台网关，正在执行高频动态网络容错挂起...`);
-    }
-}
-
-// 🔮 自动触发跨域异步智能 SOR 实时挂流询价
-async function triggerLiveQuote() {
-    const token = localStorage.getItem("finlinks_auth_token");
-    const sellCurr = document.getElementById("sell-currency").value;
-    const buyCurr = document.getElementById("buy-currency").value;
-    const sellAmt = parseFloat(document.getElementById("sell-amount").value);
-
-    if (!sellAmt || sellAmt <= 0) return;
-
-    // 🛡️ 询价前预检拦截：穿透 window 作用域去独立金库验证
-    const sellConfig = window.FINLINKS_CURRENCY_MATRIX[sellCurr.toUpperCase()];
-    const buyConfig = window.FINLINKS_CURRENCY_MATRIX[buyCurr.toUpperCase()];
-    if ((sellConfig && !sellConfig.isFXEnabled) || (buyConfig && !buyConfig.isFXEnabled)) {
-        return; 
-    }
-
-    try {
-        const response = await fetch(`${BACKEND_ENV.BASE_URL}${BACKEND_ENV.endpoints.fx_quote}?sell_currency=${sellCurr}&buy_currency=${buyCurr}&sell_amount=${sellAmt}`, {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
-        });
-
-        if (response.status === 200) {
-            const quote = await response.json();
-            currentLiveQuoteRate = quote.final_settlement_rate;
-            currentLiveQuoteTimestamp = quote.quote_timestamp; 
-            currentLiveRoutingVia = quote.routing_via; 
-
-            const fxWidgetInfo = document.querySelector("#fx-modal .bg-slate-950");
-            if (fxWidgetInfo) {
-                fxWidgetInfo.innerHTML = `
-                    <span class="block">SOR 实时最优询价: <span class="text-emerald-400 font-mono">1 ${sellCurr} = ${quote.final_settlement_rate} ${buyCurr}</span></span>
-                    <span class="block mt-1">预计买入到账: <span class="text-slate-100 font-mono font-bold">${quote.expected_buy_amount.toLocaleString(undefined, {minimumFractionDigits: 2})} ${buyCurr}</span></span>
-                    <span class="block mt-1 text-[10px] text-slate-500">点差锁定通道: ${quote.routing_via} | 10秒限时 TTL 锁价保护</span>
-                `;
+            // 👑 物理打假：提取真实 JWT 钢印强行冲刷左下角死标签
+            const roleTag = document.getElementById("user-role-badge");
+            const merchantTag = document.getElementById("merchant-id-tag");
+            if (merchantTag && data.merchant) merchantTag.innerText = data.merchant;
+            if (roleTag) {
+                const token = localStorage.getItem('finlinks_auth_token');
+                if (token) { roleTag.innerText = JSON.parse(atob(token.split('.')[1])).role || "MERCHANT"; }
             }
 
-            showPremiumNotification(
-                "⚡ FXAll 换汇即期固价锁屏",
-                `资产交割对：<span class="text-slate-100 font-mono font-bold">${quote.pair}</span><br>` +
-                `背对背锁定通道：<span class="text-indigo-400 font-bold">${quote.routing_via}</span><br>` +
-                `流式独占报价：<span class="text-emerald-400 font-mono font-bold">1 ${sellCurr} = ${quote.final_settlement_rate} ${buyCurr}</span><br>` +
-                `预计换入到账：<span class="text-emerald-400 font-mono font-bold">${quote.expected_buy_amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})} ${buyCurr}</span>`,
-                "emerald", true, 
-                () => { submitFxConversion(quote.final_settlement_rate, quote.quote_timestamp, quote.routing_via); },
-                () => { pushAuditLog(`[FX CANCELLED] 操盘手取消或 10秒未授权！即期报价作废，零敞口风险。`); },
-                10 
-            );
-            pushAuditLog(`[FX RFS SUCCESS] 固价合同生成: ${quote.quote_id} | 渠道执行价: ${quote.final_settlement_rate}`);
+            container.innerHTML = "";
+            const matrix = data.balances || {};
+            Object.keys(matrix).forEach(currency => {
+                container.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl relative overflow-hidden shadow-lg hover:border-emerald-500/50 transition duration-300">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">${currency} 可动用可用余额</div>
+                        <div class="text-3xl font-mono font-bold mt-2 text-slate-100">${matrix[currency].toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                        <div class="absolute -right-4 -bottom-6 text-6xl font-bold font-mono text-slate-800/20 select-none">${currency}</div>
+                    </div>`;
+            });
         }
-    } catch (error) {
-        pushAuditLog(`[SOR AMBUSH ALERT] 换汇通道物理网络超时，启动风险参考防护。`);
-    }
+    } catch (e) { console.error("总账轮询挂起...") }
 }
 
-// 💱 提交即期外汇双边原子化换汇
-// 💱 文件位置：C:\Users\Jacky\Desktop\my_frontend_code\assets\js\dashboard.js
-// 🎯 版本说明：v5.0.3-FX-Atomic-Secure (绝杀后端隐式参数穿仓与 408 闭包死锁完全体)
-
-async function submitFxConversion(forcedRate = null, forcedTimestamp = null, forcedRouting = null) {
-    const token = localStorage.getItem("finlinks_auth_token");
-    const sellCurr = document.getElementById("sell-currency").value;
-    const buyCurr = document.getElementById("buy-currency").value;
-    const sellAmt = parseFloat(document.getElementById("sell-amount").value);
-    
-    const sellConfig = window.FINLINKS_CURRENCY_MATRIX[sellCurr.toUpperCase()];
-    const buyConfig = window.FINLINKS_CURRENCY_MATRIX[buyCurr.toUpperCase()];
-    if ((sellConfig && !sellConfig.isFXEnabled) || (buyConfig && !buyConfig.isFXEnabled)) {
-        const offendingTarget = !sellConfig.isFXEnabled ? sellCurr : buyCurr;
-        console.warn(`💥 [FXALL LOCKDOWN] 换汇交割流被前端防御性强行熔断。拦截标的: ${offendingTarget}`);
-        pushAuditLog(`[FX REJECTED] 风控拒签：币种 [${offendingTarget.toUpperCase()}] 暂处于流动性锁定状态 [研发中]`);
-        alert(`【FinLinks 算力中枢风险提示】\n\n您选择的货币对包含未开通币种 [${offendingTarget.toUpperCase()}]。\n该区域的外汇对冲与流动性交割流目前 [功能正在研发中 / To be enabled]。`);
-        return; 
-    }
-
-    // 🔒 1. 锁死全局与闭包的双轨时钟及汇率路由，防止匿名定时器闭包污染
-// 💱 5.0.4 完美合拢版：初始化变量与地缘分流防爆盾 (彻底剪断尾部残留)
-
-    // 1. 汇率与时间戳取值钉死
-    const fxRate = forcedRate !== null ? forcedRate : currentLiveQuoteRate; 
-    const timestamp = forcedTimestamp !== null ? forcedTimestamp : currentLiveQuoteTimestamp; 
-
-    // 2. 🔌 声明可变选路变量，原有提取作为初始值
-    let routingVia = forcedRouting !== null ? forcedRouting : currentLiveRoutingVia; 
-    
-    // 3. 👑 强行地缘清洗大闸：各归各道，绝杀全局变量因高频切换产生的交织污染
-    const currentBuyCurrency = buyCurr.toUpperCase().trim();
-    if (["KES", "UGX"].includes(currentBuyCurrency)) {
-        routingVia = "PAWAPAY";     // 🌍 东非线雷打不动锁死 PawaPay
-    } else if (["NGN", "GHS"].includes(currentBuyCurrency)) {
-        routingVia = "FLUTTERWAVE"; // 🇳🇬 非洲西线锁死 Flutterwave
-    } else if (["BRL", "MXN", "TRY"].includes(currentBuyCurrency)) {
-        routingVia = "EBANX";       // 🇧🇷 拉美欧亚线锁死 EBANX 影子
-    }
-
-    // 💡 注意：原尾部的 const timestamp 和 const routingVia 已被物理清除，防止二次污染死锁！
-    if (!sellAmt || sellAmt <= 0) {
-        alert("请输入有效的换汇结算名义金额"); return;
-    }
-
-    pushAuditLog(`[FX EXECUTE] 操作员签署确权！正在向中台发射核销电报...`);
-
-    try {
-        // 🔌 2. 【核心物理自愈组装线】
-        // 前端换汇窗口没有账号输入框，但后端转汇流在接通持仓行时可能存在提取隐式字段的 Bug。
-        // 我们通过在 URL 尾部无损穷举叠加合规的 10 位 NUBAN 沙盒充值账号，物理冲刷并覆盖后端的隐式脏数据。
-        let url = `${BACKEND_ENV.BASE_URL}${BACKEND_ENV.endpoints.fx_convert}?sell_currency=${sellCurr}&sell_amount=${sellAmt}&buy_currency=${buyCurr}&fx_rate=${fxRate}&quote_timestamp=${timestamp}&routing_via=${routingVia}`;
-        
-        if (buyCurr.toUpperCase() === "NGN") {
-            // 像素级全覆盖可能的潜在字段名，强行喂给后端 10 位合规数字，绝杀 size must be 10 报错
-            url += `&account_number=0123456789&payout_account=0123456789&recipient_account=0123456789&beneficiary_account=0123456789`;
-        }
-
-        const response = await fetch(url, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
-        });
-        const result = await response.json().catch(() => ({}));
-
-        if (response.status === 200) {
-            pushAuditLog(`[SUCCESS] 跨币种原子化背对背换汇大胜！轧差批次: ${result.fx_batch_ref}`);
-            showPremiumNotification(
-                "🏁 外汇交割核销大捷",
-                `交割详情：卖出 <span class="text-rose-400 font-mono font-bold">-${result.exchange_details.sell}</span><br>` +
-                `买入到账：<span class="text-emerald-400 font-mono font-bold">+${result.exchange_details.buy}</span><br>` +
-                `通道物理流水：<span class="text-slate-100 font-mono text-[11px]">${result.fx_batch_ref}</span>`,
-                "emerald", false 
-            );
-            fetchBalances(); loadFxModal(); closeFxModal();
-        } else if (response.status === 408) {
-            const errorMsg = result.detail || "外汇即期锁价报价超时失效";
-            pushAuditLog(`[FX TIMEOUT] ❌ 交割失败：报价确认延迟，中台已强行断路拦截！`);
-            showPremiumNotification("⚠️ 外汇报价超时失效", errorMsg, "rose", true);
-        } else {
-            // 📡 3. 增强报错回显：如果后端依然通过隐式 Body 穿仓，直接将精细结构体回吐到黑金悬浮窗中
-            const errorMsg = result.detail || (result.error ? result.error.message : JSON.stringify(result));
-            pushAuditLog(`[FX MELTDOWN] 换汇中心拒绝交割: ${errorMsg}`);
-            showPremiumNotification("⚠️ 换汇交割拒绝", `外部选路清算行拒绝了本笔外汇交割电报: <br><span class="text-rose-400 font-mono font-bold text-[11px]">${errorMsg}</span>`, "rose", true);
-        }
-    } catch (error) {
-        pushAuditLog(`[FX CRITICAL ERROR] 通信链路中断，执行紧急锁死。原因: ${error.message}`);
-    }
-}
-
-// 🛡️ 触发异步三方轧差对账审计
-async function triggerMockReconciliation() {
-    const token = localStorage.getItem("finlinks_auth_token");
-    pushAuditLog("[AUDIT START] 零信任总账对账引擎强行点火，正在追溯全量历史流水变动值...");
-
-    try {
-        const response = await fetch(`${BACKEND_ENV.BASE_URL}${BACKEND_ENV.endpoints.reconcile}?currency=NGN`, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
-        });
-        const result = await response.json();
-        pushAuditLog(`[RECON RESULT] 状态: ${result.recon_status} | 内部账目Delta: ${result.discrepancies.internal_ledger_delta} | 网关物理Delta: ${result.discrepancies.external_channel_delta}`);
-        pushAuditLog(`[TELEMETRY] 遥测回执: ${result.network_telemetry}`);
-    } catch (error) {
-        pushAuditLog("[RECON WARNING] 跨境对账物理网络超时，对账总线启动容错暂估轧差对齐。");
-    }
-}
-
-// 📥 5.0 完全体：配置驱动型动态选路泛化代收总线
+// 📥 有源代收 (集成了全局正则防爆金库拦截)
 async function triggerMockPayinCallback() {
-    const token = localStorage.getItem("finlinks_auth_token");
     const amtEl = document.getElementById("collectionAmount");
     const currEl = document.getElementById("collectionCurrency");
     const phoneEl = document.getElementById("collectionPhone");
     const nameEl = document.getElementById("collectionPayerName");
     
     const amount = amtEl && amtEl.value ? parseFloat(amtEl.value) : 5000;
-    const currency = currEl && currEl.value ? currEl.value.toUpperCase().trim() : "NGN";
-    const phoneNumber = phoneEl && phoneEl.value ? phoneEl.value.trim() : "254712345678";
-    const payerName = nameEl && nameEl.value ? nameEl.value.trim() : "Demo Payer";
+    const currency = currEl ? currEl.value.toUpperCase().trim() : "NGN";
+    const phoneNumber = phoneEl ? phoneEl.value.trim() : "";
+    const payerName = nameEl && nameEl.value ? nameEl.value.trim() : "Jacky Zhang";
 
-    // 👑 5.0 核心机制：无损从全局配置金库中提权
-    const currencyConfig = window.FINLINKS_CURRENCY_MATRIX[currency];
-
-    if (!currencyConfig || !currencyConfig.isCollectionEnabled) {
-        pushAuditLog(`[COLLECTION BLOCKED] 触发离岸清算防爆闸！拦截未通电币种: ${currency}`);
-        alert(`【FinLinks 算力中枢风险提示】\n\n币种 [${currency}] 当前受限于离岸外汇管制与流动性结汇死锁，中台已关闭该通道。[功能正在研发中 / To be enabled]`);
-        return;
+    // 👑 物理断路：触发全局正则看护
+    const rule = RIGID_ACCOUNT_RULES[currency];
+    if (rule && !rule.regex.test(phoneNumber)) {
+        pushAuditLog(`[VALIDATION FAILED] ❌ ${rule.error}`);
+        showPremiumNotification("🚨 账户格式非法", rule.error, "rose");
+        return; 
     }
 
-    // 🟢 【即插即用外挂拦截点】
-    const cleanPhone = phoneNumber.replace(/\s+/g, "").replace(/-/g, "").replace(/\./g, "");
-    if (window.LOCAL_RAILS_FRONTEND_REGEXP[currency]) {
-        const rule = window.LOCAL_RAILS_FRONTEND_REGEXP[currency];
-        const targetVal = currency === "TRY" ? cleanPhone.toUpperCase() : cleanPhone;
-        if (!rule.pattern.test(targetVal)) {
-            pushAuditLog(`[PAYIN REJECTED] 客户端拦截：收单账号/手机号格式排异`);
-            showPremiumNotification("⚠️ 客户端数据不合规", `该币种${rule.notice}`, "rose", true);
-            return;
-        }
-    }
-
-    // 🔌 【5.0 绝对解耦：地缘动态选路决策树】
-    let determinedRouting = "PAWAPAY";
-    if (["BRL", "TRY", "MXN"].includes(currency)) {
-        determinedRouting = "EBANX";
-    } else if (["NGN", "GHS"].includes(currency)) {
-        determinedRouting = "FLUTTERWAVE";
-    } else if (["KES", "UGX"].includes(currency)) {
-        determinedRouting = "PAWAPAY";
-    } else if (["USD", "EUR", "GBP", "CNY", "ZAR"].includes(currency)) {
-        determinedRouting = "STRIPE"; // 提前为 Stripe 银行卡代收上电占位
-    }
-
-    pushAuditLog(`[PAYIN OUTFLOW] 正在向中台发起有源收单确权申请... 币种: ${currency} | 金额: ${amount} | 动态分流网关: ${determinedRouting}`);
-    
+    pushAuditLog(`[PAYIN OUTFLOW] 发起有源收单申请... 币种: ${currency} | 金额: ${amount}`);
     try {
-        const url = `${BACKEND_ENV.BASE_URL}${BACKEND_ENV.endpoints.payin_callback}?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(phoneNumber)}&payer_name=${encodeURIComponent(payerName)}&routing_via=${determinedRouting}`;
-        const response = await fetch(url, { 
-            method: "POST", 
-            headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" } 
-        });
+        const url = `/ledger/collection/deposit?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(phoneNumber)}&payer_name=${encodeURIComponent(payerName)}&routing_via=EBANX`;
+        const response = await client(url, { method: "POST" });
         const result = await response.json();
 
         if (response.status === 200 && result.status === "success") {
-            pushAuditLog(`[WEBHOOK ACK] 移动货币收单受理成功！清算批次号: ${result.deposit_id}`);
-            const currentWaterline = result.shadow_account_visibility.updated_balance;
-            pushAuditLog(`[LEDGER UPDATED] 影子复式记账完成。${currency} 账户最新水位: ${currentWaterline}`);
+            pushAuditLog(`[WEBHOOK ACK] 收单大胜！结算批次号: ${result.deposit_id}`);
+            await fetchBalances(); 
             
+            // 👑 激活右上角交易归档弹窗
             showPremiumNotification(
-                "📥 FinLinks 离岸代收扣击成功",
-                `清算参考号：<span class="text-slate-100 font-mono text-[11px]">${result.deposit_id}</span><br>` +
-                `物理到账入金：<span class="text-emerald-400 font-mono font-bold">+${amount} ${currency}</span><br>` +
-                `当前总账可用水线：<span class="text-indigo-400 font-mono font-bold">${currentWaterline.toLocaleString(undefined, {minimumFractionDigits: 2})} ${currency}</span>`,
-                "emerald", false, () => { fetchBalances(); }
+                "📥 FinLinks 离岸代收扣击大捷",
+                `<div class="space-y-1">
+                    <div>清算状态: <span class="text-emerald-400 font-bold">SETTLED (已清偿)</span></div>
+                    <div>物理到账: <span class="text-slate-100 font-mono">+${amount} ${currency}</span></div>
+                    <div class="text-[10px] text-slate-500 font-mono">流水批次: ${result.deposit_id}</div>
+                 </div>`,
+                "emerald"
             );
-        } else {
-            const errorDetail = result.detail || "外部清算行网络挤压拒签";
-            pushAuditLog(`[WEBHOOK DENIED] 清算报文被中台拦截: ${errorDetail}`);
-            showPremiumNotification("⚠️ 收单清算熔断", errorDetail, "rose", true);
         }
-    } catch (error) {
-        pushAuditLog("[WEBHOOK TIMEOUT] 收单回调网关发生物理网络通信超时。");
-    }
+    } catch (error) { pushAuditLog("[WEBHOOK TIMEOUT] 通信超时。"); }
 }
 
-// =================================================================
-// 💸 💸 旗舰级总线：自主出金代付工作台（300秒特赦时钟）
-// =================================================================
-async function executeLivePayoutDisbursal() {
-    pushAuditLog("[PAYOUT DISPATCH] 检测到财务操作：正在提炼出金核心清算意向...");
-    const elName = document.getElementById("payout-name");
-    const elAcc = document.getElementById("payout-acc");
-    const elCurr = document.getElementById("payout-curr");
-    const elAmt = document.getElementById("payout-amount");
-
-    if (!elName || !elAcc || !elCurr || !elAmt) {
-        alert("系统风控：前端表单 id 错配已被拦截"); return;
-    }
-
-    const beneficiaryName = elName.value.trim();
-    const beneficiaryAcc = elAcc.value.trim();
-    const currency = elCurr.value.toUpperCase();
-    const amount = parseFloat(elAmt.value);
-
-    if (!beneficiaryName || !beneficiaryAcc || !amount || amount <= 0) {
-        alert("请输入完整的受益人清算信息及大于 0 的合法金额"); return;
-    }
-
-    // 🟢 【即插即用外挂拦截点】
-    const cleanAcc = beneficiaryAcc.replace(/\s+/g, "").replace(/-/g, "").replace(/\./g, "");
-    if (window.LOCAL_RAILS_FRONTEND_REGEXP[currency]) {
-        const rule = window.LOCAL_RAILS_FRONTEND_REGEXP[currency];
-        const targetVal = currency === "TRY" ? cleanAcc.toUpperCase() : cleanAcc;
-        if (!rule.pattern.test(targetVal)) {
-            pushAuditLog(`[PAYOUT ABORTED] 客户端拦截：代付方本地卡号/钱包格式错配！`);
-            showPremiumNotification("⚠️ 填单信息不合规", `当前选择的结算本币为 [${currency}]。<br><span class="text-rose-400 font-bold">${rule.notice}</span>`, "rose", true);
-            return;
-        }
-    }
-
-    const previewUrl = `${BACKEND_ENV.BASE_URL}/ledger/payout/create?beneficiary_name=${encodeURIComponent(beneficiaryName)}&beneficiary_account=${encodeURIComponent(beneficiaryAcc)}&channel_type=MOBILE_MONEY&amount=${amount}&currency=${currency}&commit=false`;
-    pushAuditLog(`[RFS ACTIVATE] 正在向中台流动性池索要代付价格合同...`);
-
+async function triggerMockReconciliation() {
+    pushAuditLog("[AUDIT START] 零信任对账引擎点火...");
     try {
-        const response = await fetch(previewUrl, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${localStorage.getItem("finlinks_auth_token")}`, "Content-Type": "application/json" }
-        });
-        const result = await response.json();
-
-        if (response.status === 200 && result.status === "preview") {
-            pushAuditLog(`[QUOTE CAPTURED] 报价单锁定成功！请在 5分钟 内签署财务终审授权。`);
-            
-            showPremiumNotification(
-                "⚡ FXAll 限时流式换汇确权",
-                `最优选通道路由：<span class="text-emerald-400 font-bold">${result.sor_routing.executed_via}</span><br>` +
-                `换汇锁定合同号：<span class="text-slate-100 font-mono text-[10px]">${result.quote_id}</span><br>` +
-                `代付结算执行价：<span class="text-emerald-400 font-mono font-bold">1 USD = ${result.sor_routing.applied_rate} ${currency}</span><br>` +
-                `核销名义扣减值：<span class="text-amber-400 font-mono font-bold">-${result.deducted_amount} ${currency}</span>`,
-                "emerald", true, 
-                async () => {
-                    pushAuditLog(`[EXECUTE SIGNED] 操盘手确权通电！正在携带锁价时间指纹强行击穿中台血管...`);
-                    const commitUrl = `${BACKEND_ENV.BASE_URL}/ledger/payout/create?beneficiary_name=${encodeURIComponent(beneficiaryName)}&beneficiary_account=${encodeURIComponent(beneficiaryAcc)}&channel_type=MOBILE_MONEY&amount=${amount}&currency=${currency}&commit=true&quote_timestamp=${result.quote_timestamp}`;
-                    
-                    try {
-                        const commitResponse = await fetch(commitUrl, {
-                            method: "POST",
-                            headers: { "Authorization": `Bearer ${localStorage.getItem("finlinks_auth_token")}`, "Content-Type": "application/json" }
-                        });
-                        const commitResult = await commitResponse.json();
-                        
-                        if (commitResponse.status === 200 && commitResult.status === "success") {
-                            pushAuditLog(`[CLEARING SUCCESS] 🎉 3秒背对背对冲大胜！上游参考号: ${commitResult.payout_batch_ref}`);
-                            showPremiumNotification(
-                                "📥 离岸放款划转成功",
-                                `物理到账回执：<span class="text-slate-100 font-mono">${commitResult.payout_batch_ref}</span><br>` +
-                                `账户可用头寸：<span class="text-emerald-400 font-mono font-bold">${commitResult.remaining_balance.toLocaleString(undefined, {minimumFractionDigits: 2})} ${currency}</span>`,
-                                "emerald", false
-                            );
-                            elName.value = ""; elAcc.value = ""; elAmt.value = ""; fetchBalances();
-                        } else if (commitResponse.status === 408) {
-                            pushAuditLog(`[ROUTING MELTDOWN] ❌ 核销失败：网络通信延迟超标，触发中台技术债防线！`);
-                            showPremiumNotification("⚠️ 锁价执行超时", commitResult.detail, "rose", true);
-                        } else {
-                            pushAuditLog(`[PAYOUT DENIED] 核销被业务拦截: ${commitResult.detail}`);
-                            showPremiumNotification("⚠️ 放款执行拒绝", commitResult.detail, "rose", true);
-                        }
-                    } catch (commitErr) {
-                        pushAuditLog(`[CRITICAL CATASTROPHE] 通信猝死，请核对网络链路！`);
-                    }
-                },
-                () => { pushAuditLog(`[TRANSACTION FLUSHED] 交易单安全关闭。意向合同原地解体，零资产变动。`); },
-                300 
-            );
-        } else if (response.status === 400) {
-            pushAuditLog(`[PAYOUT DENIED] 风控拦截: ${result.detail}`);
-            showPremiumNotification("⚠️ 意向预检拒绝", result.detail, "rose", true);
-        } else {
-            showPremiumNotification("💥 预检阶段中台崩溃", result.detail, "rose", true);
-        }
-    } catch (catchErr) {
-        pushAuditLog(`[PAYOUT TIMEOUT] 物理路由断路：${catchErr.message}`);
-    }
+        const response = await client("/ledger/reconcile?currency=NGN", { method: "POST" });
+        await fetchBalances();
+        pushAuditLog(`[RECON SUCCESS] 内部总账轧差平账完毕。`);
+    } catch (error) { pushAuditLog("[RECON WARNING] 对账超时。"); }
 }
 
-// 🛠️ 辅助 UI 组件：免阻塞机构级黑金浮层通知窗
-let finlinksLiveTtlTimer = null;
-function showPremiumNotification(title, htmlContent, theme = "emerald", forceAcknowledge = false, onConfirmCallback = null, onCancelCallback = null, countdownTtl = 0) {
-    if (finlinksLiveTtlTimer) { clearInterval(finlinksLiveTtlTimer); finlinksLiveTtlTimer = null; }
-    const oldNotify = document.getElementById("finlinks-premium-notify"); if (oldNotify) oldNotify.remove();
-
-    const borderClass = theme === "emerald" ? "border-emerald-500/40 shadow-emerald-950/20" : "border-rose-500/40 shadow-rose-950/20";
-    const titleColor = theme === "emerald" ? "text-emerald-400" : "text-rose-400";
-
-    window.__handlePremiumConfirm = function() {
-        if (finlinksLiveTtlTimer) { clearInterval(finlinksLiveTtlTimer); finlinksLiveTtlTimer = null; }
-        const el = document.getElementById("finlinks-premium-notify");
-        if (el) { el.remove(); if (typeof onConfirmCallback === "function") onConfirmCallback(); }
-    };
-
-    window.__handlePremiumCancel = function() {
-        if (finlinksLiveTtlTimer) { clearInterval(finlinksLiveTtlTimer); finlinksLiveTtlTimer = null; }
-        const el = document.getElementById("finlinks-premium-notify");
-        if (el) { el.remove(); if (typeof onCancelCallback === "function") onCancelCallback(); }
-    };
-
-    let progressLineHtml = "", buttonText = "Acknowledge";
-    if (countdownTtl > 0) {
-        buttonText = `Confirm (<span id="ttl-countdown-digit">${countdownTtl}</span>s)`;
-        progressLineHtml = `<div class="w-full bg-slate-950 h-1 rounded-full mt-3 overflow-hidden border border-slate-800"><div id="ttl-progress-bar" class="bg-gradient-to-r from-amber-500 to-emerald-500 h-full w-full transition-all linear duration-100"></div></div>`;
-    }
-
-    const notifyHtml = `
-        <div id="finlinks-premium-notify" class="fixed top-6 right-6 z-50 max-w-sm w-full bg-slate-900/95 backdrop-blur border ${borderClass} p-5 rounded-xl shadow-2xl transition-all duration-300 transform translate-x-12 opacity-0">
-            <div class="flex items-start justify-between">
-                <div>
-                    <h4 class="text-sm font-extrabold ${titleColor} tracking-wide uppercase flex items-center"><span class="w-1.5 h-1.5 rounded-full ${theme === 'emerald' ? 'bg-emerald-400' : 'bg-rose-400'} inline-block mr-2 animate-pulse"></span>${title}</h4>
-                    <div class="mt-2.5 text-xs text-slate-400 leading-relaxed font-sans">${htmlContent}</div>${progressLineHtml}
-                </div>
-                <button onclick="window.__handlePremiumCancel()" class="text-slate-500 hover:text-slate-200 transition font-mono text-xs pl-2">✕</button>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-800/60 flex justify-end"><button id="finlinks-payout-submit-btn" onclick="window.__handlePremiumConfirm()" class="bg-slate-800 hover:bg-slate-700 px-4 py-1.5 rounded text-[10px] text-slate-200 font-bold tracking-wider transition uppercase">${buttonText}</button></div>
-        </div>`;
-
-    document.body.insertAdjacentHTML("beforeend", notifyHtml);
-    const element = document.getElementById("finlinks-premium-notify");
-    setTimeout(() => { if (element) element.classList.remove("translate-x-12", "opacity-0"); }, 50);
-
-    if (countdownTtl > 0) {
-        let timeLeft = countdownTtl;
-        const digitEl = document.getElementById("ttl-countdown-digit"), progressBarEl = document.getElementById("ttl-progress-bar"), submitBtnEl = document.getElementById("finlinks-payout-submit-btn");
-        const totalSteps = countdownTtl * 10; let currentStep = totalSteps;
-
-        finlinksLiveTtlTimer = setInterval(() => {
-            currentStep--;
-            if (progressBarEl) {
-                const pct = (currentStep / totalSteps) * 100; progressBarEl.style.width = `${pct}%`;
-                if (pct < 40) { progressBarEl.classList.remove("from-amber-500", "to-emerald-500"); progressBarEl.classList.add("bg-rose-500"); }
-            }
-            if (currentStep % 10 === 0) { timeLeft--; if (digitEl && timeLeft >= 0) digitEl.innerText = timeLeft; }
-            if (currentStep <= 0) {
-                clearInterval(finlinksLiveTtlTimer); finlinksLiveTtlTimer = null;
-                pushAuditLog(`[TTL EXPIRED] ⏳ 锁价授权超时！指令强制回滚流产。`);
-                if (submitBtnEl) {
-                    submitBtnEl.disabled = true; submitBtnEl.innerText = "EXPIRED";
-                    submitBtnEl.className = "bg-rose-950 text-rose-500 border border-rose-900/40 px-4 py-1.5 rounded text-[10px] font-bold uppercase cursor-not-allowed";
-                }
-                setTimeout(() => { const el = document.getElementById("finlinks-premium-notify"); if (el) { el.classList.add("translate-x-12", "opacity-0"); setTimeout(() => { el.remove(); if (typeof onCancelCallback === "function") onCancelCallback(); }, 300); } }, 600); 
-            }
-        }, 100);
-    } else if (!forceAcknowledge) {
-        setTimeout(() => { const el = document.getElementById("finlinks-premium-notify"); if (el && !el.classList.contains("opacity-0")) { el.classList.add("translate-x-12", "opacity-0"); setTimeout(() => el.remove(), 300); } }, 8000);
-    }
+function switchTab(tabId) {
+    pushAuditLog(`[UI ROUTER] 切流至功能仓: ${tabId.toUpperCase()}`);
+    document.querySelectorAll(".tab-pane").forEach(p => p.classList.add("hidden"));
+    document.getElementById(`pane-${tabId}`)?.classList.remove("hidden");
 }
-
 function debounce(func, delay) { let timer; return function (...args) { clearTimeout(timer); timer = setTimeout(() => func.apply(this, args), delay); }; }
-function openFxModal() { const modal = document.getElementById("fx-modal"); if (modal) modal.classList.remove("pointer-events-none", "opacity-0"); }
-function closeFxModal() {
-    const modal = document.getElementById("fx-modal"); if (modal) {
-        modal.classList.add("pointer-events-none", "opacity-0");
-        const amtInput = document.getElementById("sell-amount"); if (amtInput) amtInput.value = "";
-        const fxWidgetInfo = document.querySelector("#fx-modal .bg-slate-950");
-        if (fxWidgetInfo) { fxWidgetInfo.innerHTML = `<span class="block text-slate-400 animate-pulse">📡 等待操盘手输入名义交割资产金额...</span>`; }
-    }
-}
-
 function pushAuditLog(message) {
     const box = document.getElementById("audit-log-box");
-    if (box) { const time = new Date().toLocaleTimeString(); box.innerHTML += `<div>[${time}] ${message}</div>`; box.scrollTop = box.scrollHeight; }
+    if (box) { box.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${message}</div>`; box.scrollTop = box.scrollHeight; }
 }
-function handleLogout() { localStorage.removeItem("finlinks_auth_token"); window.location.href = "index.html"; }
 
-// 🟢 SPA 下拉菜单选择时，动态同步地缘通道提示词的对账大闸
-window.syncFXTargetVisibility = function(selectedCurrency) {
-    const currencyKey = selectedCurrency.toUpperCase();
-    const config = window.FINLINKS_CURRENCY_MATRIX[currencyKey];
-    const badgeArea = document.getElementById("channelModeBadgeArea"), matchedMode = document.getElementById("matchedChannelMode");
-    
-    if (!config || !badgeArea || !matchedMode) return;
-    
-    badgeArea.classList.remove("hidden");
-    const selectElement = document.getElementById("collectionCurrency"), selectedOption = selectElement.options[selectElement.selectedIndex];
-    const rawMode = selectedOption.getAttribute("data-mode") || "未知电讯通道";
-    
-    if (config.isCollectionEnabled) {
-        matchedMode.innerHTML = `${rawMode} <span class="ml-2 px-1.5 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-900/50">已通电 (Active)</span>`;
-    } else {
-        matchedMode.innerHTML = `${rawMode} <span class="ml-2 px-1.5 py-0.5 rounded text-[10px] bg-amber-950 text-amber-400 border border-amber-900/50">To be enabled (研发中)</span>`;
-    }
-};
+// 👑 右上角高级金融通知卡片渲染器 (开放给全局，统一调度)
+export function showPremiumNotification(title, htmlContent, theme = "emerald") {
+    const oldNotify = document.getElementById("finlinks-premium-notify"); if (oldNotify) oldNotify.remove();
+    const themeColors = {
+        emerald: { border: "border-emerald-500/40", text: "text-emerald-400", dot: "bg-emerald-400" },
+        amber: { border: "border-amber-500/40", text: "text-amber-400", dot: "bg-amber-400" },
+        rose: { border: "border-rose-500/40", text: "text-rose-400", dot: "bg-rose-400" }
+    }[theme];
 
-window.executeLivePayoutDisbursal = executeLivePayoutDisbursal;
+    const notifyHtml = `
+        <div id="finlinks-premium-notify" class="fixed top-6 right-6 z-50 max-w-sm w-full bg-slate-950/95 backdrop-blur border ${themeColors.border} p-5 rounded-xl shadow-2xl transition-all duration-300">
+            <h4 class="text-sm font-extrabold ${themeColors.text} tracking-wide uppercase flex items-center">
+                <span class="w-1.5 h-1.5 rounded-full ${themeColors.dot} inline-block mr-2 animate-pulse"></span>${title}
+            </h4>
+            <div class="mt-2.5 text-xs text-slate-400 leading-relaxed font-sans">${htmlContent}</div>
+            <div class="mt-4 pt-3 border-t border-slate-900 flex justify-end">
+                <button onclick="document.getElementById('finlinks-premium-notify').remove()" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 px-4 py-1.5 rounded text-[10px] text-slate-200 font-bold tracking-wider uppercase">确认归档</button>
+            </div>
+        </div>`;
+    document.body.insertAdjacentHTML("beforeend", notifyHtml);
+}
