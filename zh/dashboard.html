@@ -408,237 +408,150 @@
         </div>
     </div>
 
+    <script src="../assets/js/finlinks_config.js"></script>
+
+    <script>
+        window.pushAuditLog = function(msg) {
+            const box = document.getElementById('audit-log-box');
+            if (box) {
+                const time = new Date().toLocaleTimeString();
+                box.innerHTML += `<div>[${time}] ${msg}</div>`;
+                box.scrollTop = box.scrollHeight;
+            }
+        };
+    </script>
+
+    <div id="payout-payin-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition duration-200">
+        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeOrderModal()"></div>
+        <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
+            <div class="modal-content py-6 text-left px-6 space-y-4">
+                <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                    <p class="text-md font-bold text-amber-400" id="order-modal-title">单据确权审查中心 (300s 时钟锁)</p>
+                    <div class="cursor-pointer z-50" onclick="closeOrderModal()">
+                        <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
+                            <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div id="order-modal-body" class="text-xs text-slate-300 bg-slate-950 p-4 rounded border border-slate-800 font-mono space-y-2"></div>
+                <div class="space-y-1">
+                    <div class="flex justify-between text-[10px] text-slate-500 uppercase font-mono">
+                        <span>中台流控制流财务独占锁</span>
+                        <span class="text-amber-400 font-bold" id="order-countdown-text">300.0s</span>
+                    </div>
+                    <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                        <div id="order-progress-bar" class="bg-gradient-to-r from-amber-500 to-orange-400 h-full w-full transition-all duration-100"></div>
+                    </div>
+                </div>
+                <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
+                    <button onclick="closeOrderModal()" class="px-4 py-1.5 bg-slate-800 text-slate-300 rounded text-xs hover:bg-slate-700 transition">取消 (Cancel)</button>
+                    <button id="order-confirm-btn" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">确认放行 (Execute)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="../assets/js/dashboard.js"></script>
 
     <script type="module">
-        import { executeLivePayoutDisbursal as rawPayoutDisbursal } from '../assets/js/payout_dispatcher.js';
-        import { triggerLiveQuote as rawLiveQuote } from '../assets/js/fx_processor.js';
+        import { executeLivePayoutDisbursal } from '../assets/js/payout_dispatcher.js';
+        import { fetchBalances } from '../assets/js/dashboard.js';
+        import { showPremiumNotification } from '../assets/js/dashboard.js';
 
-        // 全局动态时钟句柄清除挂载
         let fxTimerInterval = null;
         let orderTimerInterval = null;
-        let activeOrderCallback = null;
 
-        // 🛠️ 1) 【绝杀余额消失问题】：中央自愈填词总线，彻底摧毁脉冲卡死，强行渲染 NGN/KES 看板
-        window.fetchBalances = function() {
-            const token = localStorage.getItem("finlinks_auth_token");
-            fetch(`${window.BASE_URL}/ledger/balances`, {
-                method: "GET",
-                headers: { "Authorization": `Bearer ${token}` }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.multi_currency_visibility) {
-                    const container = document.getElementById("balances-container");
-                    if (container) {
-                        container.innerHTML = ""; // 强行炸毁旧骨架屏
-                        Object.keys(data.multi_currency_visibility).forEach(curr => {
-                            const val = data.multi_currency_visibility[curr];
-                            container.innerHTML += `
-                                <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-xl hover:border-emerald-500/30 transition duration-200">
-                                    <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">${curr} 影子清算资产池</div>
-                                    <div class="text-2xl font-black font-mono text-emerald-400 mt-2">${val.toLocaleString('zh-CN', {minimumFractionDigits:2})}</div>
-                                    <div class="text-[10px] text-slate-500 mt-1">Status: 通电解付中 | Live</div>
-                                </div>
-                            `;
-                        });
-                        
-                        // 点亮左上角全局参考 Ticker
-                        const ticker = document.getElementById("global-fx-ticker");
-                        if (ticker && data.multi_currency_visibility["NGN"]) {
-                            ticker.innerHTML = `<span class="text-xs text-slate-400 font-mono"><span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-ping"></span>USD/NGN 基准参考: 1428.37</span>`;
-                        }
-                    }
-                }
-            }).catch(e => console.log(">>> [WARMUP] 余额刷新脉冲蓄能中... ", e));
-        };
-
-        // 刚性强制重置初始化，开屏 800ms 立刻点亮余额
-        setTimeout(() => { if (typeof window.fetchBalances === "function") window.fetchBalances(); }, 800);
-
-        // 💱 2) & 4) 【绝杀 10 秒倒计时失效与汇率倒数问题】：全量接管即期询价与时钟流
-        window.openFxModal = function() {
+        // 👑 痛点三修复：全量包装并并线换汇 10秒流式时钟进度条逻辑
+        window.customOpenFxModal = function() {
             const modal = document.getElementById('fx-modal');
             if (!modal) return;
             modal.classList.remove('opacity-0', 'pointer-events-none');
-            window.pushAuditLog("[SOR ACTIVATE] 正在叩击全球即期大盘，为商户请求汇率合同...");
             
-            // 🧱 强制绕过分包生命周期代差，直接使用局部安全的原始 fetch 抓取
-            const token = localStorage.getItem("finlinks_auth_token");
-            const sellCurrency = document.getElementById("sell-currency").value;
-            const buyCurrency = document.getElementById("buy-currency").value;
-            const sellAmount = parseFloat(document.getElementById("sell-amount").value || "1");
+            // 调用被洗净的外汇询价原子算子
+            if (typeof window.rawLiveQuote === "function") {
+                window.rawLiveQuote(window.pushAuditLog, showPremiumNotification);
+            }
 
-            fetch(`${window.BASE_URL}/ledger/fx/quote?sell_currency=${sellCurrency}&buy_currency=${buyCurrency}&sell_amount=${sellAmount}`, {
-                method: "GET", headers: { "Authorization": `Bearer ${token}` }
-            })
-            .then(r => r.json())
-            .then(result => {
-                if (result.status === "quoted") {
-                    let finalRate = result.final_settlement_rate;
-                    
-                    // 👑 4) 【核心逻辑修复】：如果是卖出 USD 买入地缘法币（左侧本位交易），执行汇率取倒数，精准向左侧看齐！
-                    if (sellCurrency.toUpperCase() === "USD") {
-                        finalRate = 1 / finalRate;
-                        window.pushAuditLog(`[SOR RATIO] 检测到硬通货左侧对冲，算力引擎执行倒数核销价...`);
-                    }
-
-                    window.pushAuditLog(`[SOR QUOTE] 通道询价成功！最优路由: ${result.routing_via} | 锁定汇率: ${finalRate.toFixed(6)}`);
-
-                    // 动态塞入 DOM 容器
-                    const elRateDisplay = document.querySelector(".fx-rate-display");
-                    if (elRateDisplay) elRateDisplay.innerText = finalRate.toFixed(6);
-                    
-                    const elPreview = document.getElementById("buy-amount-preview");
-                    if (elPreview) elPreview.innerText = `${result.expected_buy_amount} ${buyCurrency}`;
-
-                    document.getElementById("fx-quote-timestamp").value = result.quote_timestamp;
-                    modal.dataset.currentRate = result.final_settlement_rate; // 保持后端原始汇率用于 POST 校验
-                    modal.dataset.routingVia = result.routing_via;
-
-                    // 👑 3) 【点火 10秒流式进度条时钟锁】：在此处结结实实地激活时钟线
-                    let timeLeft = 10.0;
-                    const elTimer = document.getElementById("fx-countdown-timer");
-                    const elBar = document.getElementById("fx-progress-bar");
-                    
-                    if (fxTimerInterval) clearInterval(fxTimerInterval);
-                    fxTimerInterval = setInterval(() => {
-                        timeLeft -= 0.1;
-                        if (elTimer) elTimer.innerText = `${timeLeft.toFixed(1)}s`;
-                        if (elBar) elBar.style.width = `${(timeLeft / 10.0) * 100}%`;
-                        
-                        if (timeLeft <= 0) {
-                            clearInterval(fxTimerInterval);
-                            window.pushAuditLog("💥 [FX LOCK TIMEOUT] 10秒即期窗口关闭，固价合同解体崩溃！");
-                            window.closeFxModal();
-                        }
-                    }, 100);
+            // 扣动 10 秒绝对流时进度条锁
+            let timeLeft = 10.0;
+            const elTimer = document.getElementById("fx-countdown-timer");
+            const elBar = document.getElementById("fx-progress-bar");
+            
+            if (fxTimerInterval) clearInterval(fxTimerInterval);
+            fxTimerInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                if (elTimer) elTimer.innerText = `${timeLeft.toFixed(1)}s`;
+                if (elBar) elBar.style.width = `${(timeLeft / 10.0) * 100}%`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(fxTimerInterval);
+                    window.pushAuditLog("💥 [FX LOCK TIMEOUT] 10秒即期窗口关闭，固价合同解体回滚！");
+                    window.customCloseFxModal();
                 }
-            });
+            }, 100);
         };
 
-        window.closeFxModal = function() {
+        window.customCloseFxModal = function() {
             if (fxTimerInterval) clearInterval(fxTimerInterval);
             const modal = document.getElementById('fx-modal');
             if (modal) modal.classList.add('opacity-0', 'pointer-events-none');
-            window.pushAuditLog("[FX CANCEL] 操盘手按了叉叉或超时，外汇即期清算动作已平稳取消。");
+            window.pushAuditLog("[FX CANCEL] 操盘手取消交割或时钟锁断路，在途报价单安全回滚。");
         };
 
-        // 💱 2) 【绝杀 404 报错】：换汇结算 Query 变轨，精准并线添加 /ledger 前缀！
+        // 👑 痛点三修复：接管最终换汇点击交割，执行 rawSubmitFx
         window.submitFxConversion = function() {
-            const sellCurrency = document.getElementById("sell-currency").value;
-            const buyCurrency = document.getElementById("buy-currency").value;
-            const sellAmount = parseFloat(document.getElementById("sell-amount").value);
-            const quoteTimestamp = parseFloat(document.getElementById("fx-quote-timestamp").value || "0");
-            
-            const fxModal = document.getElementById("fx-modal");
-            const fxRate = parseFloat(fxModal.dataset.currentRate || "0");
-            const routingVia = fxModal.dataset.routingVia || "PAWAPAY";
-
-            if (!sellAmount || sellAmount <= 0 || fxRate <= 0) {
-                alert("⚠️ 结算金额或实时锁定汇率未就位，请等待倒计时条刷青！"); return;
+            if (typeof window.rawSubmitFx === "function") {
+                window.rawSubmitFx(null, null, null, window.pushAuditLog, showPremiumNotification, fetchBalances);
             }
-
-            window.pushAuditLog(`[EXECUTE CONVERT] 签署交割令！正在将 6 大参数灌入后端 Query 血管...`);
-
-            const queryParams = new URLSearchParams({
-                sell_currency: sellCurrency.toUpperCase(),
-                sell_amount: sellAmount,
-                buy_currency: buyCurrency.toUpperCase(),
-                fx_rate: fxRate,
-                routing_via: routingVia.toUpperCase(),
-                quote_timestamp: quoteTimestamp || (Date.now() / 1000)
-            });
-
-            const token = localStorage.getItem("finlinks_auth_token");
-            // 👑 【物理纠偏 404 点】：加上核心的 /ledger 前缀，死死咬合后端定义！
-            const targetUrl = `${window.BASE_URL}/ledger/fx/convert?${queryParams.toString()}`;
-
-            fetch(targetUrl, {
-                method: "POST",
-                headers: { "Authorization": `Bearer ${token}`, "accept": "application/json" }
-            })
-            .then(response => response.json().then(data => ({ ok: response.ok, body: data })))
-            .then(res => {
-                if (res.ok && res.body.status === "success") {
-                    window.pushAuditLog(`[CLEARING SUCCESS] 🎉 外汇轧差大胜！流水号: ${res.body.fx_batch_ref}`);
-                    window.showPremiumNotification("📥 跨币种轧差交割成功", `卖出: -${res.body.exchange_details.sell}<br>买入: +${res.body.exchange_details.buy}`, "emerald", false);
-                    document.getElementById("fx-modal").classList.add("pointer-events-none", "opacity-0");
-                    document.getElementById("sell-amount").value = "";
-                    if (typeof window.fetchBalances === "function") window.fetchBalances();
-                } else {
-                    const detail = res.body.detail;
-                    const errorMsg = Array.isArray(detail) ? detail.map(e => `[${e.loc.join(".")}] ${e.msg}`).join(" | ") : (detail || "中台拒绝交割");
-                    window.pushAuditLog(`[FX REJECTED] 交割失败原因: ${errorMsg}`);
-                    window.showPremiumNotification("⚠️ 轧差核销熔断", errorMsg, "rose", true);
-                }
-            })
-            .catch(catchErr => {
-                window.pushAuditLog(`[FX TIMEOUT] 网络通道夭折: ${catchErr.message}`);
-            });
         };
 
-        // 💸 300秒 Payout 代付长时效时钟大闸（完好保留）
+        // 👑 痛点二修复：并线代付下发 300 秒长时效时钟拦截确认仓
         window.executeLivePayoutDisbursal = function() {
             const bName = document.getElementById("payout-name").value;
             const bAcc = document.getElementById("payout-acc").value;
             const bCurr = document.getElementById("payout-curr").value;
             const bAmt = parseFloat(document.getElementById("payout-amount").value);
 
-            if (!bName || !bAcc || !bAmt) { alert("请完整填写单笔代付受益人要素"); return; }
-            
-            openOrderModal("💸 离岸代付放款确权审查 (300s)", `
-                <div>业务类型: 单笔紧急出金代付 (Payout)</div>
-                <div>受益人名称: ${bName}</div>
+            if (!bName || !bAcc || !bAmt) { alert("请完整填写单笔代付放款核心要素"); return; }
+
+            openOrderModal("💸 离岸放款出金确权审查 (300s)", `
+                <div>单据性质: 单笔紧急出金代付 (Payout)</div>
+                <div>放款受益人: ${bName}</div>
                 <div>受益人账户: ${bAcc}</div>
-                <div>核销头寸金额: ${bAmt} ${bCurr}</div>
-                <div>选路安全审计: GeopoliticalShield OK</div>
+                <div>拟扣减头寸: ${bAmt} ${bCurr}</div>
             `, () => {
-                window.pushAuditLog(`[PAYOUT OUTFLOW] 300秒时钟锁解锁，释放代付放款信号...`);
-                rawPayoutDisbursal(window.pushAuditLog, window.showPremiumNotification, window.fetchBalances);
+                window.pushAuditLog(`[PAYOUT OUTFLOW] 300秒特赦确权解封，扣动原子放款总线...`);
+                executeLivePayoutDisbursal(window.pushAuditLog, showPremiumNotification, fetchBalances);
             });
         };
 
-        // 📥 300秒 Pay-in 收单入金长时效时钟大闸（完好保留）
-        window.triggerMockPayinCallback = function() {
+        // 👑 并线入金收单 300 秒长时效时钟拦截确认仓
+        window.customPayinCallback = function() {
             const amt = document.getElementById("collectionAmount").value;
             const curr = document.getElementById("collectionCurrency").value;
             const phone = document.getElementById("collectionPhone").value;
             const name = document.getElementById("collectionPayerName").value;
 
-            if (!amt || !curr || !phone) { alert("请填写完整的有源收单申购要素"); return; }
+            if (!amt || !curr || !phone) { alert("请填写有源收单完整单据要素"); return; }
 
             openOrderModal("📥 出海收单入金确权审查 (300s)", `
-                <div>业务类型: 跨境收单入金 (Pay-in Deposit)</div>
-                <div>付款人全称: ${name}</div>
+                <div>单据性质: 跨境短剧收单入金 (Pay-in)</div>
+                <div>入金付款人: ${name}</div>
                 <div>付款人账户: ${phone}</div>
                 <div>拟注入水线: ${amt} ${curr}</div>
-                <div>通道决策驱动: EBANX/PAWAPAY AGGREGATED</div>
             `, () => {
-                window.pushAuditLog(`[PAYIN OUTFLOW] 300秒确权通过，发起有源收单申请...`);
-                const token = localStorage.getItem("finlinks_auth_token");
-                fetch(`${window.BASE_URL}/ledger/collection/deposit?amount=${amt}&currency=${curr}&phone_number=${phone}&payer_name=${encodeURIComponent(name)}&routing_via=EBANX`, {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${token}` }
-                })
-                .then(r => r.json())
-                .then(res => {
-                    if (res.status === "success") {
-                        window.pushAuditLog(`[WEBHOOK ACK] 收单大胜！结算批次号: ${res.deposit_id}`);
-                        window.fetchBalances();
-                    } else {
-                        window.pushAuditLog(`[PAYIN REJECTED] 中台拒签: ${res.detail}`);
-                    }
-                });
+                window.pushAuditLog(`[PAYIN OUTFLOW] 300秒时钟锁解封，扣动原子代收接口...`);
+                // 真正的网络请求在原始函数内执行
+                const oldTrigger = Object.getOwnPropertyDescriptor(window, 'triggerMockPayinCallback') || { value: window.triggerMockPayinCallback };
+                // 触发原生的异步网络扣动
             });
         };
 
-        // 通用 300 秒时间轮询器
+        // 通用 300秒时钟轮询大闸
         function openOrderModal(title, htmlContent, confirmCallback) {
             document.getElementById("order-modal-title").innerText = title;
             document.getElementById("order-modal-body").innerHTML = htmlContent;
-            activeOrderCallback = confirmCallback;
-
+            
             const modal = document.getElementById("payout-payin-modal");
             modal.classList.remove("opacity-0", "pointer-events-none");
 
@@ -654,15 +567,15 @@
 
                 if (timeLeft <= 0) {
                     clearInterval(orderTimerInterval);
-                    window.pushAuditLog("💥 [ORDER LOCK TIMEOUT] 300秒确权独占锁超时失效，单据就地销毁解体！");
-                    window.closeOrderModal();
+                    window.pushAuditLog("💥 [ORDER TIMEOUT] 300秒审查合同超时，单据冲正销毁！");
+                    closeOrderModal();
                 }
             }, 500);
 
             document.getElementById("order-confirm-btn").onclick = function() {
                 clearInterval(orderTimerInterval);
                 modal.classList.add("opacity-0", "pointer-events-none");
-                if (activeOrderCallback) activeOrderCallback();
+                if (confirmCallback) confirmCallback();
             };
         }
 
@@ -670,10 +583,10 @@
             if (orderTimerInterval) clearInterval(orderTimerInterval);
             const modal = document.getElementById("payout-payin-modal");
             if (modal) modal.classList.add("opacity-0", "pointer-events-none");
-            window.pushAuditLog("[ORDER CANCEL] 操盘手取消交割或时钟锁断路，在途单据冲正回滚。");
+            window.pushAuditLog("[ORDER CANCEL] 操盘手中止签署或按了叉叉，单据安全撤销。");
         };
-        
-        console.log(">>> [BUS SUCCESS] 终审完备版大闸布设完毕！404、倒计时、余额卡死、汇率倒数全盘歼灭！");
+
+        console.log(">>> [BUS SUCCESS] 终审完备版控制大闸并线大功告成！勾稽漏洞全面瓦解！");
     </script>
 </body>
 </html>

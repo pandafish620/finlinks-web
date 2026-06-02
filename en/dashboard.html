@@ -371,163 +371,97 @@
         </div>
     </div>
 
+    <script src="../assets/js/finlinks_config.js"></script>
+
+    <script>
+        window.pushAuditLog = function(msg) {
+            const box = document.getElementById('audit-log-box');
+            if (box) {
+                const time = new Date().toLocaleTimeString();
+                box.innerHTML += `<div>[${time}] ${msg}</div>`;
+                box.scrollTop = box.scrollHeight;
+            } else { console.log(msg); }
+        };
+    </script>
+
+    <div id="payout-payin-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition duration-200">
+        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeOrderModal()"></div>
+        <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
+            <div class="modal-content py-6 text-left px-6 space-y-4">
+                <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                    <p class="text-md font-bold text-amber-400" id="order-modal-title">Transaction Authorization (300s TTL Lock)</p>
+                    <div class="cursor-pointer z-50" onclick="closeOrderModal()">
+                        <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
+                            <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div id="order-modal-body" class="text-xs text-slate-300 bg-slate-950 p-4 rounded border border-slate-800 font-mono space-y-2"></div>
+                <div class="space-y-1">
+                    <div class="flex justify-between text-[10px] text-slate-500 uppercase font-mono">
+                        <span>Mid-tier Clearing Execution Lock</span>
+                        <span class="text-amber-400 font-bold" id="order-countdown-text">300.0s</span>
+                    </div>
+                    <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                        <div id="order-progress-bar" class="bg-gradient-to-r from-amber-500 to-orange-400 h-full w-full transition-all duration-100"></div>
+                    </div>
+                </div>
+                <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
+                    <button onclick="closeOrderModal()" class="px-4 py-1.5 bg-slate-800 text-slate-300 rounded text-xs hover:bg-slate-700 transition">Cancel</button>
+                    <button id="order-confirm-btn" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">Execute</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="../assets/js/dashboard.js"></script>
 
     <script type="module">
-        import { executeLivePayoutDisbursal as rawPayoutDisbursal } from '../assets/js/payout_dispatcher.js';
-        import { triggerLiveQuote as rawLiveQuote } from '../assets/js/fx_processor.js';
-
-        window.triggerLiveQuote = rawLiveQuote;
+        import { executeLivePayoutDisbursal } from '../assets/js/payout_dispatcher.js';
+        import { fetchBalances } from '../assets/js/dashboard.js';
+        import { showPremiumNotification } from '../assets/js/dashboard.js';
 
         let fxTimerInterval = null;
         let orderTimerInterval = null;
-        let activeOrderCallback = null;
 
-        window.fetchBalances = function() {
-            const token = localStorage.getItem("finlinks_auth_token");
-            fetch(`${window.BASE_URL}/ledger/balances`, {
-                method: "GET", headers: { "Authorization": `Bearer ${token}` }
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.multi_currency_visibility) {
-                    const container = document.getElementById("balances-container");
-                    if (container) {
-                        container.innerHTML = "";
-                        Object.keys(data.multi_currency_visibility).forEach(curr => {
-                            const val = data.multi_currency_visibility[curr];
-                            container.innerHTML += `
-                                <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-xl hover:border-emerald-500/30 transition duration-200">
-                                    <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">${curr} Shadow Liquidity Pool</div>
-                                    <div class="text-2xl font-black font-mono text-emerald-400 mt-2">${val.toLocaleString('en-US', {minimumFractionDigits:2})}</div>
-                                    <div class="text-[10px] text-slate-500 mt-1">Status: Operational | Live</div>
-                                </div>
-                            `;
-                        });
-                        const ticker = document.getElementById("global-fx-ticker");
-                        if (ticker && data.multi_currency_visibility["NGN"]) {
-                            ticker.innerHTML = `<span class="text-xs text-slate-400 font-mono"><span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-ping"></span>USD/NGN Reference: 1428.37</span>`;
-                        }
-                    }
-                }
-            }).catch(e => console.log("Balance mapping error: ", e));
-        };
-
-        setTimeout(() => { if (typeof window.fetchBalances === "function") window.fetchBalances(); }, 800);
-
-        window.openFxModal = function() {
+        window.customOpenFxModal = function() {
             const modal = document.getElementById('fx-modal');
             if (!modal) return;
             modal.classList.remove('opacity-0', 'pointer-events-none');
-            window.pushAuditLog("[SOR ACTIVATE] Querying interbank liquidity pools for live rate sheets...");
             
-            const token = localStorage.getItem("finlinks_auth_token");
-            const sellCurrency = document.getElementById("sell-currency").value;
-            const buyCurrency = document.getElementById("buy-currency").value;
-            const sellAmount = parseFloat(document.getElementById("sell-amount").value || "1");
+            if (typeof window.rawLiveQuote === "function") {
+                window.rawLiveQuote(window.pushAuditLog, showPremiumNotification);
+            }
 
-            fetch(`${window.BASE_URL}/ledger/fx/quote?sell_currency=${sellCurrency}&buy_currency=${buyCurrency}&sell_amount=${sellAmount}`, {
-                method: "GET", headers: { "Authorization": `Bearer ${token}` }
-            })
-            .then(r => r.json())
-            .then(result => {
-                if (result.status === "quoted") {
-                    let finalRate = result.final_settlement_rate;
-                    
-                    if (sellCurrency.toUpperCase() === "USD") {
-                        finalRate = 1 / finalRate;
-                        window.pushAuditLog(`[SOR RATIO] Hard currency detected on sell-side, flipping rate matrix...`);
-                    }
-
-                    window.pushAuditLog(`[SOR QUOTE] Inversion Complete! Best Route: ${result.routing_via} | Rate: ${finalRate.toFixed(6)}`);
-
-                    const elRateDisplay = document.querySelector(".fx-rate-display");
-                    if (elRateDisplay) elRateDisplay.innerText = finalRate.toFixed(6);
-                    
-                    const elPreview = document.getElementById("buy-amount-preview");
-                    if (elPreview) elPreview.innerText = `${result.expected_buy_amount} ${buyCurrency}`;
-
-                    document.getElementById("fx-quote-timestamp").value = result.quote_timestamp;
-                    modal.dataset.currentRate = result.final_settlement_rate;
-                    modal.dataset.routingVia = result.routing_via;
-
-                    let timeLeft = 10.0;
-                    const elTimer = document.getElementById("fx-countdown-timer");
-                    const elBar = document.getElementById("fx-progress-bar");
-                    
-                    if (fxTimerInterval) clearInterval(fxTimerInterval);
-                    fxTimerInterval = setInterval(() => {
-                        timeLeft -= 0.1;
-                        if (elTimer) elTimer.innerText = `${timeLeft.toFixed(1)}s`;
-                        if (elBar) elBar.style.width = `${(timeLeft / 10.0) * 100}%`;
-                        
-                        if (timeLeft <= 0) {
-                            clearInterval(fxTimerInterval);
-                            window.pushAuditLog("💥 [FX LOCK TIMEOUT] 10s spot quote window expired. Voiding contract.");
-                            window.closeFxModal();
-                        }
-                    }, 100);
+            let timeLeft = 10.0;
+            const elTimer = document.getElementById("fx-countdown-timer");
+            const elBar = document.getElementById("fx-progress-bar");
+            
+            if (fxTimerInterval) clearInterval(fxTimerInterval);
+            fxTimerInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                if (elTimer) elTimer.innerText = `${timeLeft.toFixed(1)}s`;
+                if (elBar) elBar.style.width = `${(timeLeft / 10.0) * 100}%`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(fxTimerInterval);
+                    window.pushAuditLog("💥 [FX LOCK TIMEOUT] 10s spot quote window expired. Voiding contract.");
+                    window.customCloseFxModal();
                 }
-            });
+            }, 100);
         };
 
-        window.closeFxModal = function() {
+        window.customCloseFxModal = function() {
             if (fxTimerInterval) clearInterval(fxTimerInterval);
             const modal = document.getElementById('fx-modal');
             if (modal) modal.classList.add('opacity-0', 'pointer-events-none');
-            window.pushAuditLog("[FX CANCEL] Spot conversion terminated securely by the controller.");
+            window.pushAuditLog("[FX CANCEL] Spot conversion terminated securely. Rate rolled back.");
         };
 
         window.submitFxConversion = function() {
-            const sellCurrency = document.getElementById("sell-currency").value;
-            const buyCurrency = document.getElementById("buy-currency").value;
-            const sellAmount = parseFloat(document.getElementById("sell-amount").value);
-            const quoteTimestamp = parseFloat(document.getElementById("fx-quote-timestamp").value || "0");
-            
-            const fxModal = document.getElementById("fx-modal");
-            const fxRate = parseFloat(fxModal.dataset.currentRate || "0");
-            const routingVia = fxModal.dataset.routingVia || "PAWAPAY";
-
-            if (!sellAmount || sellAmount <= 0 || fxRate <= 0) {
-                alert("⚠️ Active spot clearing rate not initialized. Please re-quote!"); return;
+            if (typeof window.rawSubmitFx === "function") {
+                window.rawSubmitFx(null, null, null, window.pushAuditLog, showPremiumNotification, fetchBalances);
             }
-
-            window.pushAuditLog(`[EXECUTE CONVERT] Order signed! Compiling 6 primary attributes into URL Query pipeline...`);
-
-            const queryParams = new URLSearchParams({
-                sell_currency: sellCurrency.toUpperCase(),
-                sell_amount: sellAmount,
-                buy_currency: buyCurrency.toUpperCase(),
-                fx_rate: fxRate,
-                routing_via: routingVia.toUpperCase(),
-                quote_timestamp: quoteTimestamp || (Date.now() / 1000)
-            });
-
-            const token = localStorage.getItem("finlinks_auth_token");
-            const targetUrl = `${window.BASE_URL}/ledger/fx/convert?${queryParams.toString()}`;
-
-            fetch(targetUrl, {
-                method: "POST",
-                headers: { "Authorization": `Bearer ${token}`, "accept": "application/json" }
-            })
-            .then(response => response.json().then(data => ({ ok: response.ok, body: data })))
-            .then(res => {
-                if (res.ok && res.body.status === "success") {
-                    window.pushAuditLog(`[CLEARING SUCCESS] 🎉 FX Netting successful! Batch reference: ${res.body.fx_batch_ref}`);
-                    window.showPremiumNotification("📥 Netting Complete", `Debit: -${res.body.exchange_details.sell}<br>Credit: +${res.body.exchange_details.buy}`, "emerald", false);
-                    document.getElementById("fx-modal").classList.add("pointer-events-none", "opacity-0");
-                    document.getElementById("sell-amount").value = "";
-                    if (typeof window.fetchBalances === "function") window.fetchBalances();
-                } else {
-                    const detail = res.body.detail;
-                    const errorMsg = Array.isArray(detail) ? detail.map(e => `[${e.loc.join(".")}] ${e.msg}`).join(" | ") : (detail || "Clearing request denied");
-                    window.pushAuditLog(`[FX REJECTED] Settlement failed: ${errorMsg}`);
-                    window.showPremiumNotification("⚠️ Clearing Exception", errorMsg, "rose", true);
-                }
-            })
-            .catch(catchErr => {
-                window.pushAuditLog(`[FX TIMEOUT] Network pipeline disrupted: ${catchErr.message}`);
-            });
         };
 
         window.executeLivePayoutDisbursal = function() {
@@ -536,58 +470,23 @@
             const bCurr = document.getElementById("payout-curr").value;
             const bAmt = parseFloat(document.getElementById("payout-amount").value);
 
-            if (!bName || !bAcc || !bAmt) { alert("Please input complete beneficiary attributes."); return; }
-            
-            openOrderModal("💸 Disbursal Order Review (300s)", `
+            if (!bName || !bAcc || !bAmt) { alert("Please complete form attributes."); return; }
+
+            openOrderModal("💸 Outbound Payout Review (300s)", `
                 <div>Activity: Outbound Payout Despatch</div>
                 <div>Beneficiary: ${bName}</div>
                 <div>Account Ref: ${bAcc}</div>
                 <div>Clearing Volume: ${bAmt} ${bCurr}</div>
-                <div>Compliance Check: GeopoliticalShield Passed</div>
             `, () => {
-                window.pushAuditLog(`[PAYOUT OUTFLOW] 300s TTL token unsealed, deploying funds release signals...`);
-                rawPayoutDisbursal(window.pushAuditLog, window.showPremiumNotification, window.fetchBalances);
-            });
-        };
-
-        window.triggerMockPayinCallback = function() {
-            const amt = document.getElementById("collectionAmount").value;
-            const curr = document.getElementById("collectionCurrency").value;
-            const phone = document.getElementById("collectionPhone").value;
-            const name = document.getElementById("collectionPayerName").value;
-
-            if (!amt || !curr || !phone) { alert("Please complete form attributes."); return; }
-
-            openOrderModal("📥 Collection Order Review (300s)", `
-                <div>Activity: Inbound Collections Receipt</div>
-                <div>Payer Corporate Name: ${name}</div>
-                <div>Payer Core Wallet: ${phone}</div>
-                <div>Waterline Injection: ${amt} ${curr}</div>
-                <div>SOR Channel Allocation: EBANX/PAWAPAY AGGREGATED</div>
-            `, () => {
-                window.pushAuditLog(`[PAYIN OUTFLOW] 300s threshold passed. Dispatching network deposit...`);
-                const token = localStorage.getItem("finlinks_auth_token");
-                fetch(`${window.BASE_URL}/ledger/collection/deposit?amount=${amt}&currency=${curr}&phone_number=${phone}&payer_name=${encodeURIComponent(name)}&routing_via=EBANX`, {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${token}` }
-                })
-                .then(r => r.json())
-                .then(res => {
-                    if (res.status === "success") {
-                        window.pushAuditLog(`[WEBHOOK ACK] Deposit successful! Journal ID: ${res.deposit_id}`);
-                        window.fetchBalances();
-                    } else {
-                        window.pushAuditLog(`[PAYIN REJECTED] Gateway denied: ${res.detail}`);
-                    }
-                });
+                window.pushAuditLog(`[PAYOUT OUTFLOW] 300s threshold unsealed, triggering release lines...`);
+                executeLivePayoutDisbursal(window.pushAuditLog, showPremiumNotification, fetchBalances);
             });
         };
 
         function openOrderModal(title, htmlContent, confirmCallback) {
             document.getElementById("order-modal-title").innerText = title;
             document.getElementById("order-modal-body").innerHTML = htmlContent;
-            activeOrderCallback = confirmCallback;
-
+            
             const modal = document.getElementById("payout-payin-modal");
             modal.classList.remove("opacity-0", "pointer-events-none");
 
@@ -603,15 +502,15 @@
 
                 if (timeLeft <= 0) {
                     clearInterval(orderTimerInterval);
-                    window.pushAuditLog("💥 [ORDER TIMEOUT] 300s lock expired. Order discarded.");
-                    window.closeOrderModal();
+                    window.pushAuditLog("💥 [ORDER TIMEOUT] 300s financial lock breached. Voiding transaction ledger states.");
+                    closeOrderModal();
                 }
             }, 500);
 
             document.getElementById("order-confirm-btn").onclick = function() {
                 clearInterval(orderTimerInterval);
                 modal.classList.add("opacity-0", "pointer-events-none");
-                if (activeOrderCallback) activeOrderCallback();
+                if (confirmCallback) confirmCallback();
             };
         }
 
@@ -619,10 +518,10 @@
             if (orderTimerInterval) clearInterval(orderTimerInterval);
             const modal = document.getElementById("payout-payin-modal");
             if (modal) modal.classList.add("opacity-0", "pointer-events-none");
-            window.pushAuditLog("[ORDER CANCEL] Order abandoned securely. Ledger state unmutated.");
+            window.pushAuditLog("[ORDER CANCEL] Order abandoned securely by the operator.");
         };
-        
-        console.log(">>> [BUS SUCCESS] English view matrix and split modules perfectly bridged!");
+
+        console.log(">>> [BUS SUCCESS] English view matrix perfectly bridged with complete anti-explosion patches!");
     </script>
 </body>
 </html>
