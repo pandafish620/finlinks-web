@@ -198,4 +198,144 @@
                                 <input type="file" id="kyb-license-file" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-300 focus:outline-none">
                             </div>
                             <div>
-                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">终极受益人(UBO) 护照
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">终极受益人(UBO) 护照/身份证件 (.pdf/.jpg)</label>
+                                <input type="file" id="kyb-ubo-file" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-300 focus:outline-none">
+                            </div>
+                        </div>
+                        <button onclick="if(typeof executeAdvancedKYBOnboarding === 'function') executeAdvancedKYBOnboarding();" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded text-xs tracking-wider transition uppercase">
+                            📤 确认封账并提交数字化高级合规官审计
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+                <h3 class="text-xs font-bold text-slate-300 mb-3 flex items-center uppercase tracking-wider">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-2 animate-ping"></span>
+                    FinLinks 核心自动化全量审计与行为遥测流
+                </h3>
+                <div id="audit-log-box" class="bg-slate-950 rounded-lg p-4 font-mono text-[11px] text-slate-400 h-36 overflow-y-auto space-y-1">
+                    <div>[SYSTEM] 全球多通道智能路由聚合底座通电成功。加强级防御机制与 10s/300s 双轨制时钟锁正式并线。</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="fx-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeFxModal()"></div>
+        <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
+            <div class="modal-content py-6 text-left px-6">
+                <div class="flex justify-between items-center pb-4 border-b border-slate-800">
+                    <p class="text-md font-bold text-emerald-400">即期多边轧差外汇兑换 (FX Swap)</p>
+                    <div class="modal-close cursor-pointer z-50" onclick="closeFxModal()">
+                        <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
+                            <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="py-4 space-y-4">
+                    <input type="hidden" id="fx-quote-timestamp" value="">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">卖出（扣减）币种 (Sell Currency)</label>
+                        <select id="sell-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                            <option value="USD">USD (美元)</option>
+                            <option value="KES">KES (肯尼亚先令)</option>
+                            <option value="UGX">UGX (乌干达先令)</option>
+                            <option value="NGN" selected>NGN (尼日利亚奈拉)</option>
+                            <option value="BRL">BRL (巴西雷亚尔)</option>
+                            <option value="MXN">MXN (墨西哥比索)</option>
+                            <option value="TRY">TRY (土耳其里拉)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">卖出名义金额 (Sell Amount)</label>
+                        <input type="number" id="sell-amount" placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">买入（增加）币种 (Buy Currency)</label>
+                        <select id="buy-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                            <option value="USD" selected>USD (美元)</option>
+                            <option value="KES">KES (肯尼亚先令)</option>
+                            <option value="UGX">UGX (乌干达先令)</option>
+                            <option value="NGN">NGN (尼日利亚奈拉)</option>
+                            <option value="BRL">BRL (巴西雷亚尔)</option>
+                            <option value="MXN">MXN (墨西哥比索)</option>
+                            <option value="TRY">TRY (土耳其里拉)</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-slate-950 p-4 rounded border border-slate-800 space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">SOR 最优锁定汇率:</span>
+                            <span class="text-slate-200 font-mono font-bold"><span class="fx-rate-display">--</span></span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">预计买入到账金额:</span>
+                            <span class="text-emerald-400 font-mono font-bold" id="buy-amount-preview">0.00</span>
+                        </div>
+                        <div class="pt-2">
+                            <div class="flex justify-between text-[10px] uppercase tracking-wider mb-1">
+                                <span class="text-slate-500">即期滑点保护时钟锁</span>
+                                <span class="text-amber-400 font-mono font-bold" id="fx-countdown-timer">10.0s</span>
+                            </div>
+                            <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+                                <div id="fx-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-full"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end pt-4 border-t border-slate-800 space-x-2">
+                    <button onclick="closeFxModal()" class="px-4 py-1.5 bg-slate-800 rounded text-xs hover:bg-slate-700 transition">取消</button>
+                    <button onclick="if(typeof submitFxConversion === 'function') submitFxConversion();" class="px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/10">确认清算结算</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/finlinks_config.js"></script>
+
+    <script type="module">
+        // 🚀 从你的核心数据血管中，导入在沙箱内部被隔离的清算算子
+        // 注意：确保你的 ../assets/js/dashboard.js 里的对应函数头部都加了 "export" 关键字！
+        import { 
+            switchTab, 
+            triggerMockReconciliation, 
+            executeLivePayoutDisbursal,
+            triggerMockPayinCallback,
+            handleLogout
+        } from '../assets/js/dashboard.js';
+
+        // 👑 物理提权：打破 ES Module 沙箱封印，强行将函数灌注进浏览器的最高主权 window 对象！
+        window.switchTab = switchTab;
+        window.triggerMockReconciliation = triggerMockReconciliation;
+        window.executeLivePayoutDisbursal = executeLivePayoutDisbursal;
+        window.triggerMockPayinCallback = triggerMockPayinCallback;
+        window.handleLogout = handleLogout;
+
+        // 📡 补充换汇模态窗口的独立控制总线，绝杀 openFxModal / closeFxModal 报错
+        window.openFxModal = function() {
+            const modal = document.getElementById('fx-modal');
+            if (modal) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                // 如果 dashboard.js 内部配置了 initFxQuote 锁价时钟血管，在此处顺带点火
+                if (typeof window.initFxQuote === 'function') {
+                    window.initFxQuote();
+                } else {
+                    console.log(">>> [WARMUP] 即期多边轧差换汇窗口已捕获，正在索取最优基准盘...");
+                }
+            }
+        };
+
+        window.closeFxModal = function() {
+            const modal = document.getElementById('fx-modal');
+            if (modal) {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            }
+        };
+        
+        console.log(">>> [BUS SUCCESS] 全局血管并线大功告成！HTML 与 dashboard.js 核心契约全面恢复通电咬合！");
+    </script>
+</body>
+</html>

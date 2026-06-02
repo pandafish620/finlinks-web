@@ -1,247 +1,359 @@
 <!DOCTYPE html>
+<!-- -*- coding: utf-8 -*- -->
+<!-- File Location: en/dashboard.html -->
+<!-- Version: v5.2.9-Production-Final-EN (ES Module Scope Globally Bridged) -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinLinks 3.2.0 - Global Multi-Rail Merchant Console</title>
+    <title>FinLinks 5.2.0 - Global Multi-Channel Merchant Console</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="../assets/css/custom.css">
     <style>
         .modal { transition: opacity 0.25s ease; }
         body { background-color: #0f172a; color: #f8fafc; }
+        /* Sidebar active state alignment */
         .sidebar-active { background-color: #1e293b; color: #34d399; border-left: 4px solid #34d399; }
+        /* FX progress bar smooth transition */
+        #fx-progress-bar { transition: width 0.1s linear; }
     </style>
 </head>
 <body class="font-sans antialiased flex h-screen overflow-hidden">
 
+    <!-- 🌐 Core Cross-Border Liquidity Sidebar -->
     <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0">
         <div>
+            <!-- Identity Branding & Localization Route Switcher -->
             <div class="px-6 py-6 border-b border-slate-800 flex items-center justify-between">
-                <span class="text-xl font-extrabold tracking-wider text-emerald-400">FinLinks <span class="text-xs font-normal text-slate-500">3.2.0</span></span>
-                <a href="dashboard.html" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 hover:text-emerald-400 transition font-mono">ZH</a>
+                <span class="text-xl font-extrabold tracking-wider text-emerald-400">FinLinks <span class="text-xs font-normal text-slate-500">5.2.0</span></span>
+                <a href="../zh/dashboard.html" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 hover:text-emerald-400 transition font-mono">ZH</a>
             </div>
+            
+            <!-- 🗺️ Core Business Operation Navigation Bus -->
             <nav class="mt-6 px-4 space-y-1.5">
                 <button onclick="switchTab('overview')" id="btn-overview" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition sidebar-active">
-                    <span>📊 Multi-Currency Positions</span>
+                    <span>📊 Multi-Currency Balances</span>
                 </button>
                 <button onclick="switchTab('payin')" id="btn-payin" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
-                    <span>📥 Offshore Pay-in</span>
+                    <span>📥 Offshore Collections (Pay-in)</span>
                 </button>
                 <button onclick="switchTab('payout')" id="btn-payout" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
-                    <span>💸 Autonomous Payout</span>
+                    <span>💸 Disbursal Platform (Payout)</span>
                 </button>
-                <button onclick="triggerMockReconciliation()" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
+                <button onclick="triggerMockReconciliation()" id="btn-reconcile" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
                     <span>⚖️ Automated Reconciliation</span>
                 </button>
-                <button class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-500 cursor-not-allowed" disabled>
-                    <span>🛡️ Compliance & KYB Vault</span>
+                <button onclick="switchTab('kyb')" id="btn-kyb" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
+                    <span>🛡️ Digital Advanced KYB Vault</span>
                 </button>
             </nav>
         </div>
-        <div class="p-4 border-t border-slate-800 space-y-2">
-            <div class="text-[11px] text-slate-400 px-2">
-                Merchant ID: <span id="merchant-id-tag" class="text-emerald-400 font-mono">Loading...</span>
+
+        <!-- 👑 Sidebar Bottom Merchant Identity Card (Dynamic Decryption Injection) -->
+        <div class="mt-auto border-t border-slate-800/60 p-4 shrink-0 bg-slate-950/40 space-y-3">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-mono font-bold text-sm select-none">
+                    PB
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div id="merchant-id-tag" class="text-xs font-bold text-slate-200 truncate font-sans">
+                        Loading Merchant Hub...
+                    </div>
+                    <div class="text-[11px] text-slate-500 mt-0.5 tracking-wide">
+                        Role: <span id="user-role-badge" class="font-mono font-bold text-amber-500 uppercase animate-pulse">AUTHENTICATING...</span>
+                    </div>
+                </div>
             </div>
-            <button onclick="handleLogout()" class="w-full bg-slate-800 hover:bg-rose-950 px-3 py-2 rounded text-xs text-slate-300 font-bold transition">Logout</button>
+            
+            <button onclick="handleLogout()" class="w-full flex items-center justify-center space-x-2 py-1.5 px-3 border border-slate-800 hover:border-rose-500/40 hover:bg-rose-950/20 rounded-md text-[11px] font-bold text-slate-400 hover:text-rose-400 transition duration-200 uppercase tracking-wider">
+                <span>🔒 Hard Disconnect Logout</span>
+            </button>
         </div>
     </aside>
 
+    <!-- 🌐 Main Global Operation Control Deck -->
     <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Global Top Header Operational Dashboard Ticker -->
         <header class="h-16 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between px-8 shrink-0">
-            <div class="text-sm font-semibold text-slate-400">Security Level: <span class="text-emerald-400 font-bold" id="security-status-badge">Enhanced</span></div>
-            <div class="flex space-x-4">
-                <a href="rates.html" class="text-xs text-slate-400 hover:text-emerald-400 flex items-center">📡 Live FX Telemetry</a>
-                <button onclick="openFxModal()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 py-1.5 rounded-lg text-xs transition">Execute FX Swap</button>
+            <div class="flex items-center space-x-6">
+                <div class="text-sm font-semibold text-slate-400">
+                    Security Level: <span class="text-emerald-400 font-bold" id="security-status-badge">Banking Grade Standard</span>
+                </div>
+                
+                <div id="global-fx-ticker" class="border-l border-slate-800 pl-4 h-4 flex items-center">
+                    <span class="text-xs text-slate-500 font-mono flex items-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-700 mr-2 animate-pulse"></span>
+                        Fetching global spot interbank feed...
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex space-x-4 items-center">
+                <a href="rates.html" class="text-xs text-slate-400 hover:text-emerald-400 flex items-center transition">📡 Real-Time FX Telemetry</a>
+                <button onclick="openFxModal()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 py-1.5 rounded-lg text-xs transition shadow-lg shadow-emerald-500/10">
+                    Execute Spot Exchange (FX Spot)
+                </button>
             </div>
         </header>
 
+        <!-- 🎨 Main Interbank Functional Viewport -->
         <div class="flex-1 overflow-y-auto p-8 space-y-8">
             
+            <!-- 【TAB 1: OVERVIEW】Global Multilateral Netting Asset Balances -->
             <section id="pane-overview" class="tab-pane space-y-6">
                 <div>
-                    <h1 class="text-2xl font-extrabold tracking-tight">Multilateral Netting Liquidity Positions</h1>
-                    <p class="text-slate-400 text-xs mt-1">Real-time multi-currency balances audited via double-entry shadow ledger engine.</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight">Multilateral Netting Liquidity Vault</h1>
+                    <p class="text-slate-400 text-xs mt-1">Real-time multi-currency position perspective derived from the Double-Entry Shadow Ledger Engine.</p>
                 </div>
                 <div id="balances-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="animate-pulse bg-slate-900 border border-slate-800 p-6 rounded-xl"><div class="h-4 bg-slate-800 rounded w-1/4 mb-4"></div><div class="h-8 bg-slate-800 rounded w-1/2"></div></div>
+                    <div class="animate-pulse bg-slate-900 border border-slate-800 p-6 rounded-xl">
+                        <div class="h-4 bg-slate-800 rounded w-1/4 mb-4"></div>
+                        <div class="h-8 bg-slate-800 rounded w-1/2"></div>
+                    </div>
                 </div>
             </section>
 
+            <!-- 【TAB 2: PAYIN】Offshore Collections Terminal -->
             <section id="pane-payin" class="tab-pane hidden space-y-6">
                 <div>
-                    <h1 class="text-2xl font-extrabold tracking-tight text-emerald-400">Pay-in Collections Control</h1>
-                    <p class="text-slate-400 text-xs mt-1">High-throughput payment collection gating for global digital publishing & gaming rails.</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-emerald-400">Offshore Collections (Pay-in Processing)</h1>
+                    <p class="text-slate-400 text-xs mt-1">High-frequency collection gateway optimized for cross-border entertainment and mobile gaming. Secure interception and settlement via African Mobile Money loops and Latin American instant fiscal rails.</p>
                 </div>
                 
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-2xl space-y-4">
                     <div class="border-b border-slate-800 pb-2">
-                        <span class="text-sm font-bold text-slate-200 block">Emerging Markets Unified Collection Gateway</span>
-                        <p class="text-slate-500 text-[11px] mt-0.5">Select local settlement currency to align with local central bank rails. Unauthorized currencies trigger defensive circuit-breakers.</p>
+                        <span class="text-sm font-bold text-slate-200 block">Emerging Markets Generalized Collection Gateway</span>
+                        <p class="text-slate-500 text-[11px] mt-0.5">Select target local settlement currency to align geopolitical infrastructure. Defensive circuit breaker activates automatically for non-whitelisted assets.</p>
                     </div>
 
                     <form id="collectionDepositForm" onsubmit="event.preventDefault();" class="space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Nominal Amount</label>
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Nominal Amount to Deposit</label>
                                 <input type="number" id="collectionAmount" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" placeholder="5000.00" required step="0.01">
                             </div>
                             <div>
-                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Local Settlement Currency</label>
-                                <select id="collectionCurrency" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500" required onchange="if(typeof syncFXTargetVisibility === 'function') syncFXTargetVisibility(this.value);">
-                                    <option value="" disabled selected>Select local currency...</option>
-                                    <option value="KES" data-mode="Mobile Money (Safaricom M-Pesa)">KES - Kenyan Shilling (M-Pesa Direct)</option>
-                                    <option value="UGX" data-mode="Mobile Money (MTN / Airtel)">UGX - Ugandan Shilling (MTN Rail)</option>
-                                    <option value="NGN" data-mode="Instant Bank Transfer (Virtual Account)">NGN - Nigerian Naira (Dynamic NUBAN Transfer)</option>
-                                    <option value="BRL" data-mode="Pix Instant QR / Key Code (EBANX)">BRL - Brazilian Real (Pix Real-time Active)</option>
-                                    <option value="MXN" data-mode="SPEI / OXXO Bus (EBANX)">MXN - Mexican Peso (CLABE Bus Active)</option>
-                                    <option value="TRY" data-mode="Turkey Local Wallet (Frankfurter)">TRY - Turkish Lira (Lira Free Market Active)</option>
-                                    <option value="TZS" data-mode="Mobile Money (Vodacom / Tigo)">TZS - Tanzanian Shilling [To be enabled]</option>
-                                    <option value="GHS" data-mode="Mobile Money (MTN / Telecel)">GHS - Ghanaian Cedi [To be enabled]</option>
-                                    <option value="ZAR" data-mode="Instant EFT (Capitec Pay / Stitch)">ZAR - South African Rand [To be enabled]</option>
-                                    <option value="MUR" data-mode="MauCAS Instant Net Network">MUR - Mauritian Rupee [To be enabled]</option>
-                                    <option value="ARS" data-mode="Transferencias 3.0 (Mercado Pago)">ARS - Argentine Peso [To be enabled]</option>
-                                    <option value="COP" data-mode="PSE Online Rail Payment">COP - Colombian Peso [To be enabled]</option>
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Local Settlement Asset (Currency)</label>
+                                <select id="collectionCurrency" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500" required>
+                                    <option value="" disabled selected>Select Local Fiat Code...</option>
+                                    <option value="KES">KES - Kenyan Shilling (M-Pesa Core Loop)</option>
+                                    <option value="UGX">UGX - Ugandan Shilling (MTN Base Network)</option>
+                                    <option value="NGN">NGN - Nigerian Naira (Dynamic Virtual Account Transfer)</option>
+                                    <option value="BRL">BRL - Brazilian Real (Pix Real-Time Interbank Rail)</option>
+                                    <option value="MXN">MXN - Mexican Peso (CLABE Central Pipeline)</option>
+                                    <option value="TRY">TRY - Turkish Lira (Lira Interbank Mainnet)</option>
                                 </select>
                             </div>
                         </div>
 
-                        <div id="channelModeBadgeArea" class="hidden bg-slate-950 p-3 rounded border border-slate-800 text-xs text-slate-400">
-                            📡 Aligned Geopolitical Rail: <strong id="matchedChannelMode" class="text-emerald-400 font-mono">--</strong>
-                        </div>
-
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Payer Local Account / Phone / Key</label>
-                                <input type="text" id="collectionPhone" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none" placeholder="Enter local clearing credential value">
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Payer Account ID / Phone Number</label>
+                                <input type="text" id="collectionPhone" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" placeholder="Enter geographic clearance token ID">
                             </div>
                             <div>
-                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Payer Full Name</label>
-                                <input type="text" id="collectionPayerName" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none" placeholder="Jacky Zhang">
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Payer Legal Full Name</label>
+                                <input type="text" id="collectionPayerName" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500" placeholder="Jacky Zhang">
                             </div>
                         </div>
 
-                        <button onclick="triggerMockPayinCallback()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded text-xs tracking-wider transition uppercase shadow-lg">
-                            ⚡ Dispatch Collection Settlement Telemetry
+                        <button onclick="triggerMockPayinCallback()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded text-xs tracking-wider transition uppercase shadow-lg shadow-indigo-600/10">
+                            ⚡ Dispatch Penetrative Collection Confirmation Signal
                         </button>
                     </form>
                 </div>
             </section>
 
+            <!-- 【TAB 3: PAYOUT】Autonomous Disbursal Console -->
             <section id="pane-payout" class="tab-pane hidden space-y-6">
                 <div>
-                    <h1 class="text-2xl font-extrabold tracking-tight text-rose-400">Autonomous Payout Control Room</h1>
-                    <p class="text-slate-400 text-xs mt-1">Issue cross-border clearing dispatches to local banking rails, Pix keys, or regional mobile wallets.</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-rose-400">Autonomous Disbursal Matrix (Payout Dispatcher)</h1>
+                    <p class="text-slate-400 text-xs mt-1">Authorize urgent single-payout instructions directly to banks, mobile wallets, or instant payment loops across Africa, LatAm, and Eurasia.</p>
                 </div>
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-xl">
-                    <span class="block font-bold text-sm text-slate-300 mb-4">Single Urgent Disbursement Form</span>
+                    <span class="block font-bold text-sm text-slate-300 mb-4">Urgent Cash-Out Settlement Slip</span>
                     <div class="space-y-3">
-                        <input type="text" id="payout-name" placeholder="Beneficiary Full Name" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
-                        <input type="text" id="payout-acc" placeholder="Select currency to unlock country-specific format gating..." class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
+                        <input type="text" id="payout-name" placeholder="Beneficiary Full Name" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-rose-500">
+                        <input type="text" id="payout-acc" placeholder="Beneficiary Routing / Account Identifier / IBAN" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-rose-500 font-mono">
                         <div class="grid grid-cols-2 gap-4">
-                            <select id="payout-curr" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
-                                <option value="" disabled selected>Select Currency...</option>
-                                <option value="USD">USD (Domestic Wire)</option>
-                                <option value="KES">KES (Kenyan Shilling - M-Pesa Outflow)</option>
-                                <option value="UGX">UGX (Ugandan Shilling - MTN Mobile Money)</option>
-                                <option value="NGN">NGN (Nigerian Naira - NUBAN Transfer)</option>
-                                <option value="BRL">BRL (Brazilian Real - EBANX Pix Network)</option>
-                                <option value="MXN">MXN (Mexican Peso - EBANX CLABE Bus)</option>
-                                <option value="TRY">TRY (Turkish Lira - International IBAN)</option>
-                                <option value="TZS">TZS (Tanzanian Shilling) [To be enabled]</option>
-                                <option value="GHS">GHS (Ghanaian Cedi) [To be enabled]</option>
-                                <option value="ZAR">ZAR (South African Rand) [To be enabled]</option>
-                                <option value="MUR">MUR (Mauritian Rupee) [To be enabled]</option>
-                                <option value="ARS">ARS (Argentine Peso) [To be enabled]</option>
-                                <option value="COP">COP (Colombian Peso) [To be enabled]</option>
+                            <select id="payout-curr" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-rose-500">
+                                <option value="" disabled selected>Currency...</option>
+                                <option value="USD">USD (FedWire / Local Clearance)</option>
+                                <option value="KES">KES (Kenyan Shilling - M-Pesa Disbursal)</option>
+                                <option value="UGX">UGX (Ugandan Shilling - MTN Disbursal)</option>
+                                <option value="NGN">NGN (Nigerian Naira - NUBAN Routing)</option>
+                                <option value="BRL">BRL (Brazilian Real - Pix Net)</option>
+                                <option value="MXN">MXN (Mexican Peso - CLABE Matrix)</option>
+                                <option value="TRY">TRY (Turkish Lira - International IBAN Clearance)</option>
                             </select>
-                            <input type="number" id="payout-amount" placeholder="Amount" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
+                            <input type="number" id="payout-amount" placeholder="Settlement Amount" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-rose-500 font-mono">
                         </div>
-                        <button onclick="executeLivePayoutDisbursal()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded text-xs tracking-wider transition">Audit & Execute Disbursement</button>
+                        <button onclick="executeLivePayoutDisbursal()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded text-xs tracking-wider transition shadow-lg shadow-rose-600/10">Verify & Execute Capital Disbursal Signal</button>
                     </div>
                 </div>
             </section>
 
+            <!-- 【TAB 4: KYB】Advanced Digital Onboarding Compliance Vault -->
+            <section id="pane-kyb" class="tab-pane hidden space-y-6">
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-indigo-400">Digital Advanced KYB Corporate Archival Center</h1>
+                    <p class="text-slate-400 text-xs mt-1">Pursuant to international Anti-Money Laundering (AML) standards and cross-border liquidity risk limits, the operating corporate entity must archive its primary bloodline corporate credentials here.</p>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-2xl space-y-4">
+                    <span class="block font-bold text-sm text-slate-300">Corporate Legal Entity Compliance Dossier</span>
+                    <form id="advancedKybForm" onsubmit="event.preventDefault();" class="space-y-4">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Corporate Registered Name</label>
+                            <input type="text" id="kyb-company-name" value="Pine Bay Advisory (HK)" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-400 cursor-not-allowed" readonly>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Certificate of Incorporation / Business Registration (.pdf/.jpg)</label>
+                                <input type="file" id="kyb-license-file" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-300 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Ultimate Beneficial Owner (UBO) Passport / ID (.pdf/.jpg)</label>
+                                <input type="file" id="kyb-ubo-file" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-300 focus:outline-none">
+                            </div>
+                        </div>
+                        <button onclick="if(typeof executeAdvancedKYBOnboarding === 'function') executeAdvancedKYBOnboarding();" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded text-xs tracking-wider transition uppercase">
+                            📤 Lock Dossier & Submit for Regulatory Compliance Audit
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 📡 Bottom Automated Real-time Behavioral Telemetry Loop -->
             <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
                 <h3 class="text-xs font-bold text-slate-300 mb-3 flex items-center uppercase tracking-wider">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-2 animate-ping"></span>
-                    FinLinks Core Ledger Auditing & Behavior Telemetry Stream
+                    FinLinks Core Automated Auditing & Telemetry Stream
                 </h3>
                 <div id="audit-log-box" class="bg-slate-950 rounded-lg p-4 font-mono text-[11px] text-slate-400 h-36 overflow-y-auto space-y-1">
-                    <div>[SYSTEM] Global multi-channel routing infrastructure energized. Advanced protection mechanism paired with 10s/300s dual-clock locks.</div>
+                    <div>[SYSTEM] Global multi-channel routing engine online. Reinforced defense topology & 10s/300s dual-clock tracking system engaged.</div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- 🌐 【FX SWAP MODAL】Multilateral Netting Spot Exchange Engine -->
     <div id="fx-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
         <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeFxModal()"></div>
         <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
             <div class="modal-content py-6 text-left px-6">
                 <div class="flex justify-between items-center pb-4 border-b border-slate-800">
-                    <p class="text-md font-bold text-emerald-400">Spot Multilateral Netting Exchange (FX Swap)</p>
+                    <p class="text-md font-bold text-emerald-400">Spot Clearing & Multilateral Swap (FX Spot)</p>
                     <div class="modal-close cursor-pointer z-50" onclick="closeFxModal()">
-                        <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18"><path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/></svg>
+                        <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
+                            <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
+                        </svg>
                     </div>
                 </div>
                 
                 <div class="py-4 space-y-4">
+                    <input type="hidden" id="fx-quote-timestamp" value="">
                     <div>
-                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Sell Currency (Deduction)</label>
-                        <select id="sell-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Sell (Deduct) Asset Class (Sell Currency)</label>
+                        <select id="sell-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
                             <option value="USD">USD (United States Dollar)</option>
+                            <option value="KES">KES (Kenyan Shilling)</option>
+                            <option value="UGX">UGX (Ugandan Shilling)</option>
+                            <option value="NGN" selected>NGN (Nigerian Naira)</option>
+                            <option value="BRL">BRL (Brazilian Real)</option>
+                            <option value="MXN">MXN (Mexican Peso)</option>
+                            <option value="TRY">TRY (Turkish Lira)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Nominal Amount to Discard</label>
+                        <input type="number" id="sell-amount" placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Buy (Acquire) Asset Class (Buy Currency)</label>
+                        <select id="buy-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                            <option value="USD" selected>USD (United States Dollar)</option>
                             <option value="KES">KES (Kenyan Shilling)</option>
                             <option value="UGX">UGX (Ugandan Shilling)</option>
                             <option value="NGN">NGN (Nigerian Naira)</option>
                             <option value="BRL">BRL (Brazilian Real)</option>
                             <option value="MXN">MXN (Mexican Peso)</option>
                             <option value="TRY">TRY (Turkish Lira)</option>
-                            <option value="TZS">TZS (Tanzanian Shilling) [Staging]</option>
-                            <option value="GHS">GHS (Ghanaian Cedi) [Staging]</option>
-                            <option value="ZAR">ZAR (South African Rand) [Staging]</option>
-                            <option value="MUR">MUR (Mauritian Rupee) [Staging]</option>
-                            <option value="ARS">ARS (Argentine Peso) [Staging]</option>
-                            <option value="COP">COP (Colombian Peso) [Staging]</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Sell Nominal Amount</label>
-                        <input type="number" id="sell-amount" placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Buy Currency (Increment)</label>
-                        <select id="buy-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
-                            <option value="USD">USD (United States Dollar)</option>
-                            <option value="KES">KES (Kenyan Shilling)</option>
-                            <option value="UGX">UGX (Ugandan Shilling)</option>
-                            <option value="NGN">NGN (Nigerian Naira)</option>
-                            <option value="BRL">BRL (Brazilian Real)</option>
-                            <option value="MXN">MXN (Mexican Peso)</option>
-                            <option value="TRY">TRY (Turkish Lira)</option>
-                            <option value="TZS">TZS (Tanzanian Shilling) [Staging]</option>
-                            <option value="GHS">GHS (Ghanaian Cedi) [Staging]</option>
-                            <option value="ZAR">ZAR (South African Rand) [Staging]</option>
-                            <option value="MUR">MUR (Mauritian Rupee) [Staging]</option>
-                            <option value="ARS">ARS (Argentine Peso) [Staging]</option>
-                            <option value="COP">COP (Colombian Peso) [Staging]</option>
-                        </select>
-                    </div>
-                    <div class="bg-slate-950 p-3 rounded border border-slate-800 text-xs text-slate-400">
-                        <span class="block" id="fx-live-wire-widget">SOR Optimal Live Quote: <span class="text-slate-400 animate-pulse">📡 Awaiting dealer nominal input...</span></span>
-                        <span class="block mt-1">Spot Slippage Protection Gating: <span class="text-emerald-400">LOCKED (0.01% - 10s TTL Guard)</span></span>
+
+                    <!-- 10-Second Slippage Protection Locked Window -->
+                    <div class="bg-slate-950 p-4 rounded border border-slate-800 space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">SOR Optimal Guaranteed Rate:</span>
+                            <span class="text-slate-200 font-mono font-bold"><span class="fx-rate-display">--</span></span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">Estimated Target Outturn:</span>
+                            <span class="text-emerald-400 font-mono font-bold" id="buy-amount-preview">0.00</span>
+                        </div>
+                        <div class="pt-2">
+                            <div class="flex justify-between text-[10px] uppercase tracking-wider mb-1">
+                                <span class="text-slate-500">Spot Slippage Mitigation Lock</span>
+                                <span class="text-amber-400 font-mono font-bold" id="fx-countdown-timer">10.0s</span>
+                            </div>
+                            <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+                                <div id="fx-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-full"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="flex justify-end pt-4 border-t border-slate-800 space-x-2">
                     <button onclick="closeFxModal()" class="px-4 py-1.5 bg-slate-800 rounded text-xs hover:bg-slate-700 transition">Cancel</button>
-                    <button onclick="submitFxConversion()" class="px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs hover:bg-emerald-600 transition">Confirm Settlement</button>
+                    <button onclick="if(typeof submitFxConversion === 'function') submitFxConversion();" class="px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/10">Confirm Settlement</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- 📊 Automation Infrastructure Configuration & Bridging Matrix -->
+    <!-- 1. Native configuration loader -->
     <script src="../assets/js/finlinks_config.js"></script>
 
-    <script type="module" src="../assets/js/dashboard.js"></script>
+    <!-- 2. Secure Module Bridge Interface: Eradicating ReferenceErrors across geographic views -->
+    <script type="module">
+        // 🚀 Ingesting inner core functions from encapsulated module scope
+        import { 
+            switchTab, 
+            triggerMockReconciliation, 
+            executeLivePayoutDisbursal,
+            triggerMockPayinCallback,
+            handleLogout
+        } from '../assets/js/dashboard.js';
+
+        // 👑 Global Elevation: Bridging private module functions directly onto the top-tier window context
+        window.switchTab = switchTab;
+        window.triggerMockReconciliation = triggerMockReconciliation;
+        window.executeLivePayoutDisbursal = executeLivePayoutDisbursal;
+        window.triggerMockPayinCallback = triggerMockPayinCallback;
+        window.handleLogout = handleLogout;
+
+        // 📡 Secondary execution loop for spot deal validation frames
+        window.openFxModal = function() {
+            const modal = document.getElementById('fx-modal');
+            if (modal) {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                if (typeof window.initFxQuote === 'function') {
+                    window.initFxQuote();
+                } else {
+                    console.log(">>> [WARMUP] FX Spot Netting frame engaged, pulling optimal rate matrix...");
+                }
+            }
+        };
+
+        window.closeFxModal = function() {
+            const modal = document.getElementById('fx-modal');
+            if (modal) {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            }
+        };
+        
+        console.log(">>> [BUS SUCCESS] English pipeline synchronized. DOM bindings & core dashboard.js modules perfectly bridged!");
+    </script>
 </body>
 </html>
