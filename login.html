@@ -43,54 +43,77 @@
     <!-- ⚡ 核心异步认证总线逻辑（完美咬合云端/本地双轨制宿主） -->
     <script type="module">
         // 动态网关嗅探抗体
-        const IS_LOCAL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
-        const BASE_URL = IS_LOCAL ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
+        // ⚡ 核心异步认证总线逻辑（自适应兼容 OAuth2 Form 与 JSON 双轨制宿主）
+const IS_LOCAL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+const BASE_URL = IS_LOCAL ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
 
-        window.handleLiveLogin = async function(event) {
-            event.preventDefault();
+window.handleLiveLogin = async function(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    const msgBox = document.getElementById('login-msg-box');
+    const btn = document.getElementById('loginBtn');
+
+    // 激活黑金提示流
+    msgBox.classList.remove('hidden', 'text-rose-400', 'text-emerald-400');
+    msgBox.classList.add('text-amber-400');
+    msgBox.innerText = "[AUTHENTICATING] 正在击发 OAuth2 标准表单确权报文...";
+    btn.disabled = true;
+
+    try {
+        // 👑 彻底治愈 422 熔断：将数据严格转换为 FastAPI OAuth2 期待的 x-www-form-urlencoded 表单流
+        const formData = new URLSearchParams();
+        formData.append('username', email);     // 确保对齐 OAuth2 官方绑定的 username 钢印
+        formData.append('password', password);
+
+        const response = await fetch(`${BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'accept': 'application/json'
+            },
+            body: formData
+        });
+
+        let data = await response.json();
+
+        // 🛡️ 防御性自愈分流：如果后端依然提示格式不匹配，启动第二总线（纯 JSON 结构体回滚重试）
+        if (response.status === 422) {
+            msgBox.innerText = "[RETRY] 表单网络排异，正在自动无损切流至纯 JSON 载荷总线...";
             
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const msgBox = document.getElementById('login-msg-box');
-            const btn = document.getElementById('loginBtn');
-
-            // 激活黑金提示流
-            msgBox.classList.remove('hidden', 'text-rose-400', 'text-emerald-400');
-            msgBox.classList.add('text-amber-400');
-            msgBox.innerText = "[AUTHENTICATING] 正在向云端中台击发确权报文...";
-            btn.disabled = true;
-
-            try {
-                // 100% 字节级对齐后端的 /auth/login 数据血缘
-                const response = await fetch(`${BASE_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: email, password: password })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.detail || "后端鉴权熔断拒绝放行");
-                }
-
-                // 👑 核心大捷点：生擒 JWT 黄金令牌并狠狠砸进当前公网域名的本地缓存！
-                localStorage.setItem('finlinks_auth_token', data.access_token);
-                
-                msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded border border-emerald-500/30 text-emerald-400";
-                msgBox.innerText = "[SUCCESS] 黄金令牌落盘成功！正在强行切流进入多币种持仓大厅...";
-
-                // 秒级安全护送切流到资产大厅
-                setTimeout(() => {
-                    window.location.href = 'zh/dashboard.html';
-                }, 1000);
-
-            } catch (err) {
-                msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded border border-rose-500/30 text-rose-400";
-                msgBox.innerText = `[ERROR] 登录熔断: ${err.message}`;
-                btn.disabled = false;
-            }
+            const jsonResponse = await fetch(`${BASE_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
+                body: JSON.stringify({ username: email, password: password })
+            });
+            
+            data = await jsonResponse.json();
+            if (!jsonResponse.ok) throw new Error(data.detail || "JSON 鉴权通道拒绝放行");
+        } else if (!response.ok) {
+            throw new Error(data.detail || "后端鉴权熔断拒绝放行");
         }
+
+        // 👑 核心大捷点：生擒 JWT 黄金令牌并狠狠砸进当前公网域名的本地缓存！
+        const token = data.access_token || data.token;
+        if (!token) throw new Error("回执中未包含有效鉴权令牌");
+        
+        localStorage.setItem('finlinks_auth_token', token);
+        
+        msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded border border-emerald-500/30 text-emerald-400";
+        msgBox.innerText = "[SUCCESS] 黄金令牌落盘成功！正在强行切流进入多币种持仓大厅...";
+
+        // 秒级安全护送切流到资产大厅
+        setTimeout(() => {
+            window.location.href = 'zh/dashboard.html';
+        }, 1000);
+
+    } catch (err) {
+        msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded border border-rose-500/30 text-rose-400";
+        msgBox.innerText = `[ERROR] 登录熔断: ${err.message}`;
+        btn.disabled = false;
+    }
+}
     </script>
 </body>
 </html>
