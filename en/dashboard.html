@@ -315,50 +315,20 @@
     <!-- 1. Native configuration loader -->
     <script src="../assets/js/finlinks_config.js"></script>
 
+    <script>
+        window.switchTab = window.switchTab || function(tab) { console.log(`>>> [DELAY] Core hub igniting, buffering switch view to: ${tab}`); };
+        window.triggerMockReconciliation = window.triggerMockReconciliation || function() { console.log(">>> [DELAY] Ledger engine warming up, buffering reconciliation..."); };
+        window.triggerMockPayinCallback = window.triggerMockPayinCallback || function() { console.log(">>> [DELAY] Collection gateway provisioning, buffering payin callback..."); };
+        window.handleLogout = window.handleLogout || function() { console.log(">>> [DELAY] Security vault buffering hard disconnect logout..."); };
+    </script>
+
+    <script type="module" src="../assets/js/dashboard.js"></script>
+
     <script type="module">
-        // 🚀 Pipeline A: Ingest view controllers from core dashboard script
-        import { 
-            switchTab, 
-            triggerMockReconciliation, 
-            triggerMockPayinCallback,
-            handleLogout
-        } from '../assets/js/dashboard.js';
-
-        // 🚀 Pipeline B: Recalibrate route directly into independent disbursal dispatcher!
-        import { 
-            executeLivePayoutDisbursal 
-        } from '../assets/js/payout_dispatcher.js';
-
-        // 👑 Global Elevation: Bridging handlers securely onto the top-tier window context
-        window.switchTab = switchTab;
-        window.triggerMockReconciliation = triggerMockReconciliation;
-        window.triggerMockPayinCallback = triggerMockPayinCallback;
-        window.handleLogout = handleLogout;
-        
-        // 💸 Lock physical disbursal trigger to eliminate SyntaxError exceptions
+        import { executeLivePayoutDisbursal } from '../assets/js/payout_dispatcher.js';
         window.executeLivePayoutDisbursal = executeLivePayoutDisbursal;
-
-        // 📡 Secondary execution loop for spot deal validation frames
-        window.openFxModal = function() {
-            const modal = document.getElementById('fx-modal');
-            if (modal) {
-                modal.classList.remove('opacity-0', 'pointer-events-none');
-                if (typeof window.initFxQuote === 'function') {
-                    window.initFxQuote();
-                } else {
-                    console.log(">>> [WARMUP] FX Spot Netting frame engaged, pulling optimal rate matrix...");
-                }
-            }
-        };
-
-        window.closeFxModal = function() {
-            const modal = document.getElementById('fx-modal');
-            if (modal) {
-                modal.classList.add('opacity-0', 'pointer-events-none');
-            }
-        };
         
-        console.log(">>> [BUS SUCCESS] English pipeline synchronized. DOM bindings & split modules perfectly bridged!");
+        console.log(">>> [BUS SUCCESS] Geopolitical view constraints fully resolved. English dashboard Live!");
     </script>
 </body>
 </html>

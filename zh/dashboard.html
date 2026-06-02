@@ -296,48 +296,22 @@
 
     <script src="../assets/js/finlinks_config.js"></script>
 
-    <script type="module">
-        // 🚀 血管 A：从核心视图大厅导入状态控制算子
-        import { 
-            switchTab, 
-            triggerMockReconciliation, 
-            triggerMockPayinCallback,
-            handleLogout
-        } from '../assets/js/dashboard.js';
-
-        // 🚀 血管 B：精准变轨，直奔专属清算舱，强行解构离岸跨境出金代付算子！
-        import { 
-            executeLivePayoutDisbursal 
-        } from '../assets/js/payout_dispatcher.js';
-
-        // 👑 物理提权：打破 ES Module 沙箱封印，全量灌注进浏览器的最高主权 window 对象！
-        window.switchTab = switchTab;
-        window.triggerMockReconciliation = triggerMockReconciliation;
-        window.triggerMockPayinCallback = triggerMockPayinCallback;
-        window.handleLogout = handleLogout;
-        
-        // 💸 绝杀断路：将独立血管中的代付算子强行并在全局按钮onclick触发线上！
-        window.executeLivePayoutDisbursal = executeLivePayoutDisbursal;
-
-        // 📡 补充换汇模态窗口的独立控制总线，绝杀 openFxModal / closeFxModal 报错
-        window.openFxModal = function() {
-            const modal = document.getElementById('fx-modal');
-            if (modal) {
-                modal.classList.remove('opacity-0', 'pointer-events-none');
-                if (typeof window.initFxQuote === 'function') {
-                    window.initFxQuote();
-                } else {
-                    console.log(">>> [WARMUP] FX Spot Netting frame engaged, pulling optimal rate matrix...");
-                }
-            }
-        };
-
-        window.closeFxModal = function() {
-            const modal = document.getElementById('fx-modal');
-            if (modal) {
-                modal.classList.add('opacity-0', 'pointer-events-none');
-            }
-        };
-        
-        console.log(">>> [BUS SUCCESS] 跨文件双血管全量并线大功告成！大厅正式通电咬合！");
+    <script>
+        // 🛡️ 如果模块还在网络血管里传输，用户提前点击了按钮，在此处进行无感拦截托底
+        window.switchTab = window.switchTab || function(tab) { console.log(`>>> [DELAY] 核心中枢正在点火，延迟切流至选项卡: ${tab}`); };
+        window.triggerMockReconciliation = window.triggerMockReconciliation || function() { console.log(">>> [DELAY] 总账引擎正在加热，延迟发射对账信号..."); };
+        window.triggerMockPayinCallback = window.triggerMockPayinCallback || function() { console.log(">>> [DELAY] 收单中台正在通电，延迟发射入金报文..."); };
+        window.handleLogout = window.handleLogout || function() { console.log(">>> [DELAY] 安全大闸正在初始化，延迟执行断路退出..."); };
     </script>
+
+    <script type="module" src="../assets/js/dashboard.js"></script>
+
+    <script type="module">
+        import { executeLivePayoutDisbursal } from '../assets/js/payout_dispatcher.js';
+        // 强行把从 payout_dispatcher.js 里生擒出来的出金算子焊死在全局 onclick 触发线上
+        window.executeLivePayoutDisbursal = executeLivePayoutDisbursal;
+        
+        console.log(">>> [BUS SUCCESS] 选项卡与核心算子血缘彻底烫平！全盘免除 Syntax/Reference 崩溃死锁！");
+    </script>
+</body>
+</html>
