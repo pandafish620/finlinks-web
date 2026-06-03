@@ -38,7 +38,7 @@ async function initGlobalFxTicker() {
     const tickerContainer = document.getElementById("global-fx-ticker");
     if (!tickerContainer) return;
     try {
-        const response = await client("/ledger/fx/quote?sell_currency=USD&buy_currency=NGN&sell_amount=1", { method: "GET" });
+        const response = await client("/fx/quote?sell_currency=USD&buy_currency=NGN&sell_amount=1", { method: "GET" });
         if (response.status === 200) {
             const data = await response.json();
             // 完美适配后端可能吐出的字段变体
