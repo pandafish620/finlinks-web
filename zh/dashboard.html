@@ -339,6 +339,7 @@
 
     <script type="module">
         import { handleLivePayinCallback } from '../assets/js/payin_handler.js';
+        import { handleLivePayoutDisbursal } from '../assets/js/payout_dispatcher.js'; //纯净引入积木 3
         import { client } from '../assets/js/finlinks_client.js';
 
         // 🟢 1. 【御前最高特权日志总线】：焊死最高全局日志钩子，彻底复活黑金控制台更新
@@ -352,12 +353,20 @@
             console.log(`[AUDIT LOG] ${message}`);
         };
 
-        // 🟢 2. 代理代理入金点击入口
+        // 🟢 2. 挂载积木 2：出海收单代收入口
         window.triggerMockPayinCallback = function() {
             handleLivePayinCallback(window.fetchBalances);
         };
 
-        // 🟢 3. 👑 【地缘动态自适应对账引擎】：拒绝硬编码，精准提取填单币种轰击中台！
+        // 🟢 挂载积木 3：自主出金放款代付入口（无缝注入 window 上的影子刷盘算子）
+        window.triggerMockPayoutCallback = function() {
+            // 🔌 大厅界面上的【代付下发】或【模拟代付回调】onclick 按钮直接代理触发此接口
+            handleLivePayoutDisbursal(window.fetchBalances);
+        };
+        // 托底兼容老代码onclick插槽命名
+        window.executeLivePayoutDisbursal = window.triggerMockPayoutCallback;
+
+        // 4. 挂载地缘动态自适应对账引擎
         window.triggerMockReconciliation = async function() {
             // 物理抓取当前入金界面上商户人肉选择的清算本币（如 KES 或 NGN）
             const currEl = document.getElementById("collectionCurrency");
@@ -393,7 +402,7 @@
             window.pushAuditLog("[ORDER CANCEL] 操盘手主动中断签署权，在途单据冲正销毁。");
         };
 
-        window.pushAuditLog("🚀 [LEGO BASE] 乐高第二块积木网络、时钟、日志、币种全通路合拢成功！");
+        window.pushAuditLog("🚀 [LEGO BASE] 乐高积木3离岸出金放款代付总线全量并线通电完毕！");
     </script>
 </body>
 </html>
