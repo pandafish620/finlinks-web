@@ -339,11 +339,46 @@
 
     <script type="module">
         import { handleLivePayinCallback } from '../assets/js/payin_handler.js';
-        
-        // 强行把隔离文件里的执行入口，赋给大厅留出的物理onclick门禁，通电会师！
+        import { client } from '../assets/js/finlinks_client.js';
+
+        // 🟢 1. 代理入金按钮，注入全局 window 上的 fetchBalances 刷盘算子
         window.triggerMockPayinCallback = function() {
             handleLivePayinCallback(window.fetchBalances);
         };
+
+        // 🟢 2. 👑 【对账解冻强效并线】：接管对账按钮，一枪刺穿中台解冻在途资产！
+        window.triggerMockReconciliation = async function() {
+            if (typeof window.pushAuditLog === "function") {
+                window.pushAuditLog("[AUDIT START] 零信任对账引擎点火：正在叩击轧差解冻中枢...");
+            }
+            
+            try {
+                // 强制请求后端 NGN 轧差审计端点 (client 会自动补齐 /ledger 前缀与跨域凭证)
+                const response = await client("/reconcile?currency=NGN", { method: "POST" });
+                
+                if (response.status === 200) {
+                    if (typeof window.pushAuditLog === "function") {
+                        window.pushAuditLog("[RECON SUCCESS] 🟢 内部总账流水轧差成功！在途资金解冻入库。");
+                    }
+                    
+                    // 核心平账点：对账成功后，立刻强行冲刷第一块积木的余额数字！
+                    if (typeof window.fetchBalances === "function") {
+                        await window.fetchBalances();
+                    }
+                } else {
+                    const data = await response.json();
+                    if (typeof window.pushAuditLog === "function") {
+                        window.pushAuditLog(`[RECON REJECTED] 中台对账熔断: ${data.detail || "条件不满足"}`);
+                    }
+                }
+            } catch (error) {
+                if (typeof window.pushAuditLog === "function") {
+                    window.pushAuditLog("[RECON WARNING] 对账通信链路猝死。");
+                }
+            }
+        };
+        
+        console.log(">>> [LEVERAGE COMPLETE] 积木 2 入金与对账全通路顺利合拢通电！");
     </script>
 </body>
 </html>
