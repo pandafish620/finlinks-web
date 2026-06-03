@@ -87,7 +87,17 @@ export async function fetchBalances() {
                         <div class="absolute -right-4 -bottom-6 text-6xl font-bold font-mono text-slate-800/10 select-none">${currency}</div>
                     </div>`;
             });
-            
+            // =================================================================
+            // 👑 👑 👑 【 MVP 体验自愈修补线：常驻侧边栏多币种流式重绘探针 】
+            // =================================================================
+            // 🔌 动态扫描大厅常驻侧边栏上所有打着 dataset 特征码的余额节点，在一万分之一秒内当场完成同步削减与飙青刷新！
+            document.querySelectorAll(".sidebar-balance-value").forEach(node => {
+                const nodeCurrency = node.dataset.currency ? node.dataset.currency.toUpperCase().trim() : "";
+                if (nodeCurrency && matrix[nodeCurrency] !== undefined) {
+                    node.innerText = matrix[nodeCurrency].toLocaleString(undefined, {minimumFractionDigits: 2});
+                }
+            });
+
             if (Object.keys(matrix).length === 0) {
                 container.innerHTML = `<div class="text-xs text-slate-500 font-mono p-4">📡 影子总账资产池当前为空置状态</div>`;
             }

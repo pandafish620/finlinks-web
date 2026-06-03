@@ -1,69 +1,68 @@
 // -*- coding: utf-8 -*-
 // 文件位置：assets/js/fx_processor.js
-// 🎯 FinLinks 5.2.0 终审完全体：外汇即期清算专属血管（100% 对齐后端 Query 与路径前缀）
+// 🎯 FinLinks 5.2.0 外汇即期交割独立沙箱：100% 采用统一 client，杜绝硬编码与跨域熔断
 
-// 引入全局 BASE_URL
-const IS_LOCAL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
-const BASE_URL = IS_LOCAL ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
+import { client } from './finlinks_client.js';
 
-// =================================================================
-// 🔮 1. 即期活体询价（对齐后端字段名 final_settlement_rate，动态换算倒数）
-// =================================================================
+/**
+ * 🔮 1. 独立沙箱即期询价（完美对齐 backend 独立路由）
+ */
 export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
-    const token = localStorage.getItem("finlinks_auth_token");
     const sellCurrency = document.getElementById("sell-currency").value;
     const buyCurrency = document.getElementById("buy-currency").value;
     const sellAmount = parseFloat(document.getElementById("sell-amount").value);
+    
+    // 📈 散户个性化加点：可以从特定的输入框拉取，默认给 10 Bps 的溢价保护垫
+    const clientExtraSpread = 10.0; 
 
     if (!sellAmount || sellAmount <= 0) return;
 
     try {
-        // 加上 /ledger 核心血管路径前缀
-        const response = await fetch(`${BASE_URL}/ledger/fx/quote?sell_currency=${sellCurrency}&buy_currency=${buyCurrency}&sell_amount=${sellAmount}`, {
-            method: "GET",
-            headers: { "Authorization": `Bearer ${token}` }
+        if (typeof pushAuditLog === "function") pushAuditLog(`[SANDBOX FX] 正在通过统一 client 总线发起独立外汇询价...`);
+        
+        // 🔌 像素级对齐后端新设的 fx_router.py /ledger/fx/quote 血管，加入 client_extra_spread 参数
+        const response = await client(`/fx/quote?sell_currency=${sellCurrency}&buy_currency=${buyCurrency}&sell_amount=${sellAmount}&client_extra_spread=10.0`, {
+            method: "GET"
         });
         const result = await response.json();
 
-        if (response.ok && result.status === "quoted") {
+        if (response.status === 200 && result.status === "quoted") {
             let currentRate = result.final_settlement_rate;
             
-            // 👑 痛点四修复：卖出货币是 USD 时，底下的清算汇率动态取倒数，完美向左侧交易看齐！
+            // 检测本位币左侧交易，执行反转算力
             if (sellCurrency.toUpperCase() === "USD") {
                 currentRate = 1 / currentRate;
-                if (typeof pushAuditLog === "function") pushAuditLog(`[SOR RATIO] 检测到本位币左侧交易，执行汇率反转算力。`);
+                if (typeof pushAuditLog === "function") pushAuditLog(`[SOR RATIO] 识别到本位币左侧交易，重绘倒数算力。`);
             }
 
             if (typeof pushAuditLog === "function") {
-                pushAuditLog(`[SOR QUOTE] 通道询价成功！最优路由: ${result.routing_via} | 锁定汇率: ${currentRate.toFixed(6)}`);
+                pushAuditLog(`[SOR QUOTE] 外汇沙箱对撞大胜！清算通道: ${result.routing_via} | 最终执行价: ${currentRate.toFixed(6)}`);
             }
 
-            // 渲染前端 UI 节点
+            // 渲染大厅前端文本节点
             const elRateDisplay = document.querySelector(".fx-rate-display");
             if (elRateDisplay) elRateDisplay.innerText = currentRate.toFixed(6);
             
             const elPreview = document.getElementById("buy-amount-preview");
-            if (elPreview) elPreview.innerText = `${result.expected_buy_amount} ${buyCurrency}`;
+            if (elPreview) elPreview.innerText = `${result.expected_buy_amount.toFixed(2)} ${buyCurrency}`;
 
-            // 将核心锁价资产凭证打入 DOM 状态，绝不溢出
+            // 将核心锁价资产凭证打入 DOM 状态
             document.getElementById("fx-quote-timestamp").value = result.quote_timestamp;
             const modal = document.getElementById("fx-modal");
             if (modal) {
-                modal.dataset.currentRate = result.final_settlement_rate; // 保持后端原始率值用于交割
+                modal.dataset.currentRate = result.final_settlement_rate; 
                 modal.dataset.routingVia = result.routing_via;
             }
         }
     } catch (err) {
-        if (typeof pushAuditLog === "function") pushAuditLog(`[SOR CRITICAL] 询价网关阻断: ${err.message}`);
+        if (typeof pushAuditLog === "function") pushAuditLog(`[SOR CRITICAL] 外汇沙箱网络被阻断: ${err.message}`);
     }
 }
 
-// =================================================================
-// 💱 2. 换汇确权交割（彻底纠偏 404 报错，纯净 Query 参数击发）
-// =================================================================
+/**
+ * 💱 2. 外汇确权实弹交割（100% 资金轧差，呼叫常驻侧边栏二次点火自愈）
+ */
 export async function submitFxConversion(null1, null2, null3, pushAuditLog, showPremiumNotification, fetchBalances) {
-    const token = localStorage.getItem("finlinks_auth_token");
-    
     const sellCurrency = document.getElementById("sell-currency").value;
     const buyCurrency = document.getElementById("buy-currency").value;
     const sellAmount = parseFloat(document.getElementById("sell-amount").value);
@@ -75,45 +74,35 @@ export async function submitFxConversion(null1, null2, null3, pushAuditLog, show
 
     if (!sellAmount || fxRate <= 0 || !routingVia) {
         if (typeof showPremiumNotification === "function") {
-            showPremiumNotification("⚠️ 结算指令遭拒", "固价合同已过期或残缺，请重新发起询价锁定盘口！", "rose");
+            showPremiumNotification("⚠️ 结算指令遭拒", "固价合同残缺，请重新获取活体盘口报价！", "rose");
         }
         return;
     }
 
-    if (typeof pushAuditLog === "function") pushAuditLog(`[EXECUTE CONVERT] 签署交割令！正在将参数灌入 Query 血管...`);
-
-    const queryParams = new URLSearchParams({
-        sell_currency: sellCurrency.toUpperCase(),
-        sell_amount: sellAmount,
-        buy_currency: buyCurrency.toUpperCase(),
-        fx_rate: fxRate,
-        routing_via: routingVia.toUpperCase(),
-        quote_timestamp: quoteTimestamp
-    });
+    if (typeof pushAuditLog === "function") pushAuditLog(`[EXECUTE CONVERT] 操盘手签署签署交割令，打出 Query 实弹电报...`);
 
     try {
-        // 👑 痛点二修复：加上 /ledger 前缀，彻底熔断 404 崩溃！
-        const targetUrl = `${BASE_URL}/ledger/fx/convert?${queryParams.toString()}`;
-        const response = await fetch(targetUrl, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${token}`, "accept": "application/json" }
+        // 🔌 穿透统一 client 发射，带齐新设路由前缀参数
+        const response = await client(`/fx/convert?sell_currency=${sellCurrency.toUpperCase()}&sell_amount=${sellAmount}&buy_currency=${buyCurrency.toUpperCase()}&fx_rate=${fxRate}&routing_via=${routingVia.toUpperCase()}&quote_timestamp=${quoteTimestamp}`, {
+            method: "POST"
         });
-
         const data = await response.json();
 
-        if (response.ok && data.status === "success") {
-            if (typeof pushAuditLog === "function") pushAuditLog(`[CLEARING SUCCESS] 🎉 外汇轧差大胜！流水: ${data.fx_batch_ref}`);
+        if (response.status === 200 && data.status === "success") {
+            if (typeof pushAuditLog === "function") pushAuditLog(`[CLEARING SUCCESS] 🎉 外汇交割大胜！物理流水号: ${data.fx_batch_ref}`);
             if (typeof showPremiumNotification === "function") {
                 showPremiumNotification("📥 跨币种轧差交割成功", `卖出核销: -${data.exchange_details.sell}<br>买入注入: +${data.exchange_details.buy}`, "emerald");
             }
             if (modal) modal.classList.add("pointer-events-none", "opacity-0");
             document.getElementById("sell-amount").value = "";
-            if (typeof fetchBalances === "function") fetchBalances(); 
+            
+            // 👑 核心平账点：交割大胜，瞬间调用第一块积木的活体刷盘指针，逼迫侧边栏与大厅数字自发流式跳动！
+            if (typeof fetchBalances === "function") await fetchBalances(); 
         } else {
-            const errorMsg = Array.isArray(data.detail) ? data.detail.map(e => e.msg).join(" | ") : (data.detail || "中台拒绝交割");
-            if (typeof pushAuditLog === "function") pushAuditLog(`[FX REJECTED] 交割失败原因: ${errorMsg}`);
+            const errorMsg = data.detail || "中台拒绝交割";
+            if (typeof pushAuditLog === "function") pushAuditLog(`[FX REJECTED] 交割拒绝: ${errorMsg}`);
         }
     } catch (catchErr) {
-        if (typeof pushAuditLog === "function") pushAuditLog(`[FX TIMEOUT] 物理网络断路: ${catchErr.message}`);
+        if (typeof pushAuditLog === "function") pushAuditLog(`[FX TIMEOUT] 外汇核销血管通信猝死: ${catchErr.message}`);
     }
 }
