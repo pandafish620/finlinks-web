@@ -355,11 +355,20 @@
 
         // 🟢 2. 挂载积木 2：出海收单代收入口
         window.triggerMockPayinCallback = function() {
+            const currEl = document.getElementById("collectionCurrency");
+            if (currEl && currEl.value) {
+                localStorage.setItem("FINLINKS_LAST_ACTIVE_CURRENCY", currEl.value.toUpperCase().trim());
+            }
             handleLivePayinCallback(window.fetchBalances);
         };
 
         // 🟢 挂载积木 3：自主出金放款代付入口（无缝注入 window 上的影子刷盘算子）
         window.triggerMockPayoutCallback = function() {
+            const currEl = document.getElementById("payout-curr");
+            if (currEl && currEl.value) {
+                localStorage.setItem("FINLINKS_LAST_ACTIVE_CURRENCY", currEl.value.toUpperCase().trim());
+                window.pushAuditLog(`[MONITOR] 💰 物理金库成功锁定当前出金代付币种钢印: ${currEl.value}`);
+            }
             // 🔌 大厅界面上的【代付下发】或【模拟代付回调】onclick 按钮直接代理触发此接口
             handleLivePayoutDisbursal(window.fetchBalances);
         };
@@ -368,15 +377,18 @@
 
         // 4. 挂载地缘动态自适应对账引擎
         window.triggerMockReconciliation = async function() {
-            // 物理抓取当前入金界面上商户人肉选择的清算本币（如 KES 或 NGN）
-            const currEl = document.getElementById("collectionCurrency");
-            const activeCurrency = currEl ? currEl.value.toUpperCase().trim() : "NGN";
-
-            window.pushAuditLog(`[AUDIT START] 零信任对账引擎点火：正在轧差 [${activeCurrency}] 影子总账...`);
+            // 📡 梯次抓取：优先从 localStorage 冷钱包金库里调出刚刚运行成功的本币特征码！
+            const vaultCurrency = localStorage.getItem("FINLINKS_LAST_ACTIVE_CURRENCY");
+            const payinCurr = document.getElementById("collectionCurrency")?.value;
+            const payoutCurr = document.getElementById("payout-curr")?.value;
             
+            // 刚性平账裁决：无论如何，绝不允许传空！
+            const finalCurrency = (vaultCurrency || payinCurr || payoutCurr || "NGN").toUpperCase().trim();
+
+            window.pushAuditLog(`[AUDIT START] 零信任对账引擎点火：正在提取金库凭证，刚性轧差 [${finalCurrency}] 影子总账...`);
             try {
                 // 动态携带本币参数，通过底层 client 网络血管刺穿中台
-                const response = await client(`/reconcile?currency=${activeCurrency}`, { method: "POST" });
+                const response = await client(`/reconcile?currency=${finalCurrency}`, { method: "POST" });
                 const data = await response.json();
 
                 if (response.status === 200) {
