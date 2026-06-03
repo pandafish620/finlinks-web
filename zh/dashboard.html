@@ -41,6 +41,27 @@
                     <span>🛡️ 数字化高级 KYB 归档</span>
                 </button>
             </nav>
+            <div class="mt-8 px-6 border-t border-slate-800/60 pt-4 space-y-3 shrink-0">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">常驻离岸可用头寸 (Live Balance)</span>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
+                        <span class="text-slate-400 font-bold">USD</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="USD">100,000.00</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
+                        <span class="text-slate-400 font-bold">NGN</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="NGN">0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
+                        <span class="text-slate-400 font-bold">KES</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="KES">0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
+                        <span class="text-slate-400 font-bold">TRY</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="TRY">0.00</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="mt-auto border-t border-slate-800/60 p-4 shrink-0 bg-slate-950/40 space-y-3">
@@ -226,7 +247,7 @@
         <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
             <div class="modal-content py-6 text-left px-6">
                 <div class="flex justify-between items-center pb-4 border-b border-slate-800">
-                    <p class="text-md font-bold text-emerald-400">即期多边轧差外汇兑换 (FX Swap)</p>
+                    <p class="text-md font-bold text-emerald-400">即期多边轧差外汇兑换 (FX Spot Sandbox)</p>
                     <div class="modal-close cursor-pointer z-50" onclick="closeFxModal()">
                         <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
                             <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
@@ -235,44 +256,40 @@
                 </div>
                 
                 <div class="py-4 space-y-4">
-                    <input type="hidden" id="fx-quote-timestamp" value="">
+                    <input type="hidden" id="fx-quote-timestamp" value="0">
                     <div>
                         <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">卖出（扣减）币种 (Sell Currency)</label>
-                        <select id="sell-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
-                            <option value="USD">USD (美元)</option>
+                        <select id="sell-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
+                            <option value="USD" selected>USD (美元离岸头寸)</option>
                             <option value="KES">KES (肯尼亚先令)</option>
                             <option value="UGX">UGX (乌干达先令)</option>
-                            <option value="NGN" selected>NGN (尼日利亚奈拉)</option>
-                            <option value="BRL">BRL (巴西雷亚尔)</option>
-                            <option value="MXN">MXN (墨西哥比索)</option>
+                            <option value="NGN">NGN (尼日利亚奈拉)</option>
                             <option value="TRY">TRY (土耳其里拉)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">卖出名义金额 (Sell Amount)</label>
-                        <input type="number" id="sell-amount" placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
+                        <input type="number" id="sell-amount" placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">买入（增加）币种 (Buy Currency)</label>
-                        <select id="buy-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
-                            <option value="USD" selected>USD (美元)</option>
+                        <select id="buy-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
+                            <option value="NGN" selected>NGN (尼日利亚奈拉)</option>
                             <option value="KES">KES (肯尼亚先令)</option>
                             <option value="UGX">UGX (乌干达先令)</option>
-                            <option value="NGN">NGN (尼日利亚奈拉)</option>
-                            <option value="BRL">BRL (巴西雷亚尔)</option>
-                            <option value="MXN">MXN (墨西哥比索)</option>
                             <option value="TRY">TRY (土耳其里拉)</option>
+                            <option value="USD">USD (美元离岸头寸)</option>
                         </select>
                     </div>
 
                     <div class="bg-slate-950 p-4 rounded border border-slate-800 space-y-2">
                         <div class="flex justify-between text-xs">
-                            <span class="text-slate-400">SOR 最优锁定汇率:</span>
-                            <span class="text-slate-200 font-mono font-bold"><span class="fx-rate-display">--</span></span>
+                            <span class="text-slate-400">中台 SOR 锁定执行汇率:</span>
+                            <span class="text-emerald-400 font-mono font-bold"><span class="fx-rate-display">--</span></span>
                         </div>
                         <div class="flex justify-between text-xs">
                             <span class="text-slate-400">预计买入到账金额:</span>
-                            <span class="text-emerald-400 font-mono font-bold" id="buy-amount-preview">0.00</span>
+                            <span class="text-slate-200 font-mono font-bold" id="buy-amount-preview">0.00</span>
                         </div>
                         <div class="pt-2">
                             <div class="flex justify-between text-[10px] uppercase tracking-wider mb-1">
@@ -280,7 +297,7 @@
                                 <span class="text-amber-400 font-mono font-bold" id="fx-countdown-timer">10.0s</span>
                             </div>
                             <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                                <div id="fx-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-full"></div>
+                                <div id="fx-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-full opacity-40"></div>
                             </div>
                         </div>
                     </div>
@@ -288,7 +305,7 @@
                 
                 <div class="flex justify-end pt-4 border-t border-slate-800 space-x-2">
                     <button onclick="closeFxModal()" class="px-4 py-1.5 bg-slate-800 rounded text-xs hover:bg-slate-700 transition">取消</button>
-                    <button onclick="if(typeof submitFxConversion === 'function') submitFxConversion();" class="px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/10">确认清算结算</button>
+                    <button id="fx-submit-btn" onclick="if(typeof window.triggerFxFinalConversion === 'function') window.triggerFxFinalConversion();" class="px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/10">确认清算结算</button>
                 </div>
             </div>
         </div>
@@ -339,10 +356,11 @@
 
     <script type="module">
         import { handleLivePayinCallback } from '../assets/js/payin_handler.js';
-        import { handleLivePayoutDisbursal } from '../assets/js/payout_dispatcher.js'; //纯净引入积木 3
+        import { handleLivePayoutDisbursal } from '../assets/js/payout_dispatcher.js';
+        import { triggerLiveQuote, submitFxConversion } from '../assets/js/fx_processor.js'; // 🔌 纯净并线高阶隔离外汇沙箱
         import { client } from '../assets/js/finlinks_client.js';
 
-        // 🟢 1. 【御前最高特权日志总线】：焊死最高全局日志钩子，彻底复活黑金控制台更新
+        // 1. 最高特权自动化审计日志流总线
         window.pushAuditLog = function(message) {
             const box = document.getElementById("audit-log-box");
             if (box) {
@@ -353,7 +371,7 @@
             console.log(`[AUDIT LOG] ${message}`);
         };
 
-        // 🟢 2. 挂载积木 2：出海收单代收入口
+        // 2. 挂载积木 2：出海收单代收入口
         window.triggerMockPayinCallback = function() {
             const currEl = document.getElementById("collectionCurrency");
             if (currEl && currEl.value) {
@@ -362,39 +380,42 @@
             handleLivePayinCallback(window.fetchBalances);
         };
 
-        // 🟢 挂载积木 3：自主出金放款代付入口（无缝注入 window 上的影子刷盘算子）
+        // 3. 挂载积木 3：自主出金放款代付入口
         window.triggerMockPayoutCallback = function() {
             const currEl = document.getElementById("payout-curr");
             if (currEl && currEl.value) {
                 localStorage.setItem("FINLINKS_LAST_ACTIVE_CURRENCY", currEl.value.toUpperCase().trim());
                 window.pushAuditLog(`[MONITOR] 💰 物理金库成功锁定当前出金代付币种钢印: ${currEl.value}`);
             }
-            // 🔌 大厅界面上的【代付下发】或【模拟代付回调】onclick 按钮直接代理触发此接口
             handleLivePayoutDisbursal(window.fetchBalances);
         };
-        // 托底兼容老代码onclick插槽命名
         window.executeLivePayoutDisbursal = window.triggerMockPayoutCallback;
 
-        // 4. 挂载地缘动态自适应对账引擎
+        // 4. 👑 挂载积木 4：高阶外汇沙箱双入口通电
+        window.triggerFxQuoteInquiry = function() {
+            // 🔌 拔掉原本带有硬编码 URL 的老线，一枪扣动独立沙箱询价算子
+            triggerLiveQuote(window.pushAuditLog, null); 
+        };
+        window.triggerFxFinalConversion = function() {
+            // 🔌 注入实弹换汇交割算子，完美带入我们第七步升级后的可用头寸大厅+侧边栏冲刷器
+            submitFxConversion(null, null, null, window.pushAuditLog, null, window.fetchBalances); 
+        };
+        // 桥接老版模态框上的 onclick
+        window.submitFxConversion = window.triggerFxFinalConversion;
+
+        // 5. 挂载地缘物理金库对账总线（绝杀 404 空参数丢失死锁）
         window.triggerMockReconciliation = async function() {
-            // 📡 梯次抓取：优先从 localStorage 冷钱包金库里调出刚刚运行成功的本币特征码！
             const vaultCurrency = localStorage.getItem("FINLINKS_LAST_ACTIVE_CURRENCY");
             const payinCurr = document.getElementById("collectionCurrency")?.value;
             const payoutCurr = document.getElementById("payout-curr")?.value;
-            
-            // 刚性平账裁决：无论如何，绝不允许传空！
             const finalCurrency = (vaultCurrency || payinCurr || payoutCurr || "NGN").toUpperCase().trim();
 
             window.pushAuditLog(`[AUDIT START] 零信任对账引擎点火：正在提取金库凭证，刚性轧差 [${finalCurrency}] 影子总账...`);
             try {
-                // 动态携带本币参数，通过底层 client 网络血管刺穿中台
                 const response = await client(`/reconcile?currency=${finalCurrency}`, { method: "POST" });
                 const data = await response.json();
-
                 if (response.status === 200) {
-                    window.pushAuditLog(`[RECON SUCCESS] 🟢 内部流水轧差大胜！结论: ${data.status || 'SUCCESS'} | delta 转化资产成功`);
-                    
-                    // 核心清场平账点：清偿完毕后，立刻反向扣动积木 1 的刷盘函数，把零数字无损变成百万头寸！
+                    window.pushAuditLog(`[RECON SUCCESS] 🟢 [${finalCurrency}] 内部流水轧差大胜！结构体自愈成功。`);
                     if (typeof window.fetchBalances === "function") {
                         window.pushAuditLog(`[LEDGER REFRESH] 正在扣动影子总账持仓面板执行二次点火...`);
                         await window.fetchBalances();
@@ -407,14 +428,25 @@
             }
         };
         
-        // 托底闭合模态框插槽防护
         window.closeOrderModal = function() {
             const modal = document.getElementById("payout-payin-modal");
             if (modal) modal.classList.add("opacity-0", "pointer-events-none");
-            window.pushAuditLog("[ORDER CANCEL] 操盘手主动中断签署权，在途单据冲正销毁。");
+            window.pushAuditLog("[ORDER CANCEL] 操盘手主动中断签署权，在途单据安全撤销。");
         };
 
-        window.pushAuditLog("🚀 [LEGO BASE] 乐高积木3离岸出金放款代付总线全量并线通电完毕！");
+        // 👑 自动重写开屏暂存门禁，完成最终并线
+        window.openFxModal = function() {
+            const modal = document.getElementById("fx-modal");
+            if (modal) modal.classList.remove("pointer-events-none", "opacity-0");
+            // 开屏自点火触发第一枪询价
+            window.triggerFxQuoteInquiry();
+        };
+        window.closeFxModal = function() {
+            const modal = document.getElementById("fx-modal");
+            if (modal) modal.classList.add("pointer-events-none", "opacity-0");
+        };
+
+        window.pushAuditLog("🚀 [LEGO BASE] 积木 4：高阶主权隔离外汇沙箱控制大闸全量通电会师！");
     </script>
 </body>
 </html>
