@@ -336,5 +336,15 @@
     </div>
 
     <script type="module" src="../assets/js/dashboard.js"></script>
+
+    <script type="module">
+        import { handleLivePayinCallback } from '../assets/js/payin_handler.js';
+        import { fetchBalances } from '../assets/js/dashboard.js';
+        
+        // 强行把隔离文件里的执行入口，赋给大厅留出的物理onclick门禁，通电会师！
+        window.triggerMockPayinCallback = function() {
+            handleLivePayinCallback(fetchBalances);
+        };
+    </script>
 </body>
 </html>
