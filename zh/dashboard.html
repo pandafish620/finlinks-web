@@ -297,37 +297,21 @@
     <script src="../assets/js/finlinks_config.js"></script>
 
     <script>
-        window.IS_LOCAL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
-        window.BASE_URL = window.IS_LOCAL ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
-
-        // 防御性拦截日志，确保黑金窗口百分之百通电
-        window.pushAuditLog = window.pushAuditLog || function(msg) {
-            const box = document.getElementById('audit-log-box');
-            if (box) {
-                const time = new Date().toLocaleTimeString();
-                box.innerHTML += `<div>[${time}] ${msg}</div>`;
-                box.scrollTop = box.scrollHeight;
-            } else { console.log(msg); }
-        };
-
-        window.showPremiumNotification = window.showPremiumNotification || function(title, text, type) {
-            alert(`[${title}] ${text.replace(/<[^>]*>/g, '')}`);
-        };
-
-        // 🛡️ 抢占高频选项卡切流等命名空间，防爆托底，绝杀 ReferenceError
-        window.switchTab = window.switchTab || function(tab) { console.log(`>>> [DELAY] 核心中枢加热中，延迟切流至: ${tab}`); };
-        window.triggerMockReconciliation = window.triggerMockReconciliation || function() { console.log(">>> [DELAY] 延迟发射对账信号..."); };
-        window.triggerMockPayinCallback = window.triggerMockPayinCallback || function() { console.log(">>> [DELAY] 延迟发射入金报文..."); };
-        window.handleLogout = window.handleLogout || function() { console.log(">>> [DELAY] 延迟退出登录..."); };
+        window.switchTab = window.switchTab || function(tab) { console.log(`>>> [BUFFER] 选项卡切流暂存: ${tab}`); };
+        window.handleLogout = window.handleLogout || function() { console.log(">>> [BUFFER] 登出请求暂存..."); };
+        window.openFxModal = window.openFxModal || function() { console.log(">>> [BUFFER] 外汇弹窗唤醒暂存..."); };
+        window.closeFxModal = window.closeFxModal || function() { console.log(">>> [BUFFER] 外汇弹窗关闭暂存..."); };
+        window.executeLivePayoutDisbursal = window.executeLivePayoutDisbursal || function() { console.log(">>> [BUFFER] 代付下发暂存..."); };
+        window.triggerMockPayinCallback = window.triggerMockPayinCallback || function() { console.log(">>> [BUFFER] 入金回调暂存..."); };
     </script>
 
     <div id="payout-payin-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition duration-200">
-        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeOrderModal()"></div>
+        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="if(typeof window.closeOrderModal === 'function') window.closeOrderModal()"></div>
         <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
             <div class="modal-content py-6 text-left px-6 space-y-4">
                 <div class="flex justify-between items-center pb-3 border-b border-slate-800">
                     <p class="text-md font-bold text-amber-400" id="order-modal-title">单据确权审查中心 (300s 时钟锁)</p>
-                    <div class="cursor-pointer z-50" onclick="closeOrderModal()">
+                    <div class="cursor-pointer z-50" onclick="if(typeof window.closeOrderModal === 'function') window.closeOrderModal()">
                         <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
                             <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
                         </svg>
@@ -344,107 +328,7 @@
                     </div>
                 </div>
                 <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
-                    <button onclick="closeOrderModal()" class="px-4 py-1.5 bg-slate-800 text-slate-300 rounded text-xs hover:bg-slate-700 transition">取消 (Cancel)</button>
-                    <button id="order-confirm-btn" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">确认放行 (Execute)</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="../assets/js/finlinks_config.js"></script>
-
-    <script>
-        window.IS_LOCAL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
-        window.BASE_URL = window.IS_LOCAL ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
-
-        // 防御性拦截日志，确保黑金窗口百分之百通电
-        window.pushAuditLog = function(msg) {
-            const box = document.getElementById('audit-log-box');
-            if (box) {
-                const time = new Date().toLocaleTimeString();
-                box.innerHTML += `<div>[${time}] ${msg}</div>`;
-                box.scrollTop = box.scrollHeight;
-            } else { console.log(msg); }
-        };
-
-        window.showPremiumNotification = function(title, text, type) {
-            window.pushAuditLog(`[${title}] ${text.replace(/<[^>]*>/g, '')}`);
-        };
-
-        // 🛡️ 抢占高频选项卡切流等命名空间，防爆托底，绝杀 ReferenceError
-        window.switchTab = window.switchTab || function(tab) { console.log(`>>> [DELAY] 核心中枢加热中，延迟切流至: ${tab}`); };
-        window.triggerMockReconciliation = window.triggerMockReconciliation || function() { console.log(">>> [DELAY] 延迟发射对账信号..."); };
-        window.triggerMockPayinCallback = window.triggerMockPayinCallback || function() { console.log(">>> [DELAY] 延迟发射入金报文..."); };
-        window.handleLogout = window.handleLogout || function() { console.log(">>> [DELAY] 延迟退出登录..."); };
-    </script>
-
-    <div id="payout-payin-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition duration-200">
-        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeOrderModal()"></div>
-        <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
-            <div class="modal-content py-6 text-left px-6 space-y-4">
-                <div class="flex justify-between items-center pb-3 border-b border-slate-800">
-                    <p class="text-md font-bold text-amber-400" id="order-modal-title">单据确权审查中心 (300s 时钟锁)</p>
-                    <div class="cursor-pointer z-50" onclick="closeOrderModal()">
-                        <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
-                            <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div id="order-modal-body" class="text-xs text-slate-300 bg-slate-950 p-4 rounded border border-slate-800 font-mono space-y-2"></div>
-                <div class="space-y-1">
-                    <div class="flex justify-between text-[10px] text-slate-500 uppercase font-mono">
-                        <span>中台流控制流财务独占锁</span>
-                        <span class="text-amber-400 font-bold" id="order-countdown-text">300.0s</span>
-                    </div>
-                    <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
-                        <div id="order-progress-bar" class="bg-gradient-to-r from-amber-500 to-orange-400 h-full w-full transition-all duration-100"></div>
-                    </div>
-                </div>
-                <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
-                    <button onclick="closeOrderModal()" class="px-4 py-1.5 bg-slate-800 text-slate-300 rounded text-xs hover:bg-slate-700 transition">取消 (Cancel)</button>
-                    <button id="order-confirm-btn" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">确认放行 (Execute)</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="../assets/js/finlinks_config.js"></script>
-
-    <script>
-        window.pushAuditLog = function(msg) {
-            const box = document.getElementById('audit-log-box');
-            if (box) {
-                const time = new Date().toLocaleTimeString();
-                box.innerHTML += `<div>[${time}] ${msg}</div>`;
-                box.scrollTop = box.scrollHeight;
-            }
-        };
-    </script>
-
-    <div id="payout-payin-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition duration-200">
-        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeOrderModal()"></div>
-        <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
-            <div class="modal-content py-6 text-left px-6 space-y-4">
-                <div class="flex justify-between items-center pb-3 border-b border-slate-800">
-                    <p class="text-md font-bold text-amber-400" id="order-modal-title">单据确权审查中心 (300s 时钟锁)</p>
-                    <div class="cursor-pointer z-50" onclick="closeOrderModal()">
-                        <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
-                            <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div id="order-modal-body" class="text-xs text-slate-300 bg-slate-950 p-4 rounded border border-slate-800 font-mono space-y-2"></div>
-                <div class="space-y-1">
-                    <div class="flex justify-between text-[10px] text-slate-500 uppercase font-mono">
-                        <span>中台流控制流财务独占锁</span>
-                        <span class="text-amber-400 font-bold" id="order-countdown-text">300.0s</span>
-                    </div>
-                    <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
-                        <div id="order-progress-bar" class="bg-gradient-to-r from-amber-500 to-orange-400 h-full w-full transition-all duration-100"></div>
-                    </div>
-                </div>
-                <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
-                    <button onclick="closeOrderModal()" class="px-4 py-1.5 bg-slate-800 text-slate-300 rounded text-xs hover:bg-slate-700 transition">取消 (Cancel)</button>
+                    <button onclick="if(typeof window.closeOrderModal === 'function') window.closeOrderModal()" class="px-4 py-1.5 bg-slate-800 text-slate-300 rounded text-xs hover:bg-slate-700 transition">取消 (Cancel)</button>
                     <button id="order-confirm-btn" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">确认放行 (Execute)</button>
                 </div>
             </div>
@@ -452,141 +336,5 @@
     </div>
 
     <script type="module" src="../assets/js/dashboard.js"></script>
-
-    <script type="module">
-        import { executeLivePayoutDisbursal } from '../assets/js/payout_dispatcher.js';
-        import { fetchBalances } from '../assets/js/dashboard.js';
-        import { showPremiumNotification } from '../assets/js/dashboard.js';
-
-        let fxTimerInterval = null;
-        let orderTimerInterval = null;
-
-        // 👑 痛点三修复：全量包装并并线换汇 10秒流式时钟进度条逻辑
-        window.customOpenFxModal = function() {
-            const modal = document.getElementById('fx-modal');
-            if (!modal) return;
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            
-            // 调用被洗净的外汇询价原子算子
-            if (typeof window.rawLiveQuote === "function") {
-                window.rawLiveQuote(window.pushAuditLog, showPremiumNotification);
-            }
-
-            // 扣动 10 秒绝对流时进度条锁
-            let timeLeft = 10.0;
-            const elTimer = document.getElementById("fx-countdown-timer");
-            const elBar = document.getElementById("fx-progress-bar");
-            
-            if (fxTimerInterval) clearInterval(fxTimerInterval);
-            fxTimerInterval = setInterval(() => {
-                timeLeft -= 0.1;
-                if (elTimer) elTimer.innerText = `${timeLeft.toFixed(1)}s`;
-                if (elBar) elBar.style.width = `${(timeLeft / 10.0) * 100}%`;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(fxTimerInterval);
-                    window.pushAuditLog("💥 [FX LOCK TIMEOUT] 10秒即期窗口关闭，固价合同解体回滚！");
-                    window.customCloseFxModal();
-                }
-            }, 100);
-        };
-
-        window.customCloseFxModal = function() {
-            if (fxTimerInterval) clearInterval(fxTimerInterval);
-            const modal = document.getElementById('fx-modal');
-            if (modal) modal.classList.add('opacity-0', 'pointer-events-none');
-            window.pushAuditLog("[FX CANCEL] 操盘手取消交割或时钟锁断路，在途报价单安全回滚。");
-        };
-
-        // 👑 痛点三修复：接管最终换汇点击交割，执行 rawSubmitFx
-        window.submitFxConversion = function() {
-            if (typeof window.rawSubmitFx === "function") {
-                window.rawSubmitFx(null, null, null, window.pushAuditLog, showPremiumNotification, fetchBalances);
-            }
-        };
-
-        // 👑 痛点二修复：并线代付下发 300 秒长时效时钟拦截确认仓
-        window.executeLivePayoutDisbursal = function() {
-            const bName = document.getElementById("payout-name").value;
-            const bAcc = document.getElementById("payout-acc").value;
-            const bCurr = document.getElementById("payout-curr").value;
-            const bAmt = parseFloat(document.getElementById("payout-amount").value);
-
-            if (!bName || !bAcc || !bAmt) { alert("请完整填写单笔代付放款核心要素"); return; }
-
-            openOrderModal("💸 离岸放款出金确权审查 (300s)", `
-                <div>单据性质: 单笔紧急出金代付 (Payout)</div>
-                <div>放款受益人: ${bName}</div>
-                <div>受益人账户: ${bAcc}</div>
-                <div>拟扣减头寸: ${bAmt} ${bCurr}</div>
-            `, () => {
-                window.pushAuditLog(`[PAYOUT OUTFLOW] 300秒特赦确权解封，扣动原子放款总线...`);
-                executeLivePayoutDisbursal(window.pushAuditLog, showPremiumNotification, fetchBalances);
-            });
-        };
-
-        // 👑 并线入金收单 300 秒长时效时钟拦截确认仓
-        window.customPayinCallback = function() {
-            const amt = document.getElementById("collectionAmount").value;
-            const curr = document.getElementById("collectionCurrency").value;
-            const phone = document.getElementById("collectionPhone").value;
-            const name = document.getElementById("collectionPayerName").value;
-
-            if (!amt || !curr || !phone) { alert("请填写有源收单完整单据要素"); return; }
-
-            openOrderModal("📥 出海收单入金确权审查 (300s)", `
-                <div>单据性质: 跨境短剧收单入金 (Pay-in)</div>
-                <div>入金付款人: ${name}</div>
-                <div>付款人账户: ${phone}</div>
-                <div>拟注入水线: ${amt} ${curr}</div>
-            `, () => {
-                window.pushAuditLog(`[PAYIN OUTFLOW] 300秒时钟锁解封，扣动原子代收接口...`);
-                // 真正的网络请求在原始函数内执行
-                const oldTrigger = Object.getOwnPropertyDescriptor(window, 'triggerMockPayinCallback') || { value: window.triggerMockPayinCallback };
-                // 触发原生的异步网络扣动
-            });
-        };
-
-        // 通用 300秒时钟轮询大闸
-        function openOrderModal(title, htmlContent, confirmCallback) {
-            document.getElementById("order-modal-title").innerText = title;
-            document.getElementById("order-modal-body").innerHTML = htmlContent;
-            
-            const modal = document.getElementById("payout-payin-modal");
-            modal.classList.remove("opacity-0", "pointer-events-none");
-
-            let timeLeft = 300.0;
-            const elTimer = document.getElementById("order-countdown-text");
-            const elBar = document.getElementById("order-progress-bar");
-
-            if (orderTimerInterval) clearInterval(orderTimerInterval);
-            orderTimerInterval = setInterval(() => {
-                timeLeft -= 0.5;
-                if (elTimer) elTimer.innerText = `${timeLeft.toFixed(1)}s`;
-                if (elBar) elBar.style.width = `${(timeLeft / 300.0) * 100}%`;
-
-                if (timeLeft <= 0) {
-                    clearInterval(orderTimerInterval);
-                    window.pushAuditLog("💥 [ORDER TIMEOUT] 300秒审查合同超时，单据冲正销毁！");
-                    closeOrderModal();
-                }
-            }, 500);
-
-            document.getElementById("order-confirm-btn").onclick = function() {
-                clearInterval(orderTimerInterval);
-                modal.classList.add("opacity-0", "pointer-events-none");
-                if (confirmCallback) confirmCallback();
-            };
-        }
-
-        window.closeOrderModal = function() {
-            if (orderTimerInterval) clearInterval(orderTimerInterval);
-            const modal = document.getElementById("payout-payin-modal");
-            if (modal) modal.classList.add("opacity-0", "pointer-events-none");
-            window.pushAuditLog("[ORDER CANCEL] 操盘手中止签署或按了叉叉，单据安全撤销。");
-        };
-
-        console.log(">>> [BUS SUCCESS] 终审完备版控制大闸并线大功告成！勾稽漏洞全面瓦解！");
-    </script>
 </body>
 </html>
