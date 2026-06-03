@@ -42,6 +42,16 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
             if (sellCurrency.toUpperCase() === "USD") {
                 currentRate = 1 / currentRate;
             }
+            // =================================================================
+            // 👑 【第三刀实时联动线】：将当前输入的货币对最优锁价，秒级刷写进左上角常驻 Ticker 视窗
+            // =================================================================
+            const tickerContainer = document.getElementById("global-fx-ticker");
+            if (tickerContainer) {
+                tickerContainer.innerHTML = `
+                    <div class="flex items-center space-x-2 text-[11px] font-mono text-emerald-400 animate-pulse">
+                        <span>📡 [实时询价盘口锁定] ${sellCurrency.toUpperCase()}/${buyCurrency.toUpperCase()} -> </span>
+                        <strong class="text-white ml-1">${currentRate.toFixed(6)}</strong>
+                    </div>`;
 
             if (typeof pushAuditLog === "function") {
                 pushAuditLog(`[SOR QUOTE] 通道锁价大胜！路由通道: ${result.routing_via} | 锁定执行价: ${currentRate.toFixed(6)}`);
@@ -135,36 +145,54 @@ export async function submitFxConversion(null1, null2, null3, pushAuditLog, show
     const fxRate = modal ? parseFloat(modal.dataset.currentRate || "0") : 0;
     const routingVia = modal ? modal.dataset.routingVia || "" : "";
 
-    // 双重安全卡位：如果汇率已经被时钟抹除为0，拒绝发射
     if (!sellAmount || fxRate <= 0 || !routingVia) {
-        if (typeof pushAuditLog === "function") pushAuditLog(`[EXECUTE DENIED] 🚨 固价合同已过期作废或被操盘手熔断，指令严禁下发！`);
+        if (typeof pushAuditLog === "function") pushAuditLog(`[EXECUTE DENIED] 🚨 固价合同失效，指令拦截！`);
         return;
     }
+
+    // =================================================================
+    // 👑 【第二刀防刷锁】：一旦操盘手签署交割，按钮当场禁用，绝杀连环重发毒素！
+    // =================================================================
+    const elSubmitBtn = document.getElementById("fx-submit-btn");
+    if (elSubmitBtn) {
+        elSubmitBtn.setAttribute("disabled", "true");
+        elSubmitBtn.classList.add("cursor-not-allowed", "opacity-40");
+        elSubmitBtn.innerText = "正在向公网打流物理交割中...";
+    }
+
+    if (typeof pushAuditLog === "function") pushAuditLog(`[EXECUTE CONVERT] 签署交割令！发送 Query 实弹报文...`);
 
     try {
         const response = await client(`/fx/convert?sell_currency=${sellCurrency.toUpperCase()}&sell_amount=${sellAmount}&buy_currency=${buyCurrency.toUpperCase()}&fx_rate=${fxRate}&routing_via=${routingVia.toUpperCase()}&quote_timestamp=${quoteTimestamp}`, {
             method: "POST"
         });
-        const data = await response.json();
+        
+        // 👑 核心自愈平账点：只要后端成功受理返回了200，不管后面重发怎么报错，我们前台只认第一发绿灯！
+        if (response.status === 200) {
+            const data = await response.json();
+            
+            if (fxTimerHandle) { clearInterval(fxTimerHandle); fxTimerHandle = null; }
 
-        if (response.status === 200 && data.status === "success") {
-            // 🔌 大获全胜，第一件事立刻注销销毁当前的 10 秒倒计时，防止其余温继续引发熔断！
-            if (fxTimerHandle) {
-                clearInterval(fxTimerHandle);
-                fxTimerHandle = null;
-            }
-
-            if (typeof pushAuditLog === "function") pushAuditLog(`[CLEARING SUCCESS] 🎉 外汇交割大胜！物理流水: ${data.fx_batch_ref}`);
+            if (typeof pushAuditLog === "function") pushAuditLog(`[CLEARING SUCCESS] 🎉 外汇交割成功！流水: ${data.fx_batch_ref}`);
+            
+            // 顺畅隐藏弹窗，解套表单
             if (modal) modal.classList.add("pointer-events-none", "opacity-0");
             document.getElementById("sell-amount").value = "";
             
-            if (typeof fetchBalances === "function") await fetchBalances(); 
+            // 🔌 瞬间反向扣动影子总账活体刷盘指针，逼迫左侧栏和持仓大厅数字同时发生自发闪烁暴涨刷新！
+            if (typeof fetchBalances === "function") {
+                window.pushAuditLog(`[LIVE AUTOMATION] 物理轧差生效！正在无损重绘全局可用头寸...`);
+                await fetchBalances(); 
+            }
         } else {
-            const errorMsg = data.detail || "中台拒绝交割";
-            if (typeof pushAuditLog === "function") pushAuditLog(`[FX REJECTED] 交割拒绝原因: ${errorMsg}`);
+            // 如果第一发就失败了，恢复按钮通电供重新询价
+            if (elSubmitBtn) { elSubmitBtn.removeAttribute("disabled"); elSubmitBtn.innerText = "确认清算结算"; }
+            const data = await response.json();
+            if (typeof pushAuditLog === "function") pushAuditLog(`[FX REJECTED] 交割失败: ${data.detail || "中台拒绝"}`);
         }
     } catch (catchErr) {
-        if (typeof pushAuditLog === "function") pushAuditLog(`[FX TIMEOUT] 通信血管猝死: ${catchErr.message}`);
+        if (elSubmitBtn) { elSubmitBtn.removeAttribute("disabled"); elSubmitBtn.innerText = "确认清算结算"; }
+        if (typeof pushAuditLog === "function") pushAuditLog(`[FX TIMEOUT] 通信断路: ${catchErr.message}`);
     }
 }
 

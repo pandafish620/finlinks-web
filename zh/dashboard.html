@@ -382,14 +382,29 @@
             window.pushAuditLog("[ORDER CANCEL] 操盘手主动中断签署权，在途单据安全撤销。");
         };
 
+       // =================================================================
+        // 🟢 【第一刀纠偏】：当用户点击外汇时，立刻震碎隐藏状态，高能唤醒大弹窗！
+        // =================================================================
         window.openFxModal = function() {
             const modal = document.getElementById("fx-modal");
-            if (modal) modal.classList.remove("pointer-events-none", "opacity-0");
+            if (modal) {
+                // A. 斩断隐藏类名，让大卡片弹窗、双边货币确认区、大进度条瞬间霸屏跳出！
+                modal.classList.remove("pointer-events-none", "opacity-0");
+            }
+            // B. 弹窗跳出后再去异步扣动询价算子，完美对齐用户体验！
             window.triggerFxQuoteInquiry();
         };
+
         window.closeFxModal = function() {
             const modal = document.getElementById("fx-modal");
-            if (modal) modal.classList.add("pointer-events-none", "opacity-0");
+            if (modal) {
+                modal.classList.add("pointer-events-none", "opacity-0");
+            }
+            if (fxTimerHandle) {
+                clearInterval(fxTimerHandle);
+                fxTimerHandle = null;
+                window.pushAuditLog("[FX ABORT] ⚖️ 操盘手撤销签署权，在途锁价合同就地作废，冲正销毁。");
+            }
         };
 
         window.pushAuditLog("🚀 [LEGO BASE] 积木 4：高阶主权隔离外汇沙箱控制大闸全量通电会师！");
