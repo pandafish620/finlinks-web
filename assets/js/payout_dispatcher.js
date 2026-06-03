@@ -11,10 +11,10 @@ let payoutTimerInterval = null; // Payout 专属代付时钟单例句柄
  * 💸 【积木 3 入口】：接管大厅 Payout 按钮点击，驱动两阶段确权与 300 秒拦截锁
  */
 export async function handleLivePayoutDisbursal(fetchBalances) {
-    const amtEl = document.getElementById("payoutAmount");
-    const currEl = document.getElementById("payoutCurrency");
-    const nameEl = document.getElementById("payoutBeneficiaryName");
-    const accEl = document.getElementById("payoutBeneficiaryAccount");
+    const nameEl = document.getElementById("payout-name");
+    const accEl  = document.getElementById("payout-acc");
+    const currEl = document.getElementById("payout-curr");
+    const amtEl  = document.getElementById("payout-amount");
 
     const amount = amtEl && amtEl.value ? parseFloat(amtEl.value) : 0;
     const currency = currEl ? currEl.value.toUpperCase().trim() : "NGN";
