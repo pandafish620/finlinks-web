@@ -210,70 +210,94 @@
         </div>
     </div>
 
-    <div id="fx-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
-        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeFxModal()"></div>
+    <div id="fx-modal-input" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="window.closeFxInputModal()"></div>
         <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
-            <div class="modal-content py-6 text-left px-6">
-                <div class="flex justify-between items-center pb-4 border-b border-slate-800">
-                    <p class="text-md font-bold text-emerald-400">即期多边轧差外汇兑换 (FX Spot Sandbox)</p>
-                    <div class="modal-close cursor-pointer z-50" onclick="closeFxModal()">
+            <div class="modal-content py-6 text-left px-6 space-y-4">
+                <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                    <p class="text-md font-bold text-slate-200">即期轧差外汇兑换 (FX Spot Input)</p>
+                    <div class="cursor-pointer z-50" onclick="window.closeFxInputModal()">
                         <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
                             <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
                         </svg>
                     </div>
                 </div>
                 
-                <div class="py-4 space-y-4">
-                    <input type="hidden" id="fx-quote-timestamp" value="0">
+                <div class="space-y-4">
                     <div>
                         <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">卖出（扣减）币种 (Sell Currency)</label>
-                        <select id="sell-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
-                            <option value="USD" selected>USD (美元离岸头寸)</option>
-                            <option value="KES">KES (肯尼亚先令)</option>
-                            <option value="UGX">UGX (乌干达先令)</option>
+                        <select id="sell-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                            <option value="USD">USD (美元离岸头寸)</option>
                             <option value="NGN">NGN (尼日利亚奈拉)</option>
+                            <option value="KES">KES (肯尼亚先令)</option>
                             <option value="TRY">TRY (土耳其里拉)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">卖出名义金额 (Sell Amount)</label>
-                        <input type="number" id="sell-amount" placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono focus:outline-none">
+                        <input type="number" id="sell-amount" placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-emerald-500">
                     </div>
                     <div>
                         <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">买入（增加）币种 (Buy Currency)</label>
-                        <select id="buy-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
+                        <select id="buy-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
                             <option value="NGN" selected>NGN (尼日利亚奈拉)</option>
                             <option value="KES">KES (肯尼亚先令)</option>
-                            <option value="UGX">UGX (乌干达先令)</option>
-                            <option value="TRY">TRY (土耳其里拉)</option>
                             <option value="USD">USD (美元离岸头寸)</option>
+                            <option value="TRY">TRY (土耳其里拉)</option>
                         </select>
                     </div>
+                </div>
+                
+                <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
+                    <button onclick="window.closeFxInputModal()" class="px-4 py-1.5 bg-slate-800 rounded text-xs hover:bg-slate-700 transition">取消</button>
+                    <button id="fx-inquiry-btn" onclick="if(typeof window.triggerFxQuoteInquiry === 'function') window.triggerFxQuoteInquiry();" class="px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/10">获取即期汇率报价 (Request Quote)</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                    <div class="bg-slate-950 p-4 rounded border border-slate-800 space-y-2">
-                        <div class="flex justify-between text-xs">
-                            <span class="text-slate-400">中台 SOR 锁定执行汇率:</span>
-                            <span class="text-emerald-400 font-mono font-bold"><span class="fx-rate-display">--</span></span>
+    <div id="fx-modal-confirm" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="window.closeFxConfirmModal()"></div>
+        <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
+            <div class="modal-content py-6 text-left px-6 space-y-4">
+                <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                    <p class="text-md font-bold text-amber-400">固价清算签署合同 (10S Slip Protection)</p>
+                    <div class="cursor-pointer z-50" onclick="window.closeFxConfirmModal()">
+                        <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
+                            <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-950 p-4 rounded border border-slate-800 font-mono text-xs space-y-3">
+                    <input type="hidden" id="fx-quote-timestamp" value="0">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">拟扣减卖出金额:</span>
+                        <span id="fx-confirm-sell-display" class="text-slate-200 font-bold">0.00 USD</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-800/60 pb-2">
+                        <span class="text-slate-500">预计入账买入金额:</span>
+                        <span id="buy-amount-preview" class="text-emerald-400 font-bold">0.00 NGN</span>
+                    </div>
+                    <div class="flex justify-between pt-1">
+                        <span class="text-slate-400">中台 SOR 锁定汇率:</span>
+                        <span class="text-amber-400 font-bold text-sm fx-rate-display">--</span>
+                    </div>
+                    
+                    <div class="pt-2">
+                        <div class="flex justify-between text-[10px] uppercase tracking-wider mb-1 font-sans">
+                            <span class="text-slate-500 font-bold">即期滑点保护时钟锁</span>
+                            <span class="text-amber-400 font-bold animate-pulse" id="fx-countdown-timer">10.0s</span>
                         </div>
-                        <div class="flex justify-between text-xs">
-                            <span class="text-slate-400">预计买入到账金额:</span>
-                            <span class="text-slate-200 font-mono font-bold" id="buy-amount-preview">0.00</span>
-                        </div>
-                        <div class="pt-2">
-                            <div class="flex justify-between text-[10px] uppercase tracking-wider mb-1">
-                                <span class="text-slate-500">即期滑点保护时钟锁</span>
-                                <span class="text-amber-400 font-mono font-bold" id="fx-countdown-timer">10.0s</span>
-                            </div>
-                            <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                                <div id="fx-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-full opacity-40"></div>
-                            </div>
+                        <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+                            <div id="fx-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-full"></div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="flex justify-end pt-4 border-t border-slate-800 space-x-2">
-                    <button onclick="closeFxModal()" class="px-4 py-1.5 bg-slate-800 rounded text-xs hover:bg-slate-700 transition">取消</button>
-                    <button id="fx-submit-btn" onclick="if(typeof window.triggerFxFinalConversion === 'function') window.triggerFxFinalConversion();" class="px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/10">确认清算结算</button>
+                <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
+                    <button onclick="window.closeFxConfirmModal()" class="px-4 py-1.5 bg-slate-800 rounded text-xs text-slate-300 hover:bg-slate-700 transition">拒绝并冲正</button>
+                    <button id="fx-submit-btn" onclick="if(typeof window.triggerFxFinalConversion === 'function') window.triggerFxFinalConversion();" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">确认执行交易 (Execute)</button>
                 </div>
             </div>
         </div>
@@ -383,27 +407,33 @@
         };
 
        // =================================================================
-        // 🟢 【第一刀纠偏】：当用户点击外汇时，立刻震碎隐藏状态，高能唤醒大弹窗！
+        // 👑 【中央大闸自愈开关并线】：无缝调度双模态框时序
         // =================================================================
         window.openFxModal = function() {
-            const modal = document.getElementById("fx-modal");
-            if (modal) {
-                // A. 斩断隐藏类名，让大卡片弹窗、双边货币确认区、大进度条瞬间霸屏跳出！
-                modal.classList.remove("pointer-events-none", "opacity-0");
-            }
-            // B. 弹窗跳出后再去异步扣动询价算子，完美对齐用户体验！
-            window.triggerFxQuoteInquiry();
+            // 右上角按钮一敲，干净唤醒第一输入窗（零压力静默舱）
+            const modalInput = document.getElementById("fx-modal-input");
+            if (modalInput) modalInput.classList.remove("pointer-events-none", "opacity-0");
+        };
+        window.closeFxInputModal = function() {
+            const modalInput = document.getElementById("fx-modal-input");
+            if (modalInput) modalInput.classList.add("pointer-events-none", "opacity-0");
         };
 
-        window.closeFxModal = function() {
-            const modal = document.getElementById("fx-modal");
-            if (modal) {
-                modal.classList.add("pointer-events-none", "opacity-0");
-            }
-            if (fxTimerHandle) {
-                clearInterval(fxTimerHandle);
-                fxTimerHandle = null;
-                window.pushAuditLog("[FX ABORT] ⚖️ 操盘手撤销签署权，在途锁价合同就地作废，冲正销毁。");
+        window.triggerFxQuoteInquiry = function() {
+            // 呼叫新版询价算子，它会在成功拿到锁价后自发关闭第一窗、闪烁弹起第二窗并开始点火倒计时
+            triggerLiveQuote(window.pushAuditLog, null); 
+        };
+        window.triggerFxFinalConversion = function() {
+            submitFxConversion(null, null, null, window.pushAuditLog, null, window.fetchBalances); 
+        };
+
+        window.closeFxConfirmModal = function() {
+            const modalConfirm = document.getElementById("fx-modal-confirm");
+            if (modalConfirm) modalConfirm.classList.add("pointer-events-none", "opacity-0");
+            
+            // 强行刹车，震碎释放 10 秒异步时钟，冲正单据
+            if (typeof window.forceCancelFxTimer === "function") {
+                window.forceCancelFxTimer();
             }
         };
 
