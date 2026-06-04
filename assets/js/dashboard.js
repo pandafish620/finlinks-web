@@ -59,12 +59,20 @@ async function initGlobalFxTicker() {
 /**
  * 👑 2. 【积木 1 核心功能】：影子总账可用头寸刷盘上屏（绝杀 data.balances 历史坏账）
  */
+// -*- coding: utf-8 -*-
+// 文件位置：assets/js/dashboard.js
+
 export async function fetchBalances() {
     const container = document.getElementById("balances-container");
     if (!container) return;
     try {
-        // 通过底座 client 总线击发，自动加上 /ledger 前缀，自动携带 credentials 凭证
-        const response = await client("/ledger/balances", { method: "GET" });
+        // =================================================================
+        // 👑 【路径纠偏与防HTTP缓存投毒大闸】
+        // 1. 将原厂多余的 /ledger/balances 刚性裁剪为 /balances ！！！
+        // 2. 尾部强行灌入毫秒级活体时间戳 `_t=${Date.now()}`，彻底震碎浏览器缓存死锁！
+        // =================================================================
+        const response = await client(`/balances?_t=${Date.now()}`, { method: "GET" });
+        
         if (response.status === 200) {
             const data = await response.json();
             
@@ -72,29 +80,38 @@ export async function fetchBalances() {
             const merchantTag = document.getElementById("merchant-id-tag");
             if (merchantTag && data.merchant) merchantTag.innerText = data.merchant;
 
-            // 🟢 临门一脚自愈：彻底炸毁、清除原有的灰色脉冲闪烁骨架屏
+            // 🟢 彻底炸毁、清除原有的灰色脉冲闪烁骨架屏
             container.innerHTML = "";
             
-            // 👑 勾稽平账点：完美对齐后端硬核期待的 multi_currency_visibility 字段！
+            // 👑 完美对齐后端硬核期待的 multi_currency_visibility 字段
             const matrix = data.multi_currency_visibility || {};
             
+            // 3. 渲染主大厅持仓资产卡片大卡
             Object.keys(matrix).forEach(currency => {
                 const availableValue = matrix[currency];
                 container.innerHTML += `
                     <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl relative overflow-hidden shadow-lg hover:border-emerald-500/50 transition duration-300">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">${currency} 可动用可用余额</div>
-                        <div class="text-3xl font-mono font-bold mt-2 text-emerald-400">${availableValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                        <div class="text-3xl font-mono font-bold mt-2 text-emerald-400" id="balance-${currency.toUpperCase().trim()}">${availableValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
                         <div class="absolute -right-4 -bottom-6 text-6xl font-bold font-mono text-slate-800/10 select-none">${currency}</div>
                     </div>`;
             });
+
             // =================================================================
-            // 👑 👑 👑 【 MVP 体验自愈修补线：常驻侧边栏多币种流式重绘探针 】
+            // 👑 【常驻侧边栏多币种流式重绘探针同步会师】
             // =================================================================
-            // 🔌 动态扫描大厅常驻侧边栏上所有打着 dataset 特征码的余额节点，在一万分之一秒内当场完成同步削减与飙青刷新！
             document.querySelectorAll(".sidebar-balance-value").forEach(node => {
                 const nodeCurrency = node.dataset.currency ? node.dataset.currency.toUpperCase().trim() : "";
                 if (nodeCurrency && matrix[nodeCurrency] !== undefined) {
+                    // 动态闪烁高亮视觉：数字变动瞬间飙青，增强金融级肉眼感知体验！
+                    node.classList.add("text-emerald-400", "scale-105", "transition-all", "duration-300");
+                    
                     node.innerText = matrix[nodeCurrency].toLocaleString(undefined, {minimumFractionDigits: 2});
+                    
+                    // 500毫秒后移除高亮类，让其平滑恢复正常视觉
+                    setTimeout(() => {
+                        node.classList.remove("text-emerald-400", "scale-105");
+                    }, 500);
                 }
             });
 
