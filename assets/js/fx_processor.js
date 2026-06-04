@@ -173,10 +173,15 @@ export async function submitFxConversion(null1, null2, null3, pushAuditLog, show
             if (modalConfirm) modalConfirm.classList.add("pointer-events-none", "opacity-0");
             document.getElementById("sell-amount").value = "";
             
-            // 🔌 【硬伤 2 绝杀点】：100% 自动扣动刷盘大脑，侧边栏和 Overview 余额瞬间全量跳动闪烁刷新！
+            // 👑 【第一刀纠偏】：注入 300ms 事务清算缓冲保护垫！
+            // 绝杀因为数据库刚刚 commit 还没来得及同步到只读连接引发的“余额没更新”坏账！
+            // =================================================================
             if (typeof fetchBalances === "function") {
-                window.pushAuditLog(`[LIVE AUTOMATION] 物理轧差生效！无损重绘全局可用头寸...`);
-                await fetchBalances(); 
+                if (typeof pushAuditLog === "function") pushAuditLog(`[LIVE AUTOMATION] 物理轧差完成，正在等待云端多账本清算对齐...`);
+                setTimeout(async () => {
+                    await fetchBalances(); 
+                    window.pushAuditLog(`[LIVE REPAINT] 🟢 全局多币种可用资产舱重绘重组完毕，头寸已满血同步！`);
+                }, 300); // ⚡ 刚性延时 300 毫秒，体验完全无感，数字完美流式刷新
             }
         } else {
             if (elSubmitBtn) { elSubmitBtn.removeAttribute("disabled"); elSubmitBtn.innerText = "确认执行交易 (Execute)"; }

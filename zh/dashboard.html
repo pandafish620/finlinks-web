@@ -356,18 +356,49 @@
             if (currEl && currEl.value) {
                 localStorage.setItem("FINLINKS_LAST_ACTIVE_CURRENCY", currEl.value.toUpperCase().trim());
             }
-            handleLivePayinCallback(window.fetchBalances);
+            handleLivePayinCallback(() => {
+                setTimeout(async () => {
+                    if (typeof window.fetchBalances === "function") await window.fetchBalances();
+                }, 300);
+            });
         };
 
         window.triggerMockPayoutCallback = function() {
             const currEl = document.getElementById("payout-curr");
             if (currEl && currEl.value) {
                 localStorage.setItem("FINLINKS_LAST_ACTIVE_CURRENCY", currEl.value.toUpperCase().trim());
-                window.pushAuditLog(`[MONITOR] 💰 物理金库成功锁定当前出金代付币种内聚钢印: ${currEl.value}`);
             }
-            handleLivePayoutDisbursal(window.fetchBalances);
+            handleLivePayoutDisbursal(() => {
+                setTimeout(async () => {
+                    if (typeof window.fetchBalances === "function") await window.fetchBalances();
+                }, 300);
+            });
         };
+
         window.executeLivePayoutDisbursal = window.triggerMockPayoutCallback;
+
+        window.triggerMockReconciliation = async function() {
+            const vaultCurrency = localStorage.getItem("FINLINKS_LAST_ACTIVE_CURRENCY");
+            const payinCurr = document.getElementById("collectionCurrency")?.value;
+            const payoutCurr = document.getElementById("payout-curr")?.value;
+            const finalCurrency = (vaultCurrency || payinCurr || payoutCurr || "NGN").toUpperCase().trim();
+
+            window.pushAuditLog(`[AUDIT START] 零信任对账引擎点火：正在轧差 [${finalCurrency}] 影子总账...`);
+            try {
+                // 🔌 回正血管路径：直接敲击正印的 /reconcile，client内部会自动拼装标准的 /ledger 前缀，去掉多余的硬编码参数
+                const response = await client(`/reconcile?currency=${finalCurrency}`, { method: "POST" });
+                if (response.status === 200) {
+                    window.pushAuditLog(`[RECON SUCCESS] 🟢 [${finalCurrency}] 轧差成功！结论自愈。`);
+                    setTimeout(async () => {
+                        if (typeof window.fetchBalances === "function") await window.fetchBalances();
+                    }, 300);
+                } else {
+                    window.pushAuditLog(`[RECON REJECTED] 对账熔断。`);
+                }
+            } catch (error) {
+                window.pushAuditLog(`[RECON CRITICAL] 物理断路: ${error.message}`);
+            }
+        };
 
         window.triggerFxQuoteInquiry = function() {
             triggerLiveQuote(window.pushAuditLog, null); 
