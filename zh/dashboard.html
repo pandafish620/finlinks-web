@@ -190,19 +190,27 @@
             <section id="pane-kyb" class="tab-pane hidden space-y-6">
                 <div>
                     <h1 class="text-2xl font-extrabold tracking-tight text-indigo-400">数字化高级 KYB 资质归档中心</h1>
+                    <p class="text-[11px] text-slate-500 mt-1 uppercase tracking-widest">请进入安全加密的白标确权舱递交您的金融级资质证明材料</p>
                 </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-2xl space-y-4">
-                    <form id="advancedKybForm" onsubmit="event.preventDefault();" class="space-y-4">
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">企业注册合规全称</label>
-                            <input type="text" id="kyb-company-name" value="Pine Bay Advisory (HK)" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-400 cursor-not-allowed" readonly>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-xl space-y-5 shadow-sm">
+        
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">当前注册主体</label>
+                        <div class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-xs text-slate-400 font-mono select-none">
+                            Pine Bay Advisory (HK)
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><input type="file" id="kyb-license-file" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-300"></div>
-                            <div><input type="file" id="kyb-ubo-file" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-300"></div>
-                        </div>
-                        <button onclick="if(typeof executeAdvancedKYBOnboarding === 'function') executeAdvancedKYBOnboarding();" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded text-xs tracking-wider transition uppercase">📤 确认封账并提交数字化高级合规官审计</button>
-                    </form>
+                    </div>
+
+                    <a href="./kyb_portal.html" target="_blank" 
+                       class="flex items-center justify-center space-x-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded text-[11px] tracking-widest transition-all duration-300 uppercase shadow-lg shadow-indigo-500/20 active:scale-[0.98]">
+                       <span>📤 进入数字化高级 KYB 合规官审计问卷舱</span>
+                    </a>
+
+                    <div class="flex items-start space-x-2 p-3 bg-indigo-950/20 border border-indigo-900/50 rounded text-[10px] text-indigo-400">
+                        <span class="mt-0.5">ℹ️</span>
+                        <p>基于全球合规反洗钱（AML）指引，所有证明文件需在新的确权舱内经过加密传输。此操作不会在当前 Dashboard 留下任何中间态缓存，确保您的企业法律指纹安全。</p>
+                    </div>
                 </div>
             </section>
 
