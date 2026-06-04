@@ -1,6 +1,4 @@
 <!DOCTYPE html>
-<!-- -*- coding: utf-8 -*- -->
-<!-- 文件位置：根目录/login.html (FinLinks 公网最高特权登录门禁) -->
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
@@ -8,112 +6,152 @@
     <title>FinLinks 5.2.0 - 安全认证控制塔</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; }
+        body { background-color: #020617; color: #f8fafc; }
+        /* 👑 注入高级外汇工作站独占的极光漫反射特效 */
+        .ambient-glow {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.04) 0%, rgba(0, 0, 0, 0) 70%);
+            top: -250px;
+            left: -250px;
+            pointer-events: none;
+            z-index: 0;
+        }
     </style>
 </head>
-<body class="font-sans antialiased flex items-center justify-center h-screen bg-slate-950">
+<body class="font-sans antialiased flex items-center justify-center h-screen bg-slate-950 relative overflow-hidden select-none">
 
-    <div class="w-full max-w-md p-8 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl space-y-6">
-        <!-- 门禁标志顶层头部 -->
-        <div class="text-center space-y-2">
-            <h1 class="text-2xl font-extrabold tracking-wider text-emerald-400 font-mono">FinLinks <span class="text-xs font-normal text-slate-500">5.2.0</span></h1>
-            <p class="text-slate-400 text-xs font-medium">全球多通道聚合商户控制台安全门禁</p>
+    <div class="ambient-glow animate-pulse"></div>
+    <div class="absolute right-[-200px] bottom-[-200px] w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(20,184,166,0.03)_0%,rgba(0,0,0,0)_60%)] pointer-events-none z-0"></div>
+
+    <div class="w-full max-w-md p-8 bg-slate-900/80 backdrop-blur-xl border border-slate-800/80 rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] space-y-6 z-10 relative transition-all duration-500 hover:border-slate-700/50">
+        
+        <div class="space-y-2 relative">
+            <div class="flex items-center space-x-1.5 mb-1 justify-center">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-[10px] uppercase font-mono tracking-[0.2em] text-slate-500 font-bold">SOVEREIGN NETWORK ADAPTER</span>
+            </div>
+            <h1 class="text-3xl font-black tracking-tighter text-center bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 bg-clip-text text-transparent font-mono">
+                FinLinks <span class="text-xs font-normal text-slate-500 font-sans tracking-normal">v5.2.0</span>
+            </h1>
+            <p class="text-slate-400 text-center text-xs font-medium tracking-wide">全球多通道聚合商户控制台安全门禁</p>
         </div>
 
-        <!-- 登录实弹表单 -->
-        <form id="loginForm" onsubmit="handleLiveLogin(event)" class="space-y-4">
+        <form id="loginForm" onsubmit="handleLiveLogin(event)" class="space-y-4 pt-2">
             <div>
-                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">商户主权认证邮箱 (Email)</label>
-                <input type="email" id="loginEmail" value="zhangxiaoyu620@hotmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" required placeholder="请输入您的法人电子邮箱">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">商户主权认证邮箱 (Email)</label>
+                <input type="email" id="loginEmail" value="zhangxiaoyu620@hotmail.com" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 text-xs text-emerald-400 placeholder-slate-600 focus:outline-none focus:border-emerald-500/50 focus:shadow-[0_0_15px_rgba(16,185,129,0.05)] font-mono transition-all duration-300" required placeholder="请输入您的法人电子邮箱">
             </div>
             <div>
-                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">安全访问密匙 (Password)</label>
-                <input type="password" id="loginPassword" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" required placeholder="请输入您的安全密码">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">安全访问密匙 (Password)</label>
+                <input type="password" id="loginPassword" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-500/50 focus:shadow-[0_0_15px_rgba(16,185,129,0.05)] font-mono transition-all duration-300" required placeholder="请输入您的安全密码">
             </div>
 
-            <!-- 动态黑金防爆提示框 -->
-            <div id="login-msg-box" class="hidden text-[11px] font-mono p-3 bg-slate-950 rounded border border-slate-800 transition"></div>
+            <div id="login-msg-box" class="hidden text-[11px] font-mono p-3 bg-slate-950/90 rounded-xl border border-slate-800 transition-all duration-300 leading-relaxed shadow-inner"></div>
 
-            <button type="submit" id="loginBtn" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-lg text-xs tracking-wider transition uppercase shadow-lg shadow-emerald-500/10">
-                🔒 击发实弹确权登录
+            <button type="submit" id="loginBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold py-3.5 rounded-xl text-xs tracking-widest transition-all duration-300 uppercase shadow-lg shadow-emerald-500/10 active:scale-[0.98] cursor-pointer mt-2">
+                🔒 击发实弹确权登录 (AUTHENTICATE)
             </button>
         </form>
+
+        <div class="mt-4 pt-4 border-t border-slate-800/60 text-center">
+            <p class="text-xs text-slate-500 tracking-wide">新地缘跨境商户？<a href="./register.html" class="text-emerald-400 hover:text-emerald-300 font-bold underline underline-offset-4 ml-1 transition-all">自主入驻申请开户 →</a></p>
+        </div>
     </div>
 
-    <!-- ⚡ 核心异步认证总线逻辑（完美咬合云端/本地双轨制宿主） -->
     <script type="module">
-        // 动态网关嗅探抗体
-        // ⚡ 核心异步认证总线逻辑（自适应兼容 OAuth2 Form 与 JSON 双轨制宿主）
-const IS_LOCAL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
-const BASE_URL = IS_LOCAL ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
+        const IS_LOCAL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+        // 自动分流探测网关端点
+        const BASE_URL = IS_LOCAL ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
 
-window.handleLiveLogin = async function(event) {
-    event.preventDefault();
-    
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    const msgBox = document.getElementById('login-msg-box');
-    const btn = document.getElementById('loginBtn');
-
-    // 激活黑金提示流
-    msgBox.classList.remove('hidden', 'text-rose-400', 'text-emerald-400');
-    msgBox.classList.add('text-amber-400');
-    msgBox.innerText = "[AUTHENTICATING] 正在击发 OAuth2 标准表单确权报文...";
-    btn.disabled = true;
-
-    try {
-        // 👑 彻底治愈 422 熔断：将数据严格转换为 FastAPI OAuth2 期待的 x-www-form-urlencoded 表单流
-        const formData = new URLSearchParams();
-        formData.append('username', email);     // 确保对齐 OAuth2 官方绑定的 username 钢印
-        formData.append('password', password);
-
-        const response = await fetch(`${BASE_URL}/auth/login`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'accept': 'application/json'
-            },
-            body: formData
-        });
-
-        let data = await response.json();
-
-        // 🛡️ 防御性自愈分流：如果后端依然提示格式不匹配，启动第二总线（纯 JSON 结构体回滚重试）
-        if (response.status === 422) {
-            msgBox.innerText = "[RETRY] 表单网络排异，正在自动无损切流至纯 JSON 载荷总线...";
+        window.handleLiveLogin = async function(event) {
+            event.preventDefault();
             
-            const jsonResponse = await fetch(`${BASE_URL}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
-                body: JSON.stringify({ username: email, password: password })
-            });
-            
-            data = await jsonResponse.json();
-            if (!jsonResponse.ok) throw new Error(data.detail || "JSON 鉴权通道拒绝放行");
-        } else if (!response.ok) {
-            throw new Error(data.detail || "后端鉴权熔断拒绝放行");
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const msgBox = document.getElementById('login-msg-box');
+            const btn = document.getElementById('loginBtn');
+
+            // 点火黑金提示流
+            msgBox.classList.remove('hidden', 'text-rose-400', 'text-emerald-400', 'border-rose-500/30', 'border-emerald-500/30');
+            msgBox.classList.add('text-amber-400', 'border-amber-500/20');
+            msgBox.innerText = "⚡ [AUTHENTICATING] 正在安全打包 OAuth2 标准密文表单载荷...";
+            btn.disabled = true;
+            btn.classList.add("opacity-40", "cursor-not-allowed");
+
+            try {
+                // 1. 编译 FastAPI 期待的 x-www-form-urlencoded 标准表单流（对齐老线 auth_router 承重墙）
+                const formData = new URLSearchParams();
+                formData.append('username', email);
+                formData.append('password', password);
+
+                let response = await fetch(`${BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'accept': 'application/json'
+                    },
+                    body: formData
+                });
+
+                let data;
+                
+                // 🛡️ 防御性分流拦截自愈大闸：尝试轰击老线 /auth/login
+                if (response.status === 422) {
+                    msgBox.innerText = "🔄 [RETRY] 接口格式排异，自动激活第二备用总线（纯 JSON 结构体回滚）...";
+                    const jsonResponse = await fetch(`${BASE_URL}/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
+                        body: JSON.stringify({ username: email, password: password })
+                    });
+                    data = await jsonResponse.json();
+                    if (!jsonResponse.ok) throw new Error(data.detail || "JSON 隔离通道拒绝放行凭证");
+                } else if (response.status === 404 || response.status === 405) {
+                    // 🔌 降级熔断：老线完全不在岗，说明后端已全面升级为新版 `new_merchant_auth_router.py`！
+                    // 直接全量轰击现代出出网网关，实施真正的 Query 凭证核销！
+                    msgBox.innerText = "🚀 [MODERN AUTH ACTIVATED] 正在并线至 5.2.0 现代商户清算凭证核销大闸...";
+                    const modernResponse = await fetch(`${BASE_URL}/api/v1/modern-auth/login-gateway?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`, {
+                        method: 'POST'
+                    });
+                    data = await modernResponse.json();
+                    if (!modernResponse.ok) throw new Error(data.detail || "现代主权鉴权中心拒绝接受核销");
+                } else {
+                    data = await response.json();
+                    if (!response.ok) throw new Error(data.detail || "中台风控大闸物理拒绝放行");
+                }
+
+                // =============================================================
+                // 👑 【全线并线合拢大捷点】：提取黄金令牌并完美注入多币种命名空间 👑
+                // =============================================================
+                const token = data.access_token || data.token;
+                const merchantId = data.merchant_id || email; // 提取真身商户号指纹
+                
+                if (!token) throw new Error("回执载荷异常：未包含有效签名的 JWT 黄金令牌");
+                
+                // A. 严格灌入老线小写命名空间，确保 client 总线及 fetchBalances 前线无损调用！
+                localStorage.setItem('finlinks_auth_token', token);
+                
+                // B. 严格锁死新版外汇多币种冷钱包与商户企业名牌特征码！绝杀常驻侧边栏假死！
+                localStorage.setItem('FINLINKS_ACTIVE_MID', merchantId.trim().toLowerCase());
+                if (data.company_name) localStorage.setItem('FINLINKS_COMPANY_NAME', data.company_name);
+                if (data.account_status) localStorage.setItem('FINLINKS_ACCOUNT_STATUS', data.account_status);
+                
+                msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-emerald-500/30 text-emerald-400 leading-relaxed shadow-lg";
+                msgBox.innerText = "🟢 [SUCCESS] 凭证核销大胜！商户身份及 JWT 黄金令牌已成功安全落盘。正在护送跨流进入持仓大厅...";
+
+                // 毫秒级安全延迟缓冲，体验完全丝滑拉满
+                setTimeout(() => {
+                    window.location.href = 'zh/dashboard.html';
+                }, 800);
+
+            } catch (err) {
+                msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-rose-500/30 text-rose-400 leading-relaxed";
+                msgBox.innerText = `❌ [ERROR] 登录认证熔断: ${err.message}`;
+                btn.disabled = false;
+                btn.classList.remove("opacity-40", "cursor-not-allowed");
+            }
         }
-
-        // 👑 核心大捷点：生擒 JWT 黄金令牌并狠狠砸进当前公网域名的本地缓存！
-        const token = data.access_token || data.token;
-        if (!token) throw new Error("回执中未包含有效鉴权令牌");
-        
-        localStorage.setItem('finlinks_auth_token', token);
-        
-        msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded border border-emerald-500/30 text-emerald-400";
-        msgBox.innerText = "[SUCCESS] 黄金令牌落盘成功！正在强行切流进入多币种持仓大厅...";
-
-        // 秒级安全护送切流到资产大厅
-        setTimeout(() => {
-            window.location.href = 'zh/dashboard.html';
-        }, 1000);
-
-    } catch (err) {
-        msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded border border-rose-500/30 text-rose-400";
-        msgBox.innerText = `[ERROR] 登录熔断: ${err.message}`;
-        btn.disabled = false;
-    }
-}
     </script>
 </body>
 </html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>FinLinks 5.2.0 - 跨境商户开户开闸中心</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="./assets/js/new_auth_sentinel.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 flex items-center justify-center min-h-screen font-mono selection:bg-emerald-500 selection:text-black">
+    <div class="w-full max-w-md p-8 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl my-8">
+        <div class="flex items-center space-x-2 mb-4">
+            <span class="w-2.5 h-2.5 rounded-full bg-teal-400"></span>
+            <h2 class="text-sm font-bold tracking-widest text-slate-400 uppercase">FinLinks Onboarding Gateway</h2>
+        </div>
+        <h1 class="text-2xl font-bold text-white mb-2">自主入驻开户</h1>
+        <p class="text-xs text-slate-500 mb-6">全自动高级 KYB 系统 · 24小时自动化过闸</p>
+
+        <div id="reg-alert-box" class="hidden mb-4 p-3 rounded-lg text-xs"></div>
+
+        <form id="register-form" class="space-y-4" onsubmit="handleLiveRegister(event)">
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">商户法人真实姓名</label>
+                <input type="text" id="reg-name" required class="w-full bg-slate-950 border border-slate-800 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-teal-500/50 text-white" placeholder="张晓宇">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">企业邮箱 (登录特征指纹)</label>
+                <input type="email" id="reg-email" required class="w-full bg-slate-950 border border-slate-800 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-teal-500/50 text-emerald-400" placeholder="ceo@pinebay.com">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">跨国联系电话 (带国际区号)</label>
+                <input type="text" id="reg-phone" required class="w-full bg-slate-950 border border-slate-800 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-teal-500/50 text-white" placeholder="+2348012345678">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">企业法律实体注册名称</label>
+                <input type="text" id="reg-company" required class="w-full bg-slate-950 border border-slate-800 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-teal-500/50 text-white" placeholder="Pine Bay Advisory Limited">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">设定账户主权密码</label>
+                <input type="password" id="reg-password" required class="w-full bg-slate-950 border border-slate-800 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-teal-500/50 text-white" placeholder="••••••••">
+            </div>
+            <button type="submit" id="reg-btn" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold py-3.5 rounded-xl transition duration-300 text-sm shadow-lg cursor-pointer">
+                向核心账本递交申请 (Submit)
+            </button>
+        </form>
+
+        <div class="mt-6 pt-4 border-t border-slate-800/60 text-center">
+            <p class="text-xs text-slate-500">已有主权账户？<a href="./login.html" class="text-teal-400 hover:underline">直接进入密码学核销大厅 →</a></p>
+        </div>
+    </div>
+
+    <script>
+        async function handleLiveRegister(e) {
+            e.preventDefault();
+            const btn = document.getElementById("reg-btn");
+            const alertBox = document.getElementById("reg-alert-box");
+            
+            alertBox.className = "hidden mb-4 p-3 rounded-lg text-xs";
+            btn.setAttribute("disabled", "true");
+            btn.innerText = "底层密码学加盐强洗编译中...";
+
+            const payload = {
+                customer_name: document.getElementById("reg-name").value,
+                email: document.getElementById("reg-email").value,
+                phone_with_code: document.getElementById("reg-phone").value,
+                company_name: document.getElementById("reg-company").value,
+                password: document.getElementById("reg-password").value
+            };
+
+            window.authSentinel.registerMerchant(payload,
+                (successData) => {
+                    btn.innerText = "开户申请递交成功";
+                    alertBox.innerText = successData.msg;
+                    alertBox.classList.add("bg-emerald-950/40", "border", "border-emerald-500/30", "text-emerald-400");
+                    alertBox.classList.remove("hidden");
+                },
+                (errorMsg) => {
+                    btn.removeAttribute("disabled");
+                    btn.innerText = "向核心账本递交申请 (Submit)";
+                    alertBox.innerText = `[REGISTRY REJECTED] ${errorMsg}`;
+                    alertBox.classList.add("bg-red-950/40", "border", "border-red-500/30", "text-red-400");
+                    alertBox.classList.remove("hidden");
+                }
+            );
+        }
+    </script>
+</body>
+</html>
