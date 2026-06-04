@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>FinLinks - 邮箱确权与账户激活</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#000000] text-slate-200 flex items-center justify-center min-h-screen font-mono">
+    
+    <div class="w-full max-w-md p-8 bg-[#0a0f16] border border-[#1f252d] rounded-2xl shadow-2xl text-center space-y-6">
+        <div class="flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-network-wired text-[#00FFCC]"></i>
+            <h1 class="text-xs font-bold tracking-widest uppercase">FinLinks Anchor</h1>
+        </div>
+
+        <div id="status-box" class="space-y-4">
+            <div id="loader" class="w-10 h-10 border-4 border-slate-800 border-t-[#00FFCC] rounded-full animate-spin mx-auto"></div>
+            <h2 id="title" class="text-lg font-black text-white">正在确权中...</h2>
+            <p id="msg" class="text-xs text-slate-500">正在穿透公网，向核心账本锁死您的邮箱指纹...</p>
+            <a id="btn" href="./login.html" class="hidden w-full bg-[#00FFCC] text-black font-bold py-3 rounded-lg text-xs hover:bg-[#00e6b8] transition">前往登录控制塔</a>
+        </div>
+    </div>
+
+    <script>
+        window.onload = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const email = urlParams.get('email');
+            
+            if (!email) return;
+
+            try {
+                // 自动刺向后端 API 进行状态抹绿
+                const res = await fetch(`https://finlinks-backend.onrender.com/auth/onboarding/verify-email-link?email=${encodeURIComponent(email)}`);
+                const data = await res.json();
+                
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('title').innerText = res.ok ? "🎉 电子邮箱确权大胜！" : "⚠️ 状态账本提示";
+                document.getElementById('msg').innerText = data.msg;
+                document.getElementById('btn').classList.remove('hidden');
+            } catch (err) {
+                document.getElementById('title').innerText = "❌ 中台通信熔断";
+                document.getElementById('msg').innerText = "无法连接至后端验证舱，请检查公网出网环境。";
+            }
+        }
+    </script>
+</body>
+</html>
