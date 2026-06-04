@@ -40,53 +40,58 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
         // 👑 🟢 【中央自愈并线大闸】：全面对齐直接标价与 1500/100=15 轧差公式
         // =================================================================
         if (response.status === 200 && result.status === "quoted") {
-            // 💡 A. 前端无条件认领后端清算完毕的直观大盘基准汇率（如 1500.00 或 15.00）
             let displayRate = result.final_settlement_rate;
             let computedBuyAmount = 0.00;
 
             const sellCurrUpper = sellCurrency.toUpperCase().trim();
             const buyCurrUpper = buyCurrency.toUpperCase().trim();
 
-            // 💡 B. 按照直接标价法三大极性，在表现层前线就地执行金额清算，绝杀 400 阻抗！
+            // =================================================================
+            // 👑 【第二刀防投毒解算闸】：智能适配单边大盘价、倒数价与三角交叉盘
+            // =================================================================
             if (sellCurrUpper === "USD") {
                 // 极性 1：卖美金换法币（左侧交易） -> 10 USD * 1500 = 15000 NGN
                 computedBuyAmount = sellAmount * displayRate;
             } else if (buyCurrUpper === "USD") {
-                // 极性 2：卖法币换美金（右侧交易） -> 界面显示 1500 大盘汇率，后台账本各显神通自动做倒数除法结算！ -> 15000 NGN / 1500 = 10 USD
-                computedBuyAmount = sellAmount / displayRate;
+                // 极性 2：卖法币换美金（右侧交易） 
+                // 🔌 智能化拦截：如果后端直接吐出了倒数汇率（如 0.000664），则直接相乘！
+                // 如果后端吐出的是大盘直观价（如 1423.98），则执行除法！彻底绝杀一亿美金的魔幻错误数字！
+                if (displayRate < 1.0) {
+                    computedBuyAmount = sellAmount * displayRate; // 0.000664 极性自愈
+                } else {
+                    computedBuyAmount = sellAmount / displayRate; // 1423.98 极性自愈
+                }
+                
+                // 为了保障操盘手对大盘的直观感知，如果抓到的是倒数，前台屏幕高能回正为大盘价显示！
+                if (displayRate < 1.0 && displayRate > 0) {
+                    displayRate = 1 / displayRate;
+                }
             } else {
-                // 极性 3：🎯【小币种地缘交叉盘回正】：15000 KES * 15 (displayRate) = 225000 NGN ！！！
-                // 严格遵循 P_tgt / P_src 三角轧差，前台直接相乘，财务勾稽关系全盘咬合！
+                // 极性 3：地缘小币种交叉盘（如 KES -> NGN 或 NGN -> KES）
+                // 后端三角套汇分支已回正为标准的直接大盘比值（如 15.00），前台直接稳健执行乘法！
                 computedBuyAmount = sellAmount * displayRate;
             }
 
-            // A. 【常驻 Ticker 遥测小弹窗复活线】：秒级向左上角气泡视窗灌入直观价
-            const tickerContainer = document.getElementById("global-fx-ticker");
-            if (tickerContainer) {
-                tickerContainer.innerHTML = `
-                    <div class="flex items-center space-x-1 text-[11px] font-mono bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-0.5 rounded-full text-emerald-400 animate-pulse shadow-lg shadow-emerald-500/5">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 inline-block"></span>
-                        即期锁价: ${sellCurrUpper}/${buyCurrUpper} -> <span class="text-white font-bold ml-1">${displayRate.toFixed(4)}</span>
-                    </div>`;
+            if (typeof pushAuditLog === "function") {
+                pushAuditLog(`[LIVE AMNESTY] 算力对齐大胜！直观盘口价: ${displayRate.toFixed(4)} | 到账预测: ${computedBuyAmount.toFixed(2)} ${buyCurrUpper}`);
             }
 
-            // B. 动态挂载第二窗文本节点值，让商户彻底摆脱 0.000664 的认知折磨！
+            // =================================================================
+            // 👑 下方原本刷写 DOM 节点、隐藏第一窗、弹起第二窗、10S 进度条时钟点火逻辑完全保留
+            // =================================================================
             const elRateDisplay = document.querySelector(".fx-rate-display");
             if (elRateDisplay) elRateDisplay.innerText = displayRate.toFixed(4);
             
-            // 🔌 刚性更新：准确展示清算后的买入预测金额
             const elPreview = document.getElementById("buy-amount-preview");
             if (elPreview) elPreview.innerText = `${computedBuyAmount.toFixed(2)} ${buyCurrUpper}`;
 
             const elSellDisplay = document.getElementById("fx-confirm-sell-display");
             if (elSellDisplay) elSellDisplay.innerText = `${sellAmount.toFixed(2)} ${sellCurrUpper}`;
 
-            // 封印锁价单据，修改临门一脚打向后端 /fx/convert 的真实交割契约参数
             document.getElementById("fx-quote-timestamp").value = result.quote_timestamp || result.created_at;
             const modalConfirm = document.getElementById("fx-modal-confirm");
             if (modalConfirm) {
-                // 🔒 刚性注意：传给后端的汇率必须同步锁定为直接标价大盘价，确保结算完全对齐！
-                modalConfirm.dataset.currentRate = displayRate; 
+                modalConfirm.dataset.currentRate = result.final_settlement_rate; 
                 modalConfirm.dataset.routingVia = result.best_provider_key || result.routing_via;
             }
 
