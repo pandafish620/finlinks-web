@@ -351,18 +351,24 @@
             console.log(`[AUDIT LOG] ${message}`);
         };
 
+        // 3. 挂载积木 2：出海收单代收入口
         window.triggerMockPayinCallback = function() {
             const currEl = document.getElementById("collectionCurrency");
             if (currEl && currEl.value) {
                 localStorage.setItem("FINLINKS_LAST_ACTIVE_CURRENCY", currEl.value.toUpperCase().trim());
             }
+            // 📥 收单物理回执成功后，强制等待 400 毫秒再震碎可用余额缓存，杜绝换汇时提示余额不足！
             handleLivePayinCallback(() => {
                 setTimeout(async () => {
-                    if (typeof window.fetchBalances === "function") await window.fetchBalances();
-                }, 300);
+                    if (typeof window.fetchBalances === "function") {
+                        await window.fetchBalances();
+                        window.pushAuditLog("[LIVE UPDATE] 📥 入金成功头寸已全量同步到工作台。");
+                    }
+                }, 400);
             });
         };
 
+        // 4. 挂载积木 3：自主出金放款代付入口
         window.triggerMockPayoutCallback = function() {
             const currEl = document.getElementById("payout-curr");
             if (currEl && currEl.value) {
@@ -371,10 +377,9 @@
             handleLivePayoutDisbursal(() => {
                 setTimeout(async () => {
                     if (typeof window.fetchBalances === "function") await window.fetchBalances();
-                }, 300);
+                }, 400);
             });
         };
-
         window.executeLivePayoutDisbursal = window.triggerMockPayoutCallback;
 
         window.triggerMockReconciliation = async function() {

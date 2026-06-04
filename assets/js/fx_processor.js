@@ -163,37 +163,54 @@ export async function submitFxConversion(null1, null2, null3, pushAuditLog, show
             method: "POST"
         });
 
+        // =================================================================
+        // 🟢 【第一刀纠偏完全体】：大获全换汇结算处理
+        // =================================================================
         if (response.status === 200) {
             const data = await response.json();
             if (fxTimerHandle) { clearInterval(fxTimerHandle); fxTimerHandle = null; }
 
-            if (typeof pushAuditLog === "function") pushAuditLog(`[CLEARING SUCCESS] 🎉 外汇交割成功！流水批次: ${data.fx_batch_ref}`);
+            if (typeof pushAuditLog === "function") {
+                pushAuditLog(`[CLEARING SUCCESS] 🎉 外汇交割成功！流水批次: ${data.fx_batch_ref}`);
+            }
             
-            // 顺利退场
+            // 顺利退出第二合同确认窗
             if (modalConfirm) modalConfirm.classList.add("pointer-events-none", "opacity-0");
-            document.getElementById("sell-amount").value = "";
+            const elSellAmount = document.getElementById("sell-amount");
+            if (elSellAmount) elSellAmount.value = "";
             
-            // 👑 【第一刀纠偏】：注入 300ms 事务清算缓冲保护垫！
-            // 绝杀因为数据库刚刚 commit 还没来得及同步到只读连接引发的“余额没更新”坏账！
-            // =================================================================
-            if (typeof fetchBalances === "function") {
-                if (typeof pushAuditLog === "function") pushAuditLog(`[LIVE AUTOMATION] 物理轧差完成，正在等待云端多账本清算对齐...`);
+            // 🔌 绝杀点：直接检查并呼叫全局 window.fetchBalances，彻底解决匿名作用域丢失！
+            if (typeof window.fetchBalances === "function") {
+                if (typeof pushAuditLog === "function") {
+                    pushAuditLog(`[LIVE AUTOMATION] 物理轧差锁定，正在等待云端多账本清算对齐...`);
+                }
                 setTimeout(async () => {
-                    await fetchBalances(); 
-                    window.pushAuditLog(`[LIVE REPAINT] 🟢 全局多币种可用资产舱重绘重组完毕，头寸已满血同步！`);
-                }, 300); // ⚡ 刚性延时 300 毫秒，体验完全无感，数字完美流式刷新
+                    await window.fetchBalances(); 
+                    if (typeof pushAuditLog === "function") {
+                        pushAuditLog(`[LIVE REPAINT] 🟢 全局多币种可用头寸重绘重组完毕，数字已自发自动更新！`);
+                    }
+                }, 400); // ⚡ 刚性延迟 400 毫秒，彻底防止对账引擎抢仓，确保抓回最新结转账目！
             }
         } else {
-            if (elSubmitBtn) { elSubmitBtn.removeAttribute("disabled"); elSubmitBtn.innerText = "确认执行交易 (Execute)"; }
+            // ❌ 如果第一发网关请求被中台拒绝（非 200 分支），恢复确认按钮通电状态供重新发起
+            if (elSubmitBtn) { 
+                elSubmitBtn.removeAttribute("disabled"); 
+                elSubmitBtn.innerText = "确认执行交易 (Execute)"; 
+            }
             const data = await response.json();
             if (typeof pushAuditLog === "function") pushAuditLog(`[FX REJECTED] 交割失败: ${data.detail || "中台拒绝"}`);
         }
     } catch (catchErr) {
-        if (elSubmitBtn) { elSubmitBtn.removeAttribute("disabled"); elSubmitBtn.innerText = "确认执行交易 (Execute)"; }
-        if (typeof pushAuditLog === "function") pushAuditLog(`[FX TIMEOUT] 通信断路: ${catchErr.message}`);
+        // 🛡️ 只有进入物理断路舱，才恢复按钮状态并安全吃掉异常
+        if (elSubmitBtn) { 
+            elSubmitBtn.removeAttribute("disabled"); 
+            elSubmitBtn.innerText = "确认执行交易 (Execute)"; 
+        }
+        if (typeof pushAuditLog === "function") {
+            pushAuditLog(`[FX TIMEOUT] 外汇物理通信断路: ${catchErr.message}`);
+        }
     }
 }
-
 /**
  * 🔒 3. 强力注销红字冲正算子
  */
