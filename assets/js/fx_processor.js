@@ -8,7 +8,7 @@ let fxTimerHandle = null;
 let fxRemainingSeconds = 10.0;
 
 /**
- * 🔮 1. 独立静默询价算子（敲击第一窗底部的提交，点火第二窗时钟）
+ * 🔮 1. 独立静默询价算子（完全对齐直接标价法与三角套汇清算逻辑）
  */
 export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
     const sellCurrency = document.getElementById("sell-currency").value;
@@ -36,47 +36,69 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
         // 恢复第一窗按钮状态
         if (elInquiryBtn) { elInquiryBtn.removeAttribute("disabled"); elInquiryBtn.innerText = "获取即期汇率报价 (Request Quote)"; }
 
+        // =================================================================
+        // 👑 🟢 【中央自愈并线大闸】：全面对齐直接标价与 1500/100=15 轧差公式
+        // =================================================================
         if (response.status === 200 && result.status === "quoted") {
-            let currentRate = result.final_settlement_rate;
-            if (sellCurrency.toUpperCase() === "USD") { currentRate = 1 / currentRate; }
+            // 💡 A. 前端无条件认领后端清算完毕的直观大盘基准汇率（如 1500.00 或 15.00）
+            let displayRate = result.final_settlement_rate;
+            let computedBuyAmount = 0.00;
 
-            // A. 【硬伤 3 完美闭环】：秒级向左上角常驻 Ticker 气泡视窗灌入活体执行价！
+            const sellCurrUpper = sellCurrency.toUpperCase().trim();
+            const buyCurrUpper = buyCurrency.toUpperCase().trim();
+
+            // 💡 B. 按照直接标价法三大极性，在表现层前线就地执行金额清算，绝杀 400 阻抗！
+            if (sellCurrUpper === "USD") {
+                // 极性 1：卖美金换法币（左侧交易） -> 10 USD * 1500 = 15000 NGN
+                computedBuyAmount = sellAmount * displayRate;
+            } else if (buyCurrUpper === "USD") {
+                // 极性 2：卖法币换美金（右侧交易） -> 界面显示 1500 大盘汇率，后台账本各显神通自动做倒数除法结算！ -> 15000 NGN / 1500 = 10 USD
+                computedBuyAmount = sellAmount / displayRate;
+            } else {
+                // 极性 3：🎯【小币种地缘交叉盘回正】：15000 KES * 15 (displayRate) = 225000 NGN ！！！
+                // 严格遵循 P_tgt / P_src 三角轧差，前台直接相乘，财务勾稽关系全盘咬合！
+                computedBuyAmount = sellAmount * displayRate;
+            }
+
+            // A. 【常驻 Ticker 遥测小弹窗复活线】：秒级向左上角气泡视窗灌入直观价
             const tickerContainer = document.getElementById("global-fx-ticker");
             if (tickerContainer) {
                 tickerContainer.innerHTML = `
-                    <div class="flex items-center space-x-1 text-[11px] font-mono bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-0.5 rounded-full text-emerald-400 animate-pulse">
+                    <div class="flex items-center space-x-1 text-[11px] font-mono bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-0.5 rounded-full text-emerald-400 animate-pulse shadow-lg shadow-emerald-500/5">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 inline-block"></span>
-                        即期锁价: ${sellCurrency.toUpperCase()}/${buyCurrency.toUpperCase()} -> <span class="text-white font-bold ml-1">${currentRate.toFixed(5)}</span>
+                        即期锁价: ${sellCurrUpper}/${buyCurrUpper} -> <span class="text-white font-bold ml-1">${displayRate.toFixed(4)}</span>
                     </div>`;
             }
 
-            // B. 动态挂载第二窗文本节点值
+            // B. 动态挂载第二窗文本节点值，让商户彻底摆脱 0.000664 的认知折磨！
             const elRateDisplay = document.querySelector(".fx-rate-display");
-            if (elRateDisplay) elRateDisplay.innerText = currentRate.toFixed(6);
+            if (elRateDisplay) elRateDisplay.innerText = displayRate.toFixed(4);
             
+            // 🔌 刚性更新：准确展示清算后的买入预测金额
             const elPreview = document.getElementById("buy-amount-preview");
-            if (elPreview) elPreview.innerText = `${result.expected_buy_amount.toFixed(2)} ${buyCurrency}`;
+            if (elPreview) elPreview.innerText = `${computedBuyAmount.toFixed(2)} ${buyCurrUpper}`;
 
             const elSellDisplay = document.getElementById("fx-confirm-sell-display");
-            if (elSellDisplay) elSellDisplay.innerText = `${sellAmount.toFixed(2)} ${sellCurrency.toUpperCase()}`;
+            if (elSellDisplay) elSellDisplay.innerText = `${sellAmount.toFixed(2)} ${sellCurrUpper}`;
 
-            // 封印时间戳
-            document.getElementById("fx-quote-timestamp").value = result.quote_timestamp;
+            // 封印锁价单据，修改临门一脚打向后端 /fx/convert 的真实交割契约参数
+            document.getElementById("fx-quote-timestamp").value = result.quote_timestamp || result.created_at;
             const modalConfirm = document.getElementById("fx-modal-confirm");
             if (modalConfirm) {
-                modalConfirm.dataset.currentRate = result.final_settlement_rate; 
-                modalConfirm.dataset.routingVia = result.routing_via;
+                // 🔒 刚性注意：传给后端的汇率必须同步锁定为直接标价大盘价，确保结算完全对齐！
+                modalConfirm.dataset.currentRate = displayRate; 
+                modalConfirm.dataset.routingVia = result.best_provider_key || result.routing_via;
             }
 
             // =================================================================
-            // 👑 【时序齿轮咬合】：静默隐藏第一窗，满血跳出霸屏第二确认窗！
+            // 👑 【时序齿轮轮转】：静默收卷第一输入窗，霸屏跳出第二合同确认窗！
             // =================================================================
             const modalInput = document.getElementById("fx-modal-input");
             if (modalInput) modalInput.classList.add("pointer-events-none", "opacity-0");
             if (modalConfirm) modalConfirm.classList.remove("pointer-events-none", "opacity-0");
 
             if (typeof pushAuditLog === "function") {
-                pushAuditLog(`[SOR QUOTE] 大厂报价解算完成！固价合同已锁定。渠道: ${result.routing_via} | 执行价: ${currentRate.toFixed(6)}`);
+                pushAuditLog(`[SOR QUOTE] 极性全量回正！大厅执行汇率: ${displayRate.toFixed(4)} | 预期到账金额: ${computedBuyAmount.toFixed(2)}`);
             }
 
             // =================================================================
