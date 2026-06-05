@@ -9,186 +9,334 @@
         // 🔒 刚性零信任保镖：未确权登录者直接就地轰回 login.html
         if (typeof window.authGuard === "function") window.authGuard();
     </script>
+    <style>
+        /* 🎨 步骤指示器的赛博朋克微光特效 */
+        .step-dot {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .step-dot.active {
+            box-shadow: 0 0 20px rgba(52, 211, 153, 0.4);
+        }
+        /* 🛡️ 卡片硬核物理隐藏动画 */
+        .kyb-step-panel {
+            display: none;
+        }
+        .kyb-step-panel.active {
+            display: block;
+            animation: slideIn 0.35s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(15px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
 </head>
-<body class="bg-[#0f172a] text-[#f8fafc] font-mono p-6 md:p-12 selection:bg-emerald-500/30">
+<body class="bg-[#0f172a] text-[#f8fafc] font-mono p-4 md:p-12 selection:bg-emerald-500/30">
 
-    <div class="max-w-3xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl relative">
+    <div class="max-w-3xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-10 shadow-2xl relative">
         
-        <div class="flex items-center space-x-2 mb-3">
-            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-            <h1 class="text-xs font-bold tracking-widest text-slate-400 uppercase">FinLinks Sovereign Compliance Gate</h1>
+        <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
+            <div class="flex items-center space-x-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <h1 class="text-xs font-bold tracking-widest text-slate-400 uppercase">FinLinks Sovereign Compliance Gate</h1>
+            </div>
+            <div class="flex items-center space-x-3 text-xs font-bold">
+                <span id="dot1" class="step-dot active px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500 text-emerald-400">1.身份确权</span>
+                <span class="text-slate-600">➔</span>
+                <span id="dot2" class="step-dot px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-500">2.业务对账</span>
+                <span class="text-slate-600">➔</span>
+                <span id="dot3" class="step-dot px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-500">3.资产挂载</span>
+            </div>
         </div>
-        <h2 class="text-2xl font-black text-white mb-2">商户高级尽职调查问卷 (KYB Questionnaire)</h2>
-        <p class="text-xs text-slate-400 mb-6 leading-relaxed">
-            根据国际反洗钱（AML）及跨境聚合收单合规风控标准，请完整落盘您的企业法律指纹。
-            <span class="text-amber-400">标有 <span class="text-rose-500 font-bold">*</span> 的项目为刚性核心必填项，其余为选填项。</span>
+
+        <h2 class="text-2xl md:text-3xl font-black text-white mb-2 tracking-tight">商户高级尽职调查问卷 (KYB Wizard)</h2>
+        <p class="text-xs text-slate-400 mb-8 leading-relaxed">
+            根据国际反洗钱（AML）及跨境聚合收单合规风控标准，分步清洗您的企业法律指纹。
+            <span class="text-amber-400 font-semibold block mt-1">当前步骤中标记有 * 的项目具有前端正则刚性拦截保护。</span>
         </p>
 
         <div id="kyb-alert-box" class="hidden mb-6 p-4 rounded-xl text-xs font-mono border leading-relaxed"></div>
 
-        <form id="kybQuestionnaireForm" onsubmit="handleLiveKybSubmit(event)" class="space-y-6">
+        <form id="kybStepWizardForm" onsubmit="return false;" class="space-y-6">
             
             <input type="hidden" id="kyb-email">
 
-            <div class="bg-slate-950/60 p-5 rounded-xl border border-slate-800/80 space-y-4">
-                <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-widest border-b border-slate-800/60 pb-2">📂 单元一：企业基本法人主体指纹</h3>
-                
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-400 tracking-wider mb-1.5">1.1 企业法律实体官方名称 (Company Registered Name) <span class="text-rose-500">*</span></label>
-                    <input type="text" id="companyName" disabled class="w-full bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-xs text-slate-400 font-bold font-mono cursor-not-allowed select-none" value="正在拉取核心账本注册实体...">
-                </div>
-
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-400 tracking-wider mb-1.5">1.2 企业官方公开网站 (Company Website)</label>
-                    <input type="url" id="companyWebsite" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono transition-all" placeholder="https://www.yourcompany.com (选填)">
-                </div>
-            </div>
-
-            <div class="bg-slate-950/60 p-5 rounded-xl border border-slate-800/80 space-y-4">
-                <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-widest border-b border-slate-800/60 pb-2">📋 单元二：合规风险审查 Questionnaire</h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="kyb-step-panel active space-y-5" id="stepPanel1">
+                <div class="bg-slate-950/60 p-5 rounded-xl border border-slate-800/80 space-y-4">
+                    <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-widest border-b border-slate-800/60 pb-2">📂 单元一：基础通讯与主体确权</h3>
+                    
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-400 tracking-wider mb-1.5">2.1 最终受益人/实控人姓名 (UBO Full Name) <span class="text-rose-500">*</span></label>
-                        <input type="text" id="uboName" symmetric-required="true" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono transition-all" placeholder="请输入执照占股25%以上的法人姓名">
+                        <label class="block text-xs md:text-[13px] font-bold text-slate-300 tracking-wider mb-2">1.1 企业法律实体官方名称 (Company Registered Name) <span class="text-rose-500">*</span></label>
+                        <input type="text" id="companyName" disabled class="w-full bg-slate-900/60 border border-slate-800 rounded-xl p-3.5 text-xs md:text-sm text-slate-400 font-bold font-mono cursor-not-allowed select-none" value="正在拉取核心账本注册实体...">
                     </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-400 tracking-wider mb-1.5">2.2 董事及UBO法定证件号 (Passport / ID Number) <span class="text-rose-500">*</span></label>
-                        <input type="text" id="passportId" symmetric-required="true" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono transition-all" placeholder="请输入护照号或法定身份证号">
-                    </div>
-                </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-400 tracking-wider mb-1.5">2.3 预计每月跨国清算流水量 (Estimated Monthly Vol USD) <span class="text-rose-500">*</span></label>
-                        <input type="number" id="monthlyVol" symmetric-required="true" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-emerald-400 focus:outline-none focus:border-emerald-500 font-mono transition-all" placeholder="如：50000.00">
+                        <label class="block text-xs md:text-[13px] font-bold text-slate-300 tracking-wider mb-2">1.2 企业验证电子邮箱 (Compliance Email Verified) <span class="text-rose-500">*</span></label>
+                        <input type="text" id="displayEmail" disabled class="w-full bg-slate-900/60 border border-slate-800 rounded-xl p-3.5 text-xs md:text-sm text-slate-400 font-bold font-mono cursor-not-allowed select-none">
                     </div>
+
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-400 tracking-wider mb-1.5">2.4 拟启用的外汇清算业务模态 (Business Intent Type) <span class="text-rose-500">*</span></label>
-                        <select id="businessIntent" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono transition-all">
-                            <option value="BOTH">BOTH (兼顾出海收单代收与自主放款代付)</option>
-                            <option value="PAYIN">PAYIN (仅使用跨国聚合收单代收入口)</option>
-                            <option value="PAYOUT">PAYOUT (仅使用自主出金下发代付出口)</option>
-                        </select>
+                        <label class="block text-xs md:text-[13px] font-bold text-slate-300 tracking-wider mb-2">1.3 运营负责人电话号码 (Contact Phone with Country Code) <span class="text-rose-500">*</span></label>
+                        <input type="text" id="phone" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs md:text-sm text-white focus:outline-none focus:border-emerald-500 font-mono transition-all" placeholder="例如: +8613800000000 (需带国别码)">
                     </div>
-                </div>
 
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-400 tracking-wider mb-1.5">2.5 主营业务范围与场景描述 (Detailed Business Description) <span class="text-rose-500">*</span></label>
-                    <textarea id="companyDesc" symmetric-required="true" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-emerald-500 font-mono transition-all leading-relaxed" placeholder="请简要阐述您的具体出海业务场景（如：跨境电商、独立站、地缘网关清算等）..."></option></textarea>
-                </div>
-
-                <div class="p-3.5 bg-slate-900/40 rounded-xl border border-dashed border-slate-800 text-[11px] text-slate-400 leading-relaxed">
-                    ℹ️ <span class="text-slate-300 font-bold">提示：</span>以下两项信息为<span class="text-emerald-400 font-bold">非必填项</span>。填写这些非必填信息将有助于 FinLinks 中央中台更好地为您筛选、对冲并聚合全球最优的地缘通道产品、滑点滑损对冲与出海流动性增值服务。
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 tracking-wider mb-1.5">2.6 拟主攻购结汇交易方向 (FX Intent Direction)</label>
-                        <select id="fxIntent" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-400 focus:outline-none focus:border-emerald-500 font-mono">
-                            <option value="NOT_SPECIFIED">未指定 (由中台自动适配)</option>
-                            <option value="BUY_FX">主要倾向于购汇 (用小币种买美金硬通货)</option>
-                            <option value="SELL_FX">主要倾向于结汇 (用硬通货兑换地缘本地法币)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-500 tracking-wider mb-1.5">2.7 预计覆盖的跨国地缘航线 (Target Geopolitical Corridors)</label>
-                        <input type="text" id="targetCountries" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-400 focus:outline-none focus:border-emerald-500 font-mono" placeholder="多个请用逗号隔开，如: NGN, KES, GB, CN">
+                        <label class="block text-xs md:text-[13px] font-bold text-slate-300 tracking-wider mb-2">1.4 企业官方公开网站 (Company Website) <span class="text-rose-500">*</span></label>
+                        <input type="url" id="companyWebsite" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs md:text-sm text-white focus:outline-none focus:border-emerald-500 font-mono transition-all" placeholder="https://www.yourcompany.com">
                     </div>
                 </div>
             </div>
 
-            <div class="bg-slate-950/60 p-5 rounded-xl border border-slate-800/80 space-y-5">
-                <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-widest border-b border-slate-800/60 pb-2">📁 单元三：金融级核心合规存证材料 (Dossier Attachments)</h3>
-                
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-300 mb-1.5">3.1 企业官方正式注册章程 / 营业执照 (Articles of Association) <span class="text-rose-500">*</span></label>
-                    <p class="text-[10px] text-slate-500 mb-2">请上传带有当地政府钢印的公司注册证书或执照证明文件（支持 PDF / JPG / PNG）。</p>
-                    <input type="file" id="fileArticles" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-400 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer">
-                </div>
-                
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-300 mb-1.5">3.2 法人董事及实控人护照正反面高精扫描件 (UBO Passport Copy) <span class="text-rose-500">*</span></label>
-                    <p class="text-[10px] text-slate-500 mb-2">请确保护照个人信息、签名页照片清晰可见无遮挡，并在有效期内（支持 PDF / JPG / PNG）。</p>
-                    <input type="file" id="filePassport" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-400 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer">
-                </div>
+            <div class="kyb-step-panel space-y-5" id="stepPanel2">
+                <div class="bg-slate-950/60 p-5 rounded-xl border border-slate-800/80 space-y-4">
+                    <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-widest border-b border-slate-800/60 pb-2">📋 单元二：合规风险审查 Questionnaire</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs md:text-[13px] font-bold text-slate-300 tracking-wider mb-2">2.1 最终受益人/实控人姓名 (UBO Full Name) <span class="text-rose-500">*</span></label>
+                            <input type="text" id="uboName" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs md:text-sm text-white focus:outline-none focus:border-emerald-500 font-mono transition-all" placeholder="执照占股25%以上的法人姓名">
+                        </div>
+                        <div>
+                            <label class="block text-xs md:text-[13px] font-bold text-slate-300 tracking-wider mb-2">2.2 董事及UBO法定证件号 (Passport / ID) <span class="text-rose-500">*</span></label>
+                            <input type="text" id="passportId" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs md:text-sm text-white focus:outline-none focus:border-emerald-500 font-mono transition-all" placeholder="请输入护照号或法定身份证号">
+                        </div>
+                    </div>
 
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-500 mb-1.5">3.3 企业实体近期运营地址证明 / 银行对账单流水 (Proof of Business Address)</label>
-                    <p class="text-[10px] text-slate-600 mb-2">可上传近3个月内的水电气开户账单、或正印商业银行流水对账单，需包含公司完整名称与地址（选填）。</p>
-                    <input type="file" id="fileAddress" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-slate-800/40 file:text-slate-400 hover:file:bg-slate-700/40 cursor-pointer">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs md:text-[13px] font-bold text-slate-300 tracking-wider mb-2">2.3 预计每月跨国清算流水量 (Monthly Vol USD) <span class="text-rose-500">*</span></label>
+                            <input type="number" id="monthlyVol" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs md:text-sm text-emerald-400 focus:outline-none focus:border-emerald-500 font-mono transition-all" placeholder="纯数字，如：500000">
+                        </div>
+                        <div>
+                            <label class="block text-xs md:text-[13px] font-bold text-slate-300 tracking-wider mb-2">2.4 拟启用的外汇清算业务模态 (Business Intent) <span class="text-rose-500">*</span></label>
+                            <select id="businessIntent" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs md:text-sm text-white focus:outline-none focus:border-emerald-500 font-mono transition-all cursor-pointer">
+                                <option value="BOTH">BOTH (兼顾出海收单代收与自主放款代付)</option>
+                                <option value="PAYIN">PAYIN (仅使用跨国聚合收单代收入口)</option>
+                                <option value="PAYOUT">PAYOUT (仅使用自主出金下发代付出口)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs md:text-[13px] font-bold text-slate-300 tracking-wider mb-2">2.5 主营业务范围与场景描述 (Detailed Description) <span class="text-rose-500">*</span></label>
+                        <textarea id="companyDesc" rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs md:text-sm text-white focus:outline-none focus:border-emerald-500 font-mono transition-all leading-relaxed" placeholder="请简要阐述您的具体出海业务场景，不能少于10个字..."></textarea>
+                    </div>
+
+                    <div class="p-3.5 bg-slate-900/40 rounded-xl border border-dashed border-slate-800 text-[11px] text-slate-400 leading-relaxed">
+                        ℹ️ 提示：以下两项为出海清算智能分流对冲参考（选填项目）。
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs md:text-[11px] font-bold text-slate-500 tracking-wider mb-1.5">2.6 拟主攻购结汇交易方向 (FX Intent Direction)</label>
+                            <select id="fxIntent" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-400 focus:outline-none focus:border-emerald-500 font-mono cursor-pointer">
+                                <option value="NOT_SPECIFIED">未指定 (由中台自动适配)</option>
+                                <option value="BUY_FX">主要倾向于购汇 (用小币种买美金硬通货)</option>
+                                <option value="SELL_FX">主要倾向于结汇 (用硬通货兑换地缘本地法币)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs md:text-[11px] font-bold text-slate-500 tracking-wider mb-1.5">2.7 预计覆盖的地缘航线 (Target Corridors)</label>
+                            <input type="text" id="targetCountries" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-400 focus:outline-none focus:border-emerald-500 font-mono" placeholder="如: NGN, KES, USD">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <button type="submit" id="kybBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black py-4 rounded-xl text-xs tracking-widest transition-all duration-300 uppercase shadow-lg shadow-emerald-500/10 active:scale-[0.98] cursor-pointer">
-                签署确权并正式递交合规舱 (Submit KYB Dossier)
-            </button>
+            <div class="kyb-step-panel space-y-5" id="stepPanel3">
+                <div class="bg-slate-950/60 p-5 rounded-xl border border-slate-800/80 space-y-5">
+                    <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-widest border-b border-slate-800/60 pb-2">📁 单元三：金融级核心合规存证材料</h3>
+                    
+                    <div>
+                        <label class="block text-xs md:text-[13px] font-bold text-slate-300 mb-1.5">3.1 企业官方正式注册章程 / 营业执照 (Articles of Association) <span class="text-rose-500">*</span></label>
+                        <p class="text-[10px] text-slate-500 mb-2">支持 PDF / JPG / PNG。</p>
+                        <input type="file" id="fileArticles" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-400 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs md:text-[13px] font-bold text-slate-300 mb-1.5">3.2 法人董事及实控人护照正反面高精扫描件 (UBO Passport Copy) <span class="text-rose-500">*</span></label>
+                        <p class="text-[10px] text-slate-500 mb-2">信息照片清晰可见无遮挡，且在有效期内。</p>
+                        <input type="file" id="filePassport" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-400 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs md:text-[13px] font-bold text-slate-400 mb-1.5">3.3 企业实体近期运营地址证明 / 银行对账单 (Proof of Business Address) <span class="text-rose-500">*</span></label>
+                        <p class="text-[10px] text-slate-600 mb-2">近3个月内的水电气开户账单或正印商业银行流水（已根据后台合规标准修正为必填项）。</p>
+                        <input type="file" id="fileAddress" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-400 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-4 border-t border-slate-800">
+                <button type="button" id="btnPrev" class="hidden bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-6 rounded-xl text-xs tracking-widest transition-all cursor-pointer" onclick="navigateStep(-1)">
+                    返回上一步 (Previous)
+                </button>
+                <button type="button" id="btnNext" class="ml-auto bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-3 px-6 rounded-xl text-xs tracking-widest transition-all cursor-pointer" onclick="navigateStep(1)">
+                    验证并进入下一步 (Next Step)
+                </button>
+                <button type="button" id="btnSubmit" class="hidden ml-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black py-3 px-8 rounded-xl text-xs tracking-widest transition-all duration-300 uppercase shadow-lg shadow-emerald-500/10 cursor-pointer" onclick="executeFinalSubmit()">
+                    签署确权并正式递交合规舱 (Submit KYB Dossier)
+                </button>
+            </div>
         </form>
     </div>
 
     <script>
-        // 初始化：生擒活体商户会话数据
-        document.getElementById("kyb-email").value = localStorage.getItem("FINLINKS_ACTIVE_MID") || "";
+        let currentStep = 1;
+
+        // 🧠 初始化：全自动生擒活体商户会话数据
+        const activeEmail = localStorage.getItem("FINLINKS_ACTIVE_MID") || "";
+        document.getElementById("kyb-email").value = activeEmail;
+        
+        const elDisplayEmail = document.getElementById("displayEmail");
+        if (elDisplayEmail) elDisplayEmail.value = activeEmail || "未关联到确权身份";
+
         const elCompanyName = document.getElementById("companyName");
         if (elCompanyName) {
             elCompanyName.value = localStorage.getItem("FINLINKS_COMPANY_NAME") || "FinLinks 研发期商户舱";
         }
 
-        async function handleLiveKybSubmit(e) {
-            e.preventDefault();
-            const btn = document.getElementById("kybBtn");
+        // 🔬 漏斗舱核心：前置步骤的刚性正则拦截对账
+        function validateStepGuard() {
+            const alertBox = document.getElementById("kyb-alert-box");
+            alertBox.className = "hidden mb-6 p-4 rounded-xl text-xs font-mono border leading-relaxed";
+
+            if (currentStep === 1) {
+                const phone = document.getElementById("phone").value.trim();
+                const website = document.getElementById("companyWebsite").value.trim();
+
+                if (!phone.startsWith("+") || phone.length < 7) {
+                    revealError("❌ [VALIDATION REJECTED] 运营负责人电话号码不能为空，且必须包含国际区号（以 + 开头，如 +86138...）");
+                    return false;
+                }
+                if (!/^https?:\/\/.+/.test(website)) {
+                    revealError("❌ [VALIDATION REJECTED] 企业官方公开网站格式不合规，必须以 http:// 或 https:// 开头");
+                    return false;
+                }
+            }
+
+            if (currentStep === 2) {
+                const uboName = document.getElementById("uboName").value.trim();
+                const passportId = document.getElementById("passportId").value.trim();
+                const monthlyVol = document.getElementById("monthlyVol").value.trim();
+                const companyDesc = document.getElementById("companyDesc").value.trim();
+
+                if (!uboName || uboName.length < 2) {
+                    revealError("❌ [VALIDATION REJECTED] 最终受益人/实控人姓名不能为空且不能少于 2 个字符");
+                    return false;
+                }
+                if (!passportId) {
+                    revealError("❌ [VALIDATION REJECTED] 董事及UBO法定证件号属于风控要素，不能为空");
+                    return false;
+                }
+                if (!monthlyVol || parseFloat(monthlyVol) <= 0) {
+                    revealError("❌ [VALIDATION REJECTED] 预计每月跨境流水必须是大于 0 的纯数字");
+                    return false;
+                }
+                if (companyDesc.length < 10) {
+                    revealError("❌ [VALIDATION REJECTED] 主营业务范围描述是审查核心，为了保证穿透通过，请至少填写 10 个字符");
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function revealError(msg) {
+            const alertBox = document.getElementById("kyb-alert-box");
+            alertBox.className = "mb-6 p-4 rounded-xl text-xs font-mono border bg-red-950/40 border-red-500/30 text-rose-400 leading-relaxed animate-pulse";
+            alertBox.innerText = msg;
+        }
+
+        // 🧭 状态机卡片平移切换引擎
+        function navigateStep(direction) {
+            if (direction === 1 && !validateStepGuard()) return; // 拦截熔断
+
+            currentStep += direction;
+
+            // 物理控制卡片的显隐
+            for (let i = 1; i <= 3; i++) {
+                const panel = document.getElementById(`stepPanel${i}`);
+                const dot = document.getElementById(`dot${i}`);
+                
+                if (i === currentStep) {
+                    panel.classList.add("active");
+                    dot.className = "step-dot active px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500 text-emerald-400";
+                } else if (i < currentStep) {
+                    panel.classList.remove("active");
+                    dot.className = "step-dot px-3 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-500 line-through";
+                } else {
+                    panel.classList.remove("active");
+                    dot.className = "step-dot px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-500";
+                }
+            }
+
+            // 动态修正三个操控按钮的状态
+            const btnPrev = document.getElementById("btnPrev");
+            const btnNext = document.getElementById("btnNext");
+            const btnSubmit = document.getElementById("btnSubmit");
+
+            btnPrev.classList.toggle("hidden", currentStep === 1);
+            if (currentStep === 3) {
+                btnNext.classList.add("hidden");
+                btnSubmit.classList.remove("hidden");
+            } else {
+                btnNext.classList.remove("hidden");
+                btnSubmit.classList.add("hidden");
+            }
+        }
+
+        // 🚀 实弹击发：完全回滚并对齐你最原始的后端 API 命名契约，绝不产生代码冲突
+        async function executeFinalSubmit() {
+            const btn = document.getElementById("btnSubmit");
             const alertBox = document.getElementById("kyb-alert-box");
             const liveEmail = document.getElementById("kyb-email").value;
 
             alertBox.className = "hidden mb-6 p-4 rounded-xl text-xs font-mono border leading-relaxed";
 
-            // 1. 刚性人肉核销：前台校验所有带 * 号项目的必填约束
-            const uboName = document.getElementById("uboName").value.trim();
-            const passportId = document.getElementById("passportId").value.trim();
-            const monthlyVol = document.getElementById("monthlyVol").value.trim();
-            const companyDesc = document.getElementById("companyDesc").value.trim();
+            // 单元三刚性校核：3 枚大文件必须同时挂载到位
             const fileArticles = document.getElementById("fileArticles").files[0];
             const filePassport = document.getElementById("filePassport").files[0];
+            const fileAddress = document.getElementById("fileAddress").files[0];
 
-            if (!uboName || !passportId || !monthlyVol || !companyDesc || !fileArticles || !filePassport) {
-                alertBox.className = "mb-6 p-4 rounded-xl text-xs font-mono border bg-red-950/40 border-red-500/30 text-rose-400 leading-relaxed";
-                alertBox.innerText = "❌ [VALIDATION REJECTED] 请完整填写所有标有 * 号的必填核心资信字段与证明材料！";
+            if (!fileArticles || !filePassport || !fileAddress) {
+                revealError("❌ [VALIDATION REJECTED] 单元三中的 3 项核心物理合规材料（章程、护照、地址证明）全部为刚性必填，请完整挂载文件！");
                 return;
             }
 
             btn.disabled = true;
-            btn.innerText = "正在打包 Questionnaire 问卷资产并执行物理交割...";
+            btn.innerText = "正在打包合规资产并执行物理交割...";
 
-            // 2. 利用 FormData 完美并线 Multipart/Form-Data 二进制大闸
+            // ⚙️ 编织完全体金融级 Multipart 报文 —— 🔒 精准复活回滚你原版的后端 Key 契约！
             const formData = new FormData();
-            formData.append("ubo_name", uboName);
-            formData.append("passport_or_id", passportId);
-            formData.append("estimated_monthly_vol", monthlyVol);
-            formData.append("business_type_intent", document.getElementById("businessIntent").value);
-            formData.append("company_description", companyDesc);
+            formData.append("email", liveEmail); // 🟢 刚性补枪！彻底接通后端的第一个大门槛！
+            formData.append("ubo_name", document.getElementById("uboName").value.trim());
+            formData.append("passport_or_id", document.getElementById("passportId").value.trim()); // 🟢 回滚原版 Key
+            formData.append("estimated_monthly_vol", document.getElementById("monthlyVol").value.trim());
+            formData.append("business_type_intent", document.getElementById("businessIntent").value);    // 🟢 回滚原版 Key
+            formData.append("business_description", document.getElementById("companyDesc").value.trim()); // 🟢 回滚原版 Key
             
-            // 选填字段（即使为空，Form 也会优雅降级处理）
+            // 扩容并入的基础通讯信息
             formData.append("company_website", document.getElementById("companyWebsite").value.trim());
+            formData.append("phone", document.getElementById("phone").value.trim());
+            
+            // 选填参考字段保持原状优雅出网
             formData.append("fx_intent_type", document.getElementById("fxIntent").value);
-            formData.append("target_countries_text", document.getElementById("targetCountries").value.trim());
+            formData.append("target_countries", document.getElementById("targetCountries").value.trim());
 
-            // 物理挂载附件
+            // 并线物理多媒体流
             formData.append("file_articles", fileArticles);
             formData.append("file_passport", filePassport);
-            
-            // 选填文件附件处理
-            const fileAddress = document.getElementById("fileAddress").files[0];
-            if (fileAddress) {
-                formData.append("file_address", fileAddress);
-            }
+            formData.append("file_address", fileAddress);
 
             try {
+                // 环境动态对账：自适应本地研发舱与 Render 公网生产舱
                 const BASE_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" 
                     ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
 
+                // URL 传递 email 作为 Query，实体打包原有命名，完美咬合后端血管
                 const response = await fetch(`${BASE_URL}/auth/onboarding/submit-detailed-kyb?email=${encodeURIComponent(liveEmail)}`, {
                     method: "POST",
-                    body: formData // ⚠️ 注意：禁止手动强行添加 Content-Type header，交由浏览器自动对齐 Boundary 分割线！
+                    body: formData
                 });
 
                 const result = await response.json();
@@ -196,16 +344,15 @@
                 if (response.status === 200) {
                     localStorage.setItem("FINLINKS_ACCOUNT_STATUS", "UNDER_REVIEW");
                     alertBox.className = "mb-6 p-4 rounded-xl text-xs font-mono border bg-emerald-950/40 border-emerald-500/30 text-emerald-400 leading-relaxed";
-                    alertBox.innerText = `🏁 [KYB ACCEPTED] 问卷资信大胜归档！\n${result.msg}`;
+                    alertBox.innerText = `🏁 [KYB COMPLETED] 问卷要素与 3 大附件全量交割大胜！\n商户已转入受审待定状态。`;
                     btn.innerText = "合规受审中 (UNDER_REVIEW)";
                 } else {
-                    throw new Error(result.detail || "中台合规舱拒绝了这发数据交割");
+                    throw new Error(result.detail || "飞书清算中台或风控网关硬性熔断");
                 }
             } catch (err) {
                 btn.disabled = false;
                 btn.innerText = "签署确权并正式递交合规舱 (Submit KYB Dossier)";
-                alertBox.className = "mb-6 p-4 rounded-xl text-xs font-mono border bg-red-950/40 border-red-500/30 text-rose-400 leading-relaxed";
-                alertBox.innerText = `❌ [COMPLIANCE ERROR] 递交熔断: ${err.message}`;
+                revealError(`❌ [COMPLIANCE ERROR] 递交熔断: ${err.message}`);
             }
         }
     </script>
