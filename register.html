@@ -13,9 +13,9 @@
             <h2 class="text-sm font-bold tracking-widest text-slate-400 uppercase">FinLinks Onboarding Gateway</h2>
         </div>
         <h1 class="text-2xl font-bold text-white mb-2">自主入驻开户</h1>
-        <p class="text-xs text-slate-500 mb-6">全自动高级 KYB 系统 · 24小时自动化过闸</p>
+        <p class="text-xs text-slate-500 mb-6">全自动KYB 系统 · 24小时自动化过闸</p>
 
-        <div id="reg-alert-box" class="hidden mb-4 p-3 rounded-lg text-xs"></div>
+        <div id="reg-alert-box" class="hidden mb-4 p-3 rounded-lg text-xs leading-relaxed"></div>
 
         <form id="register-form" class="space-y-4" onsubmit="handleLiveRegister(event)">
             <div>
@@ -38,13 +38,13 @@
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">设定账户主权密码</label>
                 <input type="password" id="reg-password" required class="w-full bg-slate-950 border border-slate-800 px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-teal-500/50 text-white" placeholder="••••••••">
             </div>
-            <button type="submit" id="reg-btn" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold py-3.5 rounded-xl transition duration-300 text-sm shadow-lg cursor-pointer">
-                向核心账本递交申请 (Submit)
+            <button type="submit" id="reg-btn" class="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold py-3.5 rounded-xl transition duration-300 text-sm shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                向核心账本提交申请 (Submit)
             </button>
         </form>
 
         <div class="mt-6 pt-4 border-t border-slate-800/60 text-center">
-            <p class="text-xs text-slate-500">已有主权账户？<a href="./login.html" class="text-teal-400 hover:underline">直接进入密码学核销大厅 →</a></p>
+            <p class="text-xs text-slate-500">已有账户？<a href="./login.html" class="text-teal-400 hover:underline">直接进入密码学核销大厅 →</a></p>
         </div>
     </div>
 
@@ -54,33 +54,67 @@
             const btn = document.getElementById("reg-btn");
             const alertBox = document.getElementById("reg-alert-box");
             
-            alertBox.className = "hidden mb-4 p-3 rounded-lg text-xs";
+            // 1. 初始化弹窗与按钮状态机的拦截锁定
+            alertBox.className = "hidden mb-4 p-3 rounded-lg text-xs leading-relaxed";
             btn.setAttribute("disabled", "true");
-            btn.innerText = "底层密码学加盐强洗编译中...";
+            btn.innerText = "中台中央资产库强行清洗并固化落盘中...";
 
+            // 2. 生擒前台表单活体数据载荷
             const payload = {
-                customer_name: document.getElementById("reg-name").value,
-                email: document.getElementById("reg-email").value,
-                phone_with_code: document.getElementById("reg-phone").value,
-                company_name: document.getElementById("reg-company").value,
+                customer_name: document.getElementById("reg-name").value.trim(),
+                email: document.getElementById("reg-email").value.trim().toLowerCase(),
+                phone_with_code: document.getElementById("reg-phone").value.trim(),
+                company_name: document.getElementById("reg-company").value.trim(),
                 password: document.getElementById("reg-password").value
             };
 
-            window.authSentinel.registerMerchant(payload,
-                (successData) => {
+            // 3. 动态识别本地与远程云端生产环境的基准 URL 立交桥
+            const BASE_URL = (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost")
+                ? "http://127.0.0.1:8000" 
+                : "https://finlinks-backend.onrender.com";
+
+            try {
+                // 4. 🚀 刚性穿透！发起具有物理法律效力的真实异步网络请求，直击后端核心持久化端点
+                const response = await fetch(`${BASE_URL}/auth/onboarding/register-pending`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json; charset=utf-8"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // 后端物理存储大胜，成功执行 db.commit()
                     btn.innerText = "开户申请递交成功";
-                    alertBox.innerText = successData.msg;
+                    alertBox.innerHTML = `🎉 [REGISTRY SUCCESS] ${result.msg || "商户主权账户成功物理雕刻在云端资产库！请立即执行激活特赦程序。"}`;
                     alertBox.classList.add("bg-emerald-950/40", "border", "border-emerald-500/30", "text-emerald-400");
                     alertBox.classList.remove("hidden");
-                },
-                (errorMsg) => {
-                    btn.removeAttribute("disabled");
-                    btn.innerText = "向核心账本递交申请 (Submit)";
-                    alertBox.innerText = `[REGISTRY REJECTED] ${errorMsg}`;
-                    alertBox.classList.add("bg-red-950/40", "border", "border-red-500/30", "text-red-400");
-                    alertBox.classList.remove("hidden");
+
+                    // 5. 🟢 优雅并线：向下兼容你的历史哨兵脚本（若本地组件有其他事件监听，在此同步触发同步平账）
+                    if (window.authSentinel && typeof window.authSentinel.registerMerchant === "function") {
+                        window.authSentinel.registerMerchant(payload, () => {}, () => {});
+                    }
+
+                    // 自动引流至核销大厅
+                    setTimeout(() => {
+                        window.location.href = "./login.html";
+                    }, 2000);
+
+                } else {
+                    // 后端抛出 400 或 422 风控熔断拒绝
+                    throw new Error(result.detail || "未知合规冲突");
                 }
-            );
+
+            } catch (error) {
+                // 6. 异常熔断保护与降级回流
+                btn.removeAttribute("disabled");
+                btn.innerText = "向核心账本递交申请 (Submit)";
+                alertBox.innerText = `❌ [REGISTRY REJECTED] ${error.message}`;
+                alertBox.classList.add("bg-red-950/40", "border", "border-red-500/30", "text-red-400");
+                alertBox.classList.remove("hidden");
+            }
         }
     </script>
 </body>
