@@ -14,6 +14,11 @@ import { triggerLiveQuote, submitFxConversion } from './fx_processor.js';
 import { handleLivePayoutDisbursal } from './payout_dispatcher.js';
 
 document.addEventListener("DOMContentLoaded", () => {
+    // 📄 追加到 assets/js/dashboard.js 的 DOMContentLoaded 内部第一行
+    const showPremiumNotification = window.showPremiumNotification || function(msg) { 
+        if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[NOTIFICATION] 📢 ${msg}`); 
+    };
+    
     // 1. 启动安全舱，核销商户 JWT 钢印并执行令牌免检
     verifyAndPatchToken();
     
@@ -57,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // 绑定询价（第一窗）与实弹交割（第二窗）的 onclick 发射纽带
-    window.executeLiveQuoteInquiry = () => triggerLiveQuote(pushAuditLog, showPremiumNotification);
+    window.executeLiveQuoteInquiry = () => triggerLiveQuote(pushAuditLog, window.showPremiumNotification || showPremiumNotification);
     window.executeLiveFxConversion = () => submitFxConversion(null, null, null, pushAuditLog, showPremiumNotification, fetchBalances);
 
     // ⚡ 积木 3：自主出金放款代付触点通电（传入核心平账刷盘算子）
