@@ -1,11 +1,17 @@
 // -*- coding: utf-8 -*-
 // 文件位置: assets/js/dashboard.js
 // 🎯 FinLinks 5.2.0 乐高积木第 1 块：微内核主控状态机与多币种影子账本刷盘中枢
-// 勾稽状态：100% 对齐后端 multi_currency_visibility 契约钢印，拒绝任何次生变量覆盖
+// 勾稽状态：100% 激活换汇与出金双引擎，绝杀隔离墙导致的 Mock 休克
 
 import { client } from './finlinks_client.js';
 import { verifyAndPatchToken, logout } from './auth_manager.js';
 import { submitAdvancedKYB } from './kyb_handler.js';
+
+// =====================================================================
+// 🔌 FinLinks 5.2.0 动力合流：从完全体发动机中引入真实的主权清算血管
+// =====================================================================
+import { triggerLiveQuote, submitFxConversion } from './fx_processor.js';
+import { handleLivePayoutDisbursal } from './payout_dispatcher.js';
 
 document.addEventListener("DOMContentLoaded", () => {
     // 1. 启动安全舱，核销商户 JWT 钢印并执行令牌免检
@@ -17,16 +23,47 @@ document.addEventListener("DOMContentLoaded", () => {
     // 3. 点火拉取左上角全局行情 Ticker 血管
     initGlobalFxTicker(); 
 
-    // 👑 最高特权提权区：将基础大厅门禁暴露给 HTML onclick 事件，绝杀 ReferenceError
+    // =====================================================================
+    // 👑 最高特权提权区：将 5.2.0 完全体实弹功能流式暴露给全局 window，绝杀 ReferenceError
+    // =====================================================================
     window.switchTab = switchTab;
     window.handleLogout = logout;
+    
+    // 🛡️ 注入全局重绘大闸：确保底层驱动交割大胜后，跨文件、匿名作用域能够瞬间冲重新冲刷头寸
+    window.fetchBalances = fetchBalances;
+    
     window.executeAdvancedKYBOnboarding = () => submitAdvancedKYB(pushAuditLog, showPremiumNotification);
     
-    // 🧱 积木 1 隔离防御墙：为后续要搭建的 Pay-in / Payout / 外汇积木提前空置出 onclick 门禁插槽
-    // 在后续业务积木未搭建完成前，点击按钮安全拦截，绝不发生主线程 ReferenceError 崩溃！
-    window.openFxModal = window.openFxModal || function() { pushAuditLog("[BUFFER] ⚖️ 积木 4 (即期换汇外汇) 尚未通电，插槽安全隔离中..."); };
-    window.closeFxModal = window.closeFxModal || function() { document.getElementById("fx-modal")?.classList.add("pointer-events-none", "opacity-0"); };
-    window.executeLivePayoutDisbursal = window.executeLivePayoutDisbursal || function() { pushAuditLog("[BUFFER] 💸 积木 3 (出金放款代付) 尚未通电，表单执行安全拦截..."); };
+    // =====================================================================
+    // 🚀 爆破拆除僵尸隔离墙：像素级对齐真外汇引擎（fx_processor.js）与出金引擎
+    // =====================================================================
+    // ⚡ 积木 4：即期外汇换汇触点通电
+    window.openFxModal = () => {
+        const modalInput = document.getElementById("fx-modal-input");
+        if (modalInput) {
+            modalInput.classList.remove("pointer-events-none", "opacity-0");
+            if (typeof window.pushAuditLog === "function") window.pushAuditLog("[FX WINDOW] ⚖️ 换汇指令仓弹起，即期滑点保护链准备点火...");
+        } else {
+            // 兼容可能存在的统一大卡片弹窗控制
+            document.getElementById("fx-modal")?.classList.remove("pointer-events-none", "opacity-0");
+        }
+    };
+    
+    window.closeFxModal = () => {
+        if (typeof window.forceCancelFxTimer === "function") window.forceCancelFxTimer();
+        document.getElementById("fx-modal-input")?.classList.add("pointer-events-none", "opacity-0");
+        document.getElementById("fx-modal-confirm")?.classList.add("pointer-events-none", "opacity-0");
+        document.getElementById("fx-modal")?.classList.add("pointer-events-none", "opacity-0");
+    };
+
+    // 绑定询价（第一窗）与实弹交割（第二窗）的 onclick 发射纽带
+    window.executeLiveQuoteInquiry = () => triggerLiveQuote(pushAuditLog, showPremiumNotification);
+    window.executeLiveFxConversion = () => submitFxConversion(null, null, null, pushAuditLog, showPremiumNotification, fetchBalances);
+
+    // ⚡ 积木 3：自主出金放款代付触点通电（传入核心平账刷盘算子）
+    window.executeLivePayoutDisbursal = () => handleLivePayoutDisbursal(fetchBalances);
+
+    // ⏳ 积木 2 保留：入金渠道与保活对账维持沙箱安全拦截状态
     window.triggerMockPayinCallback = window.triggerMockPayinCallback || function() { pushAuditLog("[BUFFER] 📥 积木 2 (跨境收单入金) 尚未通电，回调报文安全隔离..."); };
     window.triggerMockReconciliation = window.triggerMockReconciliation || function() { pushAuditLog("[BUFFER] 零信任对账引擎正在缓冲加热中..."); };
 });
@@ -41,7 +78,6 @@ async function initGlobalFxTicker() {
         const response = await client("/fx/quote?sell_currency=USD&buy_currency=NGN&sell_amount=1", { method: "GET" });
         if (response.status === 200) {
             const data = await response.json();
-            // 完美适配后端可能吐出的字段变体
             const liveRate = data.final_settlement_rate || data.lock_rate || 1428.37;
             tickerContainer.innerHTML = `
                 <div class="flex items-center space-x-4 text-[11px] font-mono text-slate-400">
@@ -59,34 +95,21 @@ async function initGlobalFxTicker() {
 /**
  * 👑 2. 【积木 1 核心功能】：影子总账可用头寸刷盘上屏（绝杀 data.balances 历史坏账）
  */
-// -*- coding: utf-8 -*-
-// 文件位置：assets/js/dashboard.js
-
 export async function fetchBalances() {
     const container = document.getElementById("balances-container");
     if (!container) return;
     try {
-        // =================================================================
-        // 👑 【路径纠偏与防HTTP缓存投毒大闸】
-        // 1. 将原厂多余的 /ledger/balances 刚性裁剪为 /balances ！！！
-        // 2. 尾部强行灌入毫秒级活体时间戳 `_t=${Date.now()}`，彻底震碎浏览器缓存死锁！
-        // =================================================================
         const response = await client(`/balances?_t=${Date.now()}`, { method: "GET" });
         
         if (response.status === 200) {
             const data = await response.json();
             
-            // 提取真实商户 MID 强行刷写界面死标签
             const merchantTag = document.getElementById("merchant-id-tag");
             if (merchantTag && data.merchant) merchantTag.innerText = data.merchant;
 
-            // 🟢 彻底炸毁、清除原有的灰色脉冲闪烁骨架屏
             container.innerHTML = "";
-            
-            // 👑 完美对齐后端硬核期待的 multi_currency_visibility 字段
             const matrix = data.multi_currency_visibility || {};
             
-            // 3. 渲染主大厅持仓资产卡片大卡
             Object.keys(matrix).forEach(currency => {
                 const availableValue = matrix[currency];
                 container.innerHTML += `
@@ -97,18 +120,11 @@ export async function fetchBalances() {
                     </div>`;
             });
 
-            // =================================================================
-            // 👑 【常驻侧边栏多币种流式重绘探针同步会师】
-            // =================================================================
             document.querySelectorAll(".sidebar-balance-value").forEach(node => {
                 const nodeCurrency = node.dataset.currency ? node.dataset.currency.toUpperCase().trim() : "";
                 if (nodeCurrency && matrix[nodeCurrency] !== undefined) {
-                    // 动态闪烁高亮视觉：数字变动瞬间飙青，增强金融级肉眼感知体验！
                     node.classList.add("text-emerald-400", "scale-105", "transition-all", "duration-300");
-                    
                     node.innerText = matrix[nodeCurrency].toLocaleString(undefined, {minimumFractionDigits: 2});
-                    
-                    // 500毫秒后移除高亮类，让其平滑恢复正常视觉
                     setTimeout(() => {
                         node.classList.remove("text-emerald-400", "scale-105");
                     }, 500);
@@ -133,5 +149,4 @@ function switchTab(tabId) {
     document.getElementById(`pane-${tabId}`)?.classList.remove("hidden");
 }
 
-function debounce(func, delay) { let timer; return function (...args) { clearTimeout(timer); timer = setTimeout(() => func.apply(this, args), delay); }; }
 function pushAuditLog(message) { if (typeof window.pushAuditLog === "function") window.pushAuditLog(message); }
