@@ -88,8 +88,9 @@ export async function handleLivePayoutDisbursal(fetchBalances) {
             return;
         }
 
+        // 📄 修改 assets/js/payout_dispatcher.js 的该节点
         // 提取比价引擎锁定的通道数据和时间戳
-        const quoteId = previewData.quote_id || uuid.uuid4().hex[:8].upper();
+        const quoteId = previewData.quote_id || Math.random().toString(36).substring(2, 10).toUpperCase();
         const quoteTimestamp = previewData.quote_timestamp || Math.floor(Date.now() / 1000);
         const chosenProvider = previewData.sor_routing?.executed_via || "FLUTTERWAVE";
         const appliedRate = previewData.sor_routing?.applied_rate || 1.0;
