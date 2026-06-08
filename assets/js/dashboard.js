@@ -155,3 +155,29 @@ function switchTab(tabId) {
 }
 
 function pushAuditLog(message) { if (typeof window.pushAuditLog === "function") window.pushAuditLog(message); }
+
+// 📄 追加到 assets/js/dashboard.js 中，激活大厅表单的极性动态切换
+window.adaptPayoutFormByGeopolitical = function() {
+    const currency = document.getElementById("payout-curr")?.value || "";
+    const bankGroup = document.getElementById("payout-bank-group");
+    const mobileGroup = document.getElementById("payout-mobile-group");
+    
+    if (!bankGroup || !mobileGroup) return;
+
+    // 📱 东非/西非移动钱包路由体系
+    if (currency === "KES" || currency === "UGX" || currency === "GHS") {
+        mobileGroup.classList.remove("hidden"); // 展示手机号输入框
+        bankGroup.classList.add("hidden");    // 隐藏银行卡账户/编码
+        if (typeof window.pushAuditLog === "function") {
+            window.pushAuditLog(`[UI ROUTER] 📱 币种已切换至 [${currency}]，已自动调谐至移动货币(Mobile Money)放款矩阵。`);
+        }
+    } 
+    // 🏦 全球银行卡清算与影子总账体系
+    else {
+        bankGroup.classList.remove("hidden"); // 唤醒传统的账户/网关编码框
+        mobileGroup.classList.add("hidden");  // 关闸隐藏手机号框
+        if (typeof window.pushAuditLog === "function") {
+            window.pushAuditLog(`[UI ROUTER] 🏦 币种已切换至 [${currency}]，已自动调谐至标准跨境银行网关清算矩阵。`);
+        }
+    }
+};

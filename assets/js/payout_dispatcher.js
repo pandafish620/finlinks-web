@@ -45,28 +45,32 @@ export async function handleLivePayoutDisbursal(fetchBalances) {
     const cleanSwift = elSwift && elSwift.value.trim() ? elSwift.value.trim() : (currency === "NGN" ? "" : "BOFAUS3N");
     const cleanRouting = elRouting && elRouting.value.trim() ? elRouting.value.trim() : (currency === "NGN" ? "" : "021000021");
 
-    // =================================================================
     // 👑 阶梯第一枪：封装强类型 Body 结构，全速穿透 FastAPI 422 门禁
+    // 5.2.0 完全体校准：回正 payment_instruction 容器层级，绝杀 Pydantic 宪法阻抗
     // =================================================================
     const basePayload = {
-        "sell_currency": currency, // 代付扣减本金币种
+        "sell_currency": currency.toUpperCase().trim(), // 强转大写，严防脏数据
         "sell_amount": amount,
-        "buy_currency": currency,  // 最终下发目的地币种
-        "fx_rate": 1.0,            // 纯账户代付解付，基准汇率初始化为 1
+        "buy_currency": currency.toUpperCase().trim(),  
+        "fx_rate": 1.0,            
         "routing_via": "FLUTTERWAVE",
         "quote_timestamp": 0,
+        
+        // 🛡️ 嵌套层 1：受益人身份信息
         "beneficiary": {
             "name": beneficiaryName,
             "email": cleanEmail,
             "phone": cleanPhone,
             "address": cleanAddress,
-            "account_type": "individual",
-            "bank": {
-                "account_number": beneficiaryAccount,
-                "bank_code": cleanBankCode,
-                "swift_code": cleanSwift,
-                "routing_number": cleanRouting
-            }
+            "account_type": "individual"
+        },
+        
+        // 🔌 嵌套层 2：将原有的 "bank" 壳子原位回正为中台认领的 "payment_instruction"
+        "payment_instruction": {
+            "account_number": beneficiaryAccount,
+            "bank_code": cleanBankCode,
+            "swift_code": cleanSwift,
+            "routing_number": cleanRouting
         }
     };
 
@@ -82,7 +86,11 @@ export async function handleLivePayoutDisbursal(fetchBalances) {
         const previewData = await previewRes.json();
 
         if (previewRes.status !== 200 || previewData.status !== "preview") {
-            const errMsg = previewData.detail || previewData.msg || "离岸钱包可用头寸不足或格式排异";
+            // 💡 降维解包：如果 detail 是 Pydantic 抛出的强类型错误数组对象，将其彻底拍扁，防止吐出 [object Object]
+            const errMsg = typeof previewData.detail === 'object' 
+                ? JSON.stringify(previewData.detail) 
+                : (previewData.detail || previewData.msg || "离岸钱包可用头寸不足或格式排异");
+                
             if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[PAYOUT REJECTED] ❌ 中台拒签预检: ${errMsg}`);
             alert(`🚨 代付预检拦截: ${errMsg}`);
             return;

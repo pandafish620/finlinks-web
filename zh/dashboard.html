@@ -168,34 +168,41 @@
                     <span class="block font-bold text-sm text-slate-300 mb-4">单笔代付下发表单</span>
                     <div class="space-y-3">
                         <input type="text" id="payout-name" placeholder="受益人姓名 (Beneficiary Name)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-rose-500">
-                        <input type="text" id="payout-acc" placeholder="请输入账户/IBAN" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none font-mono">
-                        
-                        <div class="hidden">
-                            <input type="email" id="payout-email" value="merchant_white_label@finlinks.io">
-                            <input type="text" id="payout-phone" value="+19012345678">
-                            <input type="text" id="payout-address" value="78 Pine Street, New York, NY 10005">
-                            <input type="text" id="payout-bank-code" value="125200057">
-                            <input type="text" id="payout-swift-code" value="BOFAUS3N">
-                            <input type="text" id="payout-routing-number" value="021000021">
-                        </div>
-
-                        <div class="hidden">
-                            <input type="email" id="payout-email" value="merchant_white_label@finlinks.io">
-                            <input type="text" id="payout-phone" value="+2348012345678"> <input type="text" id="payout-address" value="126 Joel Ogunnaike Street, Ikeja"> <input type="text" id="payout-bank-code" value="044"> <input type="text" id="payout-swift-code" value=""> <input type="text" id="payout-routing-number" value=""> </div>
 
                         <div class="grid grid-cols-2 gap-4">
-                            <select id="payout-curr" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
-                                <option value="" disabled selected>选择币种...</option>
-                                <option value="USD">USD (美元本地清算)</option>
-                                <option value="KES">KES (肯尼亚先令 - M-Pesa 放款)</option>
-                                <option value="UGX">UGX (乌干达先令 - MTN 移动打款)</option>
-                                <option value="NGN">NGN (尼日利亚奈拉 - NUBAN 虚拟转账)</option>
-                                <option value="BRL">BRL (巴西雷亚尔 - Pix网关)</option>
-                                <option value="MXN">MXN (墨西哥比索 - CLABE总线)</option>
+                            <select id="payout-curr" onchange="if(typeof window.adaptPayoutFormByGeopolitical === 'function') window.adaptPayoutFormByGeopolitical();" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
+                                <option value="" disabled selected>选择结算币种...</option>
+                                <option value="USD">USD (美元 Fedwire / ACH 本地清算)</option>
+                                <option value="EUR">EUR (欧元区 SEPA 实时清算总线)</option>
+                                <option value="GBP">GBP (英镑 Fast Payments 快速网络)</option>
+                                <option value="NGN">NGN (尼日利亚奈拉 - NUBAN 影子总账)</option>
+                                <option value="BRL">BRL (巴西雷亚尔 - Pix 实时网关)</option>
+                                <option value="MXN">MXN (墨西哥比索 - SPEI 核心网)</option>
                                 <option value="TRY">TRY (土耳其里拉 - 国际 IBAN 清算)</option>
+                                <option value="KES">KES (肯尼亚先令 - M-Pesa 移动放款)</option>
+                                <option value="UGX">UGX (乌干达先令 - MTN 移动打款)</option>
+                                <option value="GHS">GHS (加纳塞地 - Vodafone Mobile Money)</option>
+                                <option value="ZAR">ZAR (南非兰特 - EFT 银行结算大闸)</option>
                             </select>
-                            <input type="number" id="payout-amount" placeholder="清算金额 (Amount)" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono">
+                            <input type="number" id="payout-amount" placeholder="清算金额 (Amount)" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-rose-500">
                         </div>
+
+                        <div id="payout-bank-group" class="space-y-3">
+                            <input type="text" id="payout-acc" placeholder="请输入受益人银行账户 / NUBAN / IBAN / CLABE" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none font-mono">
+                            <input type="text" id="payout-bank-code" placeholder="银行/分行编码 (Bank/Sort Code，如尼日利亚网关填 044)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none font-mono">
+                        </div>
+
+                        <div id="payout-mobile-group" class="hidden">
+                            <input type="text" id="payout-phone" placeholder="付款人本地电子钱包手机号 (格式如 +254... / +233...)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none font-mono">
+                        </div>
+
+                        <div class="hidden">
+                            <input type="email" id="payout-email" value="merchant_white_label@finlinks.io">
+                            <input type="text" id="payout-address" value="126 Joel Ogunnaike Street, Ikeja">
+                            <input type="text" id="payout-swift-code" value="">
+                            <input type="text" id="payout-routing-number" value="">
+                        </div>
+
                         <button onclick="executeLivePayoutDisbursal()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded text-xs tracking-wider transition shadow-lg shadow-rose-600/10">核销并下发代付信号</button>
                     </div>
                 </div>
