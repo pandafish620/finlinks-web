@@ -169,6 +169,16 @@
                     <div class="space-y-3">
                         <input type="text" id="payout-name" placeholder="受益人姓名 (Beneficiary Name)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-rose-500">
                         <input type="text" id="payout-acc" placeholder="请输入账户/IBAN" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none font-mono">
+                        
+                        <div class="hidden">
+                            <input type="email" id="payout-email" value="merchant_white_label@finlinks.io">
+                            <input type="text" id="payout-phone" value="+19012345678">
+                            <input type="text" id="payout-address" value="78 Pine Street, New York, NY 10005">
+                            <input type="text" id="payout-bank-code" value="125200057">
+                            <input type="text" id="payout-swift-code" value="BOFAUS3N">
+                            <input type="text" id="payout-routing-number" value="021000021">
+                        </div>
+
                         <div class="grid grid-cols-2 gap-4">
                             <select id="payout-curr" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
                                 <option value="" disabled selected>选择币种...</option>
@@ -194,7 +204,6 @@
                 </div>
 
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-xl space-y-5 shadow-sm">
-        
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">当前注册主体</label>
                         <div class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-xs text-slate-400 font-mono select-none">
@@ -204,7 +213,7 @@
 
                     <a href="./kyb_portal.html" target="_blank" 
                        class="flex items-center justify-center space-x-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded text-[11px] tracking-widest transition-all duration-300 uppercase shadow-lg shadow-indigo-500/20 active:scale-[0.98]">
-                       <span>📤 进入数字化高级 KYB 合规官审计问卷舱</span>
+                        <span>📤 进入数字化高级 KYB 合规官审计问卷舱</span>
                     </a>
 
                     <div class="flex items-start space-x-2 p-3 bg-indigo-950/20 border border-indigo-900/50 rounded text-[10px] text-indigo-400">
@@ -219,19 +228,19 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-2 animate-ping"></span>FinLinks 核心全量自动化行为遥测流
                 </h3>
                 <div id="audit-log-box" class="bg-slate-950 rounded-lg p-4 font-mono text-[11px] text-slate-400 h-36 overflow-y-auto space-y-1">
-                    <div>[SYSTEM] 全球多通道智能路由聚合底座通电成功。加强级防御机制与 10s/300s 双轨制时钟锁正式并线。</div>
+                    <div>[SYSTEM] 全球多通道智能路由聚合底座通电成功。加强级防御机制与 30s/300s 双轨制时钟锁正式并线。</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="fx-modal-input" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
-        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="window.closeFxInputModal()"></div>
+        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeFxModal()"></div>
         <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
             <div class="modal-content py-6 text-left px-6 space-y-4">
                 <div class="flex justify-between items-center pb-3 border-b border-slate-800">
                     <p class="text-md font-bold text-slate-200">即期轧差外汇兑换 (FX Spot Input)</p>
-                    <div class="cursor-pointer z-50" onclick="window.closeFxInputModal()">
+                    <div class="cursor-pointer z-50" onclick="closeFxModal()">
                         <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
                             <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
                         </svg>
@@ -261,23 +270,35 @@
                             <option value="TRY">TRY (土耳其里拉)</option>
                         </select>
                     </div>
+
+                    <div class="hidden">
+                        <input type="text" id="beneficiary-name" value="Ajadi Jackson">
+                        <input type="email" id="beneficiary-email" value="jacky.xiaoyu.zhang@pinebay.io">
+                        <input type="text" id="beneficiary-phone" value="+2348012345678">
+                        <input type="text" id="beneficiary-address" value="126 Joel Ogunnaike Street, Ikeja">
+                        <input type="text" id="beneficiary-account-type" value="individual">
+                        <input type="text" id="bank-account-number" value="0690000031">
+                        <input type="text" id="bank-code" value="044">
+                        <input type="text" id="swift-code" value="">
+                        <input type="text" id="routing-number" value="">
+                    </div>
                 </div>
                 
                 <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
-                    <button onclick="window.closeFxInputModal()" class="px-4 py-1.5 bg-slate-800 rounded text-xs hover:bg-slate-700 transition">取消</button>
-                    <button id="fx-inquiry-btn" onclick="if(typeof window.triggerFxQuoteInquiry === 'function') window.triggerFxQuoteInquiry();" class="px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/10">获取即期汇率报价 (Request Quote)</button>
+                    <button onclick="closeFxModal()" class="px-4 py-1.5 bg-slate-800 rounded text-xs hover:bg-slate-700 transition">取消</button>
+                    <button id="fx-inquiry-btn" onclick="if(typeof window.executeLiveQuoteInquiry === 'function') window.executeLiveQuoteInquiry();" class="px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/10">获取即期汇率报价 (Request Quote)</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="fx-modal-confirm" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
-        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="window.closeFxConfirmModal()"></div>
+        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeFxModal()"></div>
         <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
             <div class="modal-content py-6 text-left px-6 space-y-4">
                 <div class="flex justify-between items-center pb-3 border-b border-slate-800">
-                    <p class="text-md font-bold text-amber-400">固价清算签署合同 (10S Slip Protection)</p>
-                    <div class="cursor-pointer z-50" onclick="window.closeFxConfirmModal()">
+                    <p class="text-md font-bold text-amber-400">固价清算签署合同 (30S Slip Protection)</p>
+                    <div class="cursor-pointer z-50" onclick="closeFxModal()">
                         <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
                             <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
                         </svg>
@@ -302,7 +323,7 @@
                     <div class="pt-2">
                         <div class="flex justify-between text-[10px] uppercase tracking-wider mb-1 font-sans">
                             <span class="text-slate-500 font-bold">即期滑点保护时钟锁</span>
-                            <span class="text-amber-400 font-bold animate-pulse" id="fx-countdown-timer">10.0s</span>
+                            <span class="text-amber-400 font-bold animate-pulse" id="fx-countdown-timer">30.0s</span>
                         </div>
                         <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
                             <div id="fx-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-full"></div>
@@ -311,20 +332,20 @@
                 </div>
                 
                 <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
-                    <button onclick="window.closeFxConfirmModal()" class="px-4 py-1.5 bg-slate-800 rounded text-xs text-slate-300 hover:bg-slate-700 transition">拒绝并冲正</button>
-                    <button id="fx-submit-btn" onclick="if(typeof window.triggerFxFinalConversion === 'function') window.triggerFxFinalConversion();" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">确认执行交易 (Execute)</button>
+                    <button onclick="closeFxModal()" class="px-4 py-1.5 bg-slate-800 rounded text-xs text-slate-300 hover:bg-slate-700 transition">拒绝并冲正</button>
+                    <button id="fx-submit-btn" onclick="if(typeof window.executeLiveFxConversion === 'function') window.executeLiveFxConversion();" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">确认执行交易 (Execute)</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="payout-payin-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition duration-200">
-        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="if(typeof window.closeOrderModal === 'function') window.closeOrderModal()"></div>
+        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeOrderModal()"></div>
         <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
             <div class="modal-content py-6 text-left px-6 space-y-4">
                 <div class="flex justify-between items-center pb-3 border-b border-slate-800">
                     <p class="text-md font-bold text-amber-400" id="order-modal-title">单据确权审查中心 (300s 时钟锁)</p>
-                    <div class="cursor-pointer z-50" onclick="if(typeof window.closeOrderModal === 'function') window.closeOrderModal()">
+                    <div class="cursor-pointer z-50" onclick="closeOrderModal()">
                         <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
                             <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
                         </svg>
@@ -341,7 +362,7 @@
                     </div>
                 </div>
                 <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
-                    <button onclick="if(typeof window.closeOrderModal === 'function') window.closeOrderModal()" class="px-4 py-1.5 bg-slate-800 text-slate-300 rounded text-xs hover:bg-slate-700 transition">取消 (Cancel)</button>
+                    <button onclick="closeOrderModal()" class="px-4 py-1.5 bg-slate-800 text-slate-300 rounded text-xs hover:bg-slate-700 transition">取消 (Cancel)</button>
                     <button id="order-confirm-btn" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">确认放行 (Execute)</button>
                 </div>
             </div>
@@ -352,9 +373,20 @@
 
     <script type="module">
         import { handleLivePayinCallback } from '../assets/js/payin_handler.js';
-        import { handleLivePayoutDisbursal } from '../assets/js/payout_dispatcher.js';
-        import { triggerLiveQuote, submitFxConversion } from '../assets/js/fx_processor.js'; 
         import { client } from '../assets/js/finlinks_client.js';
+
+        // 👑 桥接全局兜底日志及取消大闸，绝杀 ReferenceError
+        window.closeOrderModal = function() {
+            const modal = document.getElementById("payout-payin-modal");
+            if (modal) modal.classList.add("opacity-0", "pointer-events-none");
+            window.pushAuditLog("[ORDER CANCEL] 操盘手主动中断签署权，在途单据安全撤销。");
+        };
+
+        window.closeFxModal = function() {
+            if (typeof window.forceCancelFxTimer === "function") window.forceCancelFxTimer();
+            document.getElementById("fx-modal-input")?.classList.add("pointer-events-none", "opacity-0");
+            document.getElementById("fx-modal-confirm")?.classList.add("pointer-events-none", "opacity-0");
+        };
 
         window.pushAuditLog = function(message) {
             const box = document.getElementById("audit-log-box");
@@ -366,13 +398,12 @@
             console.log(`[AUDIT LOG] ${message}`);
         };
 
-        // 3. 挂载积木 2：出海收单代收入口
+        // 📥 挂载积木 2：出海收单代收入口
         window.triggerMockPayinCallback = function() {
             const currEl = document.getElementById("collectionCurrency");
             if (currEl && currEl.value) {
                 localStorage.setItem("FINLINKS_LAST_ACTIVE_CURRENCY", currEl.value.toUpperCase().trim());
             }
-            // 📥 收单物理回执成功后，强制等待 400 毫秒再震碎可用余额缓存，杜绝换汇时提示余额不足！
             handleLivePayinCallback(() => {
                 setTimeout(async () => {
                     if (typeof window.fetchBalances === "function") {
@@ -383,51 +414,7 @@
             });
         };
 
-        // 4. 挂载积木 3：自主出金放款代付入口
-        window.triggerMockPayoutCallback = function() {
-            const currEl = document.getElementById("payout-curr");
-            if (currEl && currEl.value) {
-                localStorage.setItem("FINLINKS_LAST_ACTIVE_CURRENCY", currEl.value.toUpperCase().trim());
-            }
-            handleLivePayoutDisbursal(() => {
-                setTimeout(async () => {
-                    if (typeof window.fetchBalances === "function") await window.fetchBalances();
-                }, 400);
-            });
-        };
-        window.executeLivePayoutDisbursal = window.triggerMockPayoutCallback;
-
-        window.triggerMockReconciliation = async function() {
-            const vaultCurrency = localStorage.getItem("FINLINKS_LAST_ACTIVE_CURRENCY");
-            const payinCurr = document.getElementById("collectionCurrency")?.value;
-            const payoutCurr = document.getElementById("payout-curr")?.value;
-            const finalCurrency = (vaultCurrency || payinCurr || payoutCurr || "NGN").toUpperCase().trim();
-
-            window.pushAuditLog(`[AUDIT START] 零信任对账引擎点火：正在轧差 [${finalCurrency}] 影子总账...`);
-            try {
-                // 🔌 回正血管路径：直接敲击正印的 /reconcile，client内部会自动拼装标准的 /ledger 前缀，去掉多余的硬编码参数
-                const response = await client(`/reconcile?currency=${finalCurrency}`, { method: "POST" });
-                if (response.status === 200) {
-                    window.pushAuditLog(`[RECON SUCCESS] 🟢 [${finalCurrency}] 轧差成功！结论自愈。`);
-                    setTimeout(async () => {
-                        if (typeof window.fetchBalances === "function") await window.fetchBalances();
-                    }, 300);
-                } else {
-                    window.pushAuditLog(`[RECON REJECTED] 对账熔断。`);
-                }
-            } catch (error) {
-                window.pushAuditLog(`[RECON CRITICAL] 物理断路: ${error.message}`);
-            }
-        };
-
-        window.triggerFxQuoteInquiry = function() {
-            triggerLiveQuote(window.pushAuditLog, null); 
-        };
-        window.triggerFxFinalConversion = function() {
-            submitFxConversion(null, null, null, window.pushAuditLog, null, window.fetchBalances); 
-        };
-        window.submitFxConversion = window.triggerFxFinalConversion;
-
+        // ⚖️ 零信任复式总账自动化对账
         window.triggerMockReconciliation = async function() {
             const vaultCurrency = localStorage.getItem("FINLINKS_LAST_ACTIVE_CURRENCY");
             const payinCurr = document.getElementById("collectionCurrency")?.value;
@@ -450,72 +437,29 @@
                 window.pushAuditLog(`[RECON CRITICAL] 物理对账通信链路猝死: ${error.message}`);
             }
         };
-        
-        window.closeOrderModal = function() {
-            const modal = document.getElementById("payout-payin-modal");
-            if (modal) modal.classList.add("opacity-0", "pointer-events-none");
-            window.pushAuditLog("[ORDER CANCEL] 操盘手主动中断签署权，在途单据安全撤销。");
-        };
-
-       // =================================================================
-        // 👑 【中央大闸自愈开关并线】：无缝调度双模态框时序
-        // =================================================================
-        window.openFxModal = function() {
-            // 右上角按钮一敲，干净唤醒第一输入窗（零压力静默舱）
-            const modalInput = document.getElementById("fx-modal-input");
-            if (modalInput) modalInput.classList.remove("pointer-events-none", "opacity-0");
-        };
-        window.closeFxInputModal = function() {
-            const modalInput = document.getElementById("fx-modal-input");
-            if (modalInput) modalInput.classList.add("pointer-events-none", "opacity-0");
-        };
-
-        window.triggerFxQuoteInquiry = function() {
-            // 呼叫新版询价算子，它会在成功拿到锁价后自发关闭第一窗、闪烁弹起第二窗并开始点火倒计时
-            triggerLiveQuote(window.pushAuditLog, null); 
-        };
-        window.triggerFxFinalConversion = function() {
-            submitFxConversion(null, null, null, window.pushAuditLog, null, window.fetchBalances); 
-        };
-
-        window.closeFxConfirmModal = function() {
-            const modalConfirm = document.getElementById("fx-modal-confirm");
-            if (modalConfirm) modalConfirm.classList.add("pointer-events-none", "opacity-0");
-            
-            // 强行刹车，震碎释放 10 秒异步时钟，冲正单据
-            if (typeof window.forceCancelFxTimer === "function") {
-                window.forceCancelFxTimer();
-            }
-        };
 
         // =================================================================
-        // 👑 🟢 【中央大闸并线点火核心】：生擒活体商户指纹并秒级强制刷盘
-        // 绝杀 admin 灰色裸奔历史，100% 顺向认领登录成功的真实法人主体血缘！
+        // 👑 🟢 【商户法人主体血缘流同步点火】
         // =================================================================
         (async function() {
-            // 1. 动态抓取登录核销通过后焊死在本地的企业邮箱真身
             const activeMerchantId = localStorage.getItem("FINLINKS_ACTIVE_MID") || "admin";
             const activeCompanyName = localStorage.getItem("FINLINKS_COMPANY_NAME") || "FinLinks 研发期商户舱";
             
-            // 2. 物理重写、刷写大厅左上角的商户 MID 铭牌及控制台全局标志
             const elMerchantLabel = document.getElementById("merchant-id-tag");
             if (elMerchantLabel) {
                 elMerchantLabel.innerText = activeMerchantId;
                 elMerchantLabel.classList.add("text-emerald-400", "font-bold");
             }
             
-            window.pushAuditLog(`[IDENTITY] ⚖️ 零信任确权成功！当前登录主体: [${activeMerchantId}] | 实体: [${activeCompanyName}]`);
-            
-            // 3. 临门一脚自动点火：一开盘自发呼叫前线重绘算子，流式渲染该商户的真身钱包持仓！
-            setTimeout(async () => {
-                if (typeof window.fetchBalances === "function") {
-                    await window.fetchBalances();
-                    window.pushAuditLog("🚀 [LIVE DEPLOY] 全局多币种账本首期头寸流式加载完毕，FinLinks 商业大闸完全闭环通电！");
-                }
-            }, 100);
-        })();
+            const elRoleLabel = document.getElementById("user-role-badge");
+            if (elRoleLabel) {
+                elRoleLabel.innerText = activeMerchantId === "admin" ? "SUPER_ADMIN" : "MERCHANT_OPERATOR";
+                elRoleLabel.classList.remove("text-amber-500", "animate-pulse");
+                elRoleLabel.classList.add("text-emerald-400");
+            }
 
-        window.pushAuditLog("🚀 [LEGO BASE] 积木 4：高阶主权隔离外汇沙箱控制大闸全量通电会师！");
+            window.pushAuditLog(`[IDENTITY] ⚖️ 零信任确权成功！当前登录主体: [${activeMerchantId}] | 实体: [${activeCompanyName}]`);
+        })();
     </script>
 </body>
 </html>
