@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 // 文件位置：assets/js/payout_dispatcher.js
 // 🎯 FinLinks 5.2.0 乐高积木第 3 块：完全体两阶段（Preview/Commit）代付放款专属调度器
-// 隔离看护：100% 像素级咬合中台 Body 强类型契约，绝杀 422 与 400 格式排异
+// 隔离看护：100% 像素级平铺并线中台 Body 强类型契约，绝杀 422 与 400 格式排异
 
 import { client } from './finlinks_client.js';
 
@@ -45,39 +45,27 @@ export async function handleLivePayoutDisbursal(fetchBalances) {
     const cleanSwift = elSwift && elSwift.value.trim() ? elSwift.value.trim() : (currency === "NGN" ? "" : "BOFAUS3N");
     const cleanRouting = elRouting && elRouting.value.trim() ? elRouting.value.trim() : (currency === "NGN" ? "" : "021000021");
 
-    // 👑 阶梯第一枪：封装强类型 Body 结构，全速穿透 FastAPI 422 门禁
-    // 5.2.0 完全体校准：回正 payment_instruction 容器层级，绝杀 Pydantic 宪法阻抗
+    // =================================================================
+    // 👑 📌 核心修改位置 1：将嵌套 JSON 结构体完全拍扁，1:1 对齐后端的平铺强类型模型
     // =================================================================
     const basePayload = {
-        "sell_currency": currency.toUpperCase().trim(), // 强转大写，严防脏数据
+        "sell_currency": currency.toUpperCase().trim(), 
         "sell_amount": amount,
         "buy_currency": currency.toUpperCase().trim(),  
         "fx_rate": 1.0,            
         "routing_via": "FLUTTERWAVE",
-        "quote_timestamp": 0,
-        
-        // 🛡️ 嵌套层 1：受益人身份信息
-        "beneficiary": {
-            "name": beneficiaryName,
-            "email": cleanEmail,
-            "phone": cleanPhone,
-            "address": cleanAddress,
-            "account_type": "individual"
-        },
-        
-        // 🔌 嵌套层 2：将原有的 "bank" 壳子原位回正为中台认领的 "payment_instruction"
-        "payment_instruction": {
-            "account_number": beneficiaryAccount,
-            "bank_code": cleanBankCode,
-            "swift_code": cleanSwift,
-            "routing_number": cleanRouting
-        }
+        "quote_timestamp": 0.0,
+        "beneficiary_name": beneficiaryName,        // 🎯 刚性拍扁，去除嵌套
+        "beneficiary_account": beneficiaryAccount,  // 🎯 刚性拍扁，去除嵌套
+        "channel_type": "MOBILE_MONEY",
+        "bank_code": cleanBankCode,
+        "phone_number": cleanPhone
     };
 
     try {
         console.log("📡 [PAYOUT STAGE-1 PREVIEW] 发射预检合规载荷Body:", basePayload);
         
-        // 🚨 刚性升级：全面抛弃老代码 URL 拼接，改装为圣洁的 POST JSON Body
+        // 🚨 刚性升级：保持标准的 POST JSON Body 契约传输
         const previewRes = await client("/payout/create?commit=false", { 
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -86,7 +74,6 @@ export async function handleLivePayoutDisbursal(fetchBalances) {
         const previewData = await previewRes.json();
 
         if (previewRes.status !== 200 || previewData.status !== "preview") {
-            // 💡 降维解包：如果 detail 是 Pydantic 抛出的强类型错误数组对象，将其彻底拍扁，防止吐出 [object Object]
             const errMsg = typeof previewData.detail === 'object' 
                 ? JSON.stringify(previewData.detail) 
                 : (previewData.detail || previewData.msg || "离岸钱包可用头寸不足或格式排异");
@@ -96,8 +83,6 @@ export async function handleLivePayoutDisbursal(fetchBalances) {
             return;
         }
 
-        // 📄 修改 assets/js/payout_dispatcher.js 的该节点
-        // 提取比价引擎锁定的通道数据和时间戳
         const quoteId = previewData.quote_id || Math.random().toString(36).substring(2, 10).toUpperCase();
         const quoteTimestamp = previewData.quote_timestamp || Math.floor(Date.now() / 1000);
         const chosenProvider = previewData.sor_routing?.executed_via || "FLUTTERWAVE";
@@ -157,16 +142,17 @@ export async function handleLivePayoutDisbursal(fetchBalances) {
                 window.pushAuditLog(`[PAYOUT COMMIT] 操盘手签署放款令，执行秒级背对背核销锁死...`);
             }
 
-            // ⏱️ 将第一阶段斩获的权威时间戳特征码顺向压入二次提交的 Body 盒子中
+            // =================================================================
+            // 👑 📌 核心修改位置 2：Stage-2 同样保持拍扁的强类型 Body，顺向压入时间戳特征码
+            // =================================================================
             const commitPayload = {
                 ...basePayload,
-                "quote_timestamp": parseInt(quoteTimestamp)
+                "quote_timestamp": parseFloat(quoteTimestamp)
             };
 
             try {
                 console.log("📡 [PAYOUT STAGE-2 COMMIT] 正在向中台推送真·打款放行令牌Body:", commitPayload);
                 
-                // 🚨 刚性升级：双线彻底切除 URL 传参，采用统一的 Body 复式账账簿对齐
                 const commitRes = await client("/payout/create?commit=true", { 
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -179,7 +165,6 @@ export async function handleLivePayoutDisbursal(fetchBalances) {
                         window.pushAuditLog(`[FXALL SUCCESS] 🎉 放款解付大捷！清算批次号: ${commitData.payout_batch_ref || commitData.fx_ref}`);
                     }
                     
-                    // 核心平账点：扣款成功后，瞬间调用第一块积木，把侧边栏的可用数字动态减掉，完成闭环！
                     if (typeof fetchBalances === "function") await fetchBalances();
 
                     alert(`🎉 离岸代付下发成功!\n结算状态: PROCESSING (处理中)\n代付批次号: ${commitData.payout_batch_ref || commitData.fx_ref}\n可用余额已安全扣减。`);
