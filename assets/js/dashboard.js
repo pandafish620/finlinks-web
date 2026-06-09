@@ -104,32 +104,46 @@ export async function fetchBalances() {
     const container = document.getElementById("balances-container");
     if (!container) return;
     try {
-        const response = await client(`/balances?_t=${Date.now()}`, { method: "GET" });
+        console.log("📡 [FRONTEND BALANCES APP] 正在通过 client 总线打捞中台 12 国多币种可用资产...");
         
-        if (response.status === 200) {
-            const data = await response.json();
-            
+        // 🎯 核心回正 1：刚性补齐 /ledger 路由前缀，并线大厂中台标准大动脉
+        const response = await client(`/ledger/balances?_t=${Date.now()}`, { method: "GET" });
+        
+        // 🛡️ 防御机制：如果后端不幸返回 500 或 404，前端刚性进行沙箱隔离，绝不向下解包
+        if (!response || response.status !== 200) {
+            console.error(`❌ [FRONTEND REJECTED] 中台总线断路，物理状态码: ${response ? response.status : '休克'}`);
+            if (typeof window.pushAuditLog === "function") {
+                window.pushAuditLog(`[BALANCES ERROR] ❌ 资产大动脉失联，中台状态码: ${response ? response.status : '无回执'}`);
+            }
+            return; 
+        }
+
+        const data = await response.json();
+        
+        if (data.status === "success" || data.status === "SUCCESS") {
             const merchantTag = document.getElementById("merchant-id-tag");
             if (merchantTag && data.merchant) merchantTag.innerText = data.merchant;
 
             container.innerHTML = "";
             const matrix = data.multi_currency_visibility || {};
             
+            // 👑 100% 无损留存：你原汁原味的 12 国多币种卡片动态填词排版
             Object.keys(matrix).forEach(currency => {
                 const availableValue = matrix[currency];
                 container.innerHTML += `
                     <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl relative overflow-hidden shadow-lg hover:border-emerald-500/50 transition duration-300">
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">${currency} 可动用可用余额</div>
-                        <div class="text-3xl font-mono font-bold mt-2 text-emerald-400" id="balance-${currency.toUpperCase().trim()}">${availableValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                        <div class="text-3xl font-mono font-bold mt-2 text-emerald-400" id="balance-${currency.toUpperCase().trim()}">${availableValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                         <div class="absolute -right-4 -bottom-6 text-6xl font-bold font-mono text-slate-800/10 select-none">${currency}</div>
                     </div>`;
             });
 
+            // 👑 100% 无损留存：侧边栏可用资产卡片多币种动态刷新变色飙青特效
             document.querySelectorAll(".sidebar-balance-value").forEach(node => {
                 const nodeCurrency = node.dataset.currency ? node.dataset.currency.toUpperCase().trim() : "";
                 if (nodeCurrency && matrix[nodeCurrency] !== undefined) {
                     node.classList.add("text-emerald-400", "scale-105", "transition-all", "duration-300");
-                    node.innerText = matrix[nodeCurrency].toLocaleString(undefined, {minimumFractionDigits: 2});
+                    node.innerText = matrix[nodeCurrency].toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
                     setTimeout(() => {
                         node.classList.remove("text-emerald-400", "scale-105");
                     }, 500);
@@ -142,9 +156,11 @@ export async function fetchBalances() {
         }
     } catch (e) { 
         console.error(">>> [BLOCK 1 ERROR] 资产卡片动态填词中止: ", e); 
+        if (typeof window.pushAuditLog === "function") {
+            window.pushAuditLog(`[BALANCES EXCEPTION] 前端发生解包排异: ${e.message}`);
+        }
     }
 }
-
 /**
  * 📊 3. 基础选项卡纯净切流控制
  */
