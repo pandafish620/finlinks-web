@@ -191,6 +191,29 @@ export async function submitFxConversion(null1, null2, null3, pushAuditLog, show
     const defaultSwift = buyCurrency === "NGN" ? "" : "BOFAUS3N";
     const defaultRouting = buyCurrency === "NGN" ? "" : "021000021";
     const defaultTargetAcc = buyCurrency === "NGN" ? "0690000031" : "1234567890";
+    
+    const elRouting = document.getElementById("routing-number");
+
+    // =================================================================
+    // 🚨 局部加塞：FinLinks 5.2.0 前端主权资本管制优雅降级门禁
+    // 🎯 拒绝将假指纹抛给后端，就地置灰按钮并给出金融级合规弹窗提示
+    // =================================================================
+    const isInternalWalletSwap = (sellCurrency === "NGN" && buyCurrency === "USD");
+    
+    // 判断是否是没有填写受益人的纯自持钱包对敲
+    const hasUserFilledTarget = elAccNum && elAccNum.value.trim() && elAccNum.value.trim() !== "string";
+
+    if (isInternalWalletSwap && !hasUserFilledTarget) {
+        if (elSubmitBtn) { 
+            elSubmitBtn.removeAttribute("disabled"); 
+            elSubmitBtn.innerText = "确认执行交易 (Execute)"; 
+        }
+        if (typeof pushAuditLog === "function") {
+            pushAuditLog(`[COMPLIANCE BLOCKED] 🚨 拦截到自持钱包 NGN->USD 结汇。因西非资本管制，该方向功能不可用。`);
+        }
+        alert("【地缘风控熔断】因西非主权外汇资本管制，平台目前暂不支持【自持奈拉账户】直接结汇为【美元持仓账户】。\n\n该方向换汇功能暂时不可用，请绑定真实的离岸解付收款银行以触发跨境直付。");
+        return; // 刚性强退，火炮就地熄火
+    }
 
     const payloadBody = {
         "sell_currency": sellCurrency,
@@ -207,7 +230,7 @@ export async function submitFxConversion(null1, null2, null3, pushAuditLog, show
             "account_type": elAccType && elAccType.value.trim() ? elAccType.value.trim() : "individual",
             "bank": {
                 "account_number": elAccNum && elAccNum.value.trim() ? elAccNum.value.trim() : defaultTargetAcc,
-                "bank_code": elBankCode && elBankCode.value.trim() ? elBankCode.value.trim() : "044",
+                "bank_code": elBankCode && elBankCode.value.trim() ? elBankCode.value.trim() : (buyCurrency === "USD" ? "string" : "044"),
                 "swift_code": elSwift && elSwift.value.trim() ? elSwift.value.trim() : defaultSwift,
                 "routing_number": elRouting && elRouting.value.trim() ? elRouting.value.trim() : defaultRouting
             }
