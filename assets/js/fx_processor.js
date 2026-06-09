@@ -191,8 +191,6 @@ export async function submitFxConversion(null1, null2, null3, pushAuditLog, show
     const defaultSwift = buyCurrency === "NGN" ? "" : "BOFAUS3N";
     const defaultRouting = buyCurrency === "NGN" ? "" : "021000021";
     const defaultTargetAcc = buyCurrency === "NGN" ? "0690000031" : "1234567890";
-    
-    const elRouting = document.getElementById("routing-number");
 
     // =================================================================
     // 🚨 局部加塞：FinLinks 5.2.0 前端主权资本管制优雅降级门禁
