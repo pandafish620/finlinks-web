@@ -1,13 +1,12 @@
 // -*- coding: utf-8 -*-
 // 文件位置：assets/js/payin_handler.js
-// 🎯 FinLinks 5.2.0 乐高积木第 2 块：出海离岸收单入金专属拦截与时钟处理器
-// 隔离看护：完全独立原子闭环，除触发 fetchBalances 刷新外，对大厅其他文件 0 侵入
+// 🎯 FinLinks 5.2.0 完全体升级版：出海离岸收单入金专属拦截与时钟处理器
 
 import { client } from './finlinks_client.js';
 
 let payinTimerInterval = null; // 300秒代收专属时钟单例句柄
 
-// 👑 【CONFIG REGEX VAULT】全盘硬核账号正则格式校验拦截金库
+// 👑 【CONFIG REGEX VAULT】全盘硬核账号正则格式校验拦截金库 - 100% 留存
 const RIGID_ACCOUNT_RULES = {
     "NGN": { regex: /^\d{10}$/, error: "奈拉通道校验失败：必须为 10位 纯数字 NUBAN 标准银行账号！" },
     "KES": { regex: /^(254\d{9}|0\d{9})$/, error: "肯尼亚先令校验失败：必须为标准的移动货币手机号（如254...）！" },
@@ -15,7 +14,7 @@ const RIGID_ACCOUNT_RULES = {
 };
 
 /**
- * 📥 【积木 2 入口】：接管大厅 Pay-in 按钮点击，拉起 300 秒拦截确权大闸
+ * 📥 【积木 2 入口】：接管大厅 Pay-in 按钮点击
  */
 export function handleLivePayinCallback(fetchBalances) {
     const amtEl = document.getElementById("collectionAmount");
@@ -40,6 +39,9 @@ export function handleLivePayinCallback(fetchBalances) {
         return; 
     }
 
+    // 👑 智能化地缘渠道前置预测文案自适应
+    const displayProvider = currency === "NGN" ? "FLUTTERWAVE V4 PWBT" : (["KES", "UGX"].includes(currency) ? "PAWAPAY MOMO" : "FINLINKS AGGREGATED");
+
     // 2. 👑 激活 HTML 基地内置的 300 秒原子级财务独占锁弹窗
     const modal = document.getElementById("payout-payin-modal");
     const titleEl = document.getElementById("order-modal-title");
@@ -58,7 +60,7 @@ export function handleLivePayinCallback(fetchBalances) {
             <div>付款人全称: <span class="text-slate-100">${payerName}</span></div>
             <div>付款人账号: <span class="text-slate-100">${phoneNumber}</span></div>
             <div>拟注入水线: <span class="text-emerald-400 font-bold">+${amount.toLocaleString()} ${currency}</span></div>
-            <div>通道决策驱动: <span class="text-amber-400">EBANX AGGREGATED LINK</span></div>
+            <div>中台预计路由: <span class="text-amber-400">${displayProvider}</span></div>
         </div>
     `;
 
@@ -90,29 +92,46 @@ export function handleLivePayinCallback(fetchBalances) {
 
         // 3. 👑 完美对齐后端 Query 模型，通过 client 网络总线统一安全发射
         try {
-            const url = `/collection/deposit?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(phoneNumber)}&payer_name=${encodeURIComponent(payerName)}&routing_via=EBANX`;
-            // client 会自动判定并补齐 /ledger 主动脉前缀，自动处理 credentials 跨域
+            const url = `/collection/deposit?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(phoneNumber)}&payer_name=${encodeURIComponent(payerName)}&routing_via=${currency === 'NGN' ? 'FLUTTERWAVE' : 'PAWAPAY'}`;
             const response = await client(url, { method: "POST" });
             const result = await response.json();
 
             if (response.status === 200 && result.status === "success") {
                 if (typeof window.pushAuditLog === "function") {
-                    window.pushAuditLog(`[WEBHOOK ACK] 收单大胜！结算批次流水号: ${result.deposit_id}`);
+                    window.pushAuditLog(`[WEBHOOK ACK] 收单成功受理！结算批次流水号: ${result.deposit_id}`);
                 }
                 
-                // 动态拉起大厅顶部的刷新，重新冲刷持仓可用数字
+                // 动态拉起大厅顶部的刷新，重新冲刷持仓可用数字（在途挂账增加）
                 if (typeof fetchBalances === "function") await fetchBalances();
                 
-                alert(`🎉 离岸代收扣击大捷!\n清算状态: SETTLED (已清偿)\n到账流水: ${result.deposit_id}`);
+                // 👑 🎯 核心改装点：精准捕捉并提取后端驱动生成的动态虚拟打款账户特征要素
+                const vBank = result.generated_bank_name || (result.raw_data && result.raw_data.account_bank_name) || "WEMA BANK";
+                const vAcc = result.generated_account_number || (result.raw_data && result.raw_data.account_number);
+
+                if (currency === "NGN" && vAcc) {
+                    // 🏛️ 针对西非大厂 PWBT 模式，完美下发打款单据账单提示，破冰体验
+                    alert(`🎉 跨境奈拉入金专属通道开凿成功!\n\n` +
+                          `【重要提示】请提示客户立即向以下生成的专用清算账户发起转账以完成确权充值：\n` +
+                          `----------------------------------------\n` +
+                          `🏛️ 目标清算行: ${vBank}\n` +
+                          `🎯 专属打款账号: ${vAcc}\n` +
+                          `💵 需转入金额: ${amount.toLocaleString()} NGN\n` +
+                          `----------------------------------------\n` +
+                          `清算批次号: ${result.deposit_id}\n\n资产已注入系统在途水线（Pending Frozen），到账后持仓将自动解冻通电！`);
+                } else {
+                    // 传统东非移动货币回执兼容留存
+                    alert(`🎉 跨境东非收单申请已成功受理!\n\n清算状态: PENDING (在途网络确权中)\n到账流水: ${result.deposit_id}\n\n资产已安全注入在途持仓矩阵，请在手机上完成 PIN 码确权放行。`);
+                }
             } else {
                 if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[PAYIN REJECTED] 中台拒签: ${result.detail || "未知异常"}`);
+                alert(`❌ 充值申请被系统拒签: ${result.detail || "外部网关网络排异"}`);
             }
         } catch (err) {
             if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[PAYIN CRITICAL] 物理通道通信夭折。`);
+            alert(`💥 核心网络阻断：无法连接到离岸总账服务器。`);
         }
     };
 
-    // 绑定 HTML 基地点击取消或叉叉的自愈闭合函数
     window.closeOrderModal = closePayinModal;
 }
 
