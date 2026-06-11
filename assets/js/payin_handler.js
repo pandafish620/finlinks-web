@@ -1,17 +1,22 @@
 // -*- coding: utf-8 -*-
 // 文件位置：assets/js/payin_handler.js
-// 🎯 FinLinks 5.2.0 完全体生产版：出海离岸收单入金专属拦截与两阶段水单重绘状态机
-// 勾稽状态：100% 熔断浏览器 alert()，原地重织金融级白标 PWBT 动态收单舱
+// 🎯 FinLinks 5.5.0 完全体生产版：出海离岸收单入金专属拦截与两阶段水单重绘状态机
+// 勾稽状态：100% 熔断浏览器 alert()，原位重织大厂 V4 规格地缘自适应多币种收单凭证舱
 
 import { client } from './finlinks_client.js';
 
 let payinTimerInterval = null; // 300秒代收专属时钟单例句柄
 
-// 👑 【CONFIG REGEX VAULT】全盘硬核账号正则格式校验拦截金库 - 100% 留存保持
+// 👑 【CONFIG REGEX VAULT】全盘硬核账号正则格式校验拦截金库 - 全量非洲与海外本币并线支持
+// 💡 架构回正：无损对齐 finlinks_config.js 里的地缘风控，决杀一切垃圾位数的脏数据提单
 const RIGID_ACCOUNT_RULES = {
     "NGN": { regex: /^\d{10}$/, error: "奈拉通道校验失败：必须为 10位 纯数字 NUBAN 标准银行账号！" },
-    "KES": { regex: /^(254\d{9}|0\d{9})$/, error: "肯尼亚先令校验失败：必须为标准的移动货币手机号（如254...）！" },
-    "UGX": { regex: /^\d{9,12}$/, error: "乌干达先令校验失败：请输入合规的东非 Mobile Money 钱包账号！" }
+    "GHS": { regex: /^(233|0)?(2|5)\d{8}$/, error: "加纳通道校验失败：必须是标准的加纳移动钱包手机号格式！" },
+    "KES": { regex: /^(254|0)?(7|1)\d{8}$/, error: "肯尼亚通道校验失败：必须为标准的东非 M-Pesa 钱包手机号！" },
+    "TZS": { regex: /^(255|0)?(6|7)\d{8}$/, error: "坦桑尼亚通道校验失败：必须符合本地 Vodacom/Tigo 钱包号段！" },
+    "UGX": { regex: /^(256|0)?\d{9}$/, error: "乌干达通道校验失败：必须是标准的乌干达钱包账号/手机号！" },
+    "ZAR": { regex: /^\d{9,13}$/, error: "南非通道校验失败：银行物理账户通常为 9 到 13 位纯数字！" },
+    "MUR": { regex: /^\d{7,12}$/, error: "毛里求斯通道校验失败：必须是 7 到 12 位标准离岸结算银行账号！" }
 };
 
 /**
@@ -40,8 +45,10 @@ export function handleLivePayinCallback(fetchBalances) {
         return; 
     }
 
-    // 👑 智能化地缘渠道前置预测文案自适应
-    const displayProvider = currency === "NGN" ? "FLUTTERWAVE V4 PWBT" : (["KES", "UGX"].includes(currency) ? "PAWAPAY MOMO" : "FINLINKS AGGREGATED");
+    // 👑 智能化地缘渠道前置预测文案自适应 (5.5.0 动态字典解耦)
+    // 💡 绝杀硬编码：直接去全局币种硬矩阵打捞对应的通知钢印，如果属于拉美则预测为 EBANX，非洲 8 国统一展示大厂清算 notice
+    const currencyConfig = window.FINLINKS_CURRENCY_MATRIX ? window.FINLINKS_CURRENCY_MATRIX[currency] : null;
+    const displayProvider = currencyConfig ? currencyConfig.notice.toUpperCase() : "FINLINKS AGGREGATED RAILS";
 
     // 2. 👑 激活 HTML 基地内置的 300 秒原子级财务独占锁弹窗
     const modal = document.getElementById("payout-payin-modal");
@@ -53,7 +60,7 @@ export function handleLivePayinCallback(fetchBalances) {
 
     if (!modal || !bodyEl) return;
 
-    // 👑 注入一键物理剪贴板复制算子，绝杀跨文件引用 ReferenceError
+    // 👑 注入一键物理剪贴板复制算子，100% 保活留存
     window.copyVoucherText = function(text, btnId) {
         navigator.clipboard.writeText(text).then(() => {
             const btn = document.getElementById(btnId);
@@ -77,7 +84,7 @@ export function handleLivePayinCallback(fetchBalances) {
     // 🛡️ 【第一阶段】：灌入业务审计要素数据 (确权审查状态)
     // =====================================================================
     titleEl.innerText = "📥 出海收单入金确权审查 (300s 财务锁)";
-    confirmBtn.style.display = "inline-block"; // 回复放行纽带可见性
+    confirmBtn.style.display = "inline-block"; 
     confirmBtn.innerText = "确认放行 (Execute)";
     confirmBtn.className = "px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10";
 
@@ -129,7 +136,6 @@ export function handleLivePayinCallback(fetchBalances) {
     // ⚡ 核心击发：签署确权令后的“二阶段细胞分裂式重绘”
     // =====================================================================
     confirmBtn.onclick = async function() {
-        // 瞬间冻结并卸载 300 秒通用申领时钟，防止其干扰二阶段长驻水单
         clearInterval(payinTimerInterval);
         if (progressBar) progressBar.style.width = "100%";
         if (countdownText) countdownText.innerText = "LOCKED";
@@ -140,7 +146,10 @@ export function handleLivePayinCallback(fetchBalances) {
         if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[PAYIN COMMIT] 操盘手签署确权令，通过 client 总线轰击中台...`);
 
         try {
-            const url = `/collection/deposit?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(phoneNumber)}&payer_name=${encodeURIComponent(payerName)}&routing_via=${currency === 'NGN' ? 'FLUTTERWAVE' : 'PAWAPAY'}`;
+            // 🧱 🎯 核心指纹回正：判断当前币种通道，拉美则传 EBANX，非洲 8 国与国际币种统一回正为 FLUTTERWAVE，彻底掐断老旧 PAWAPAY 参数！
+            const assignedProvider = (currencyConfig && currencyConfig.notice.includes("EBANX")) ? "EBANX" : "FLUTTERWAVE";
+            
+            const url = `/collection/deposit?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(phoneNumber)}&payer_name=${encodeURIComponent(payerName)}&routing_via=${assignedProvider}`;
             const response = await client(url, { method: "POST" });
             const result = await response.json();
 
@@ -151,10 +160,8 @@ export function handleLivePayinCallback(fetchBalances) {
                     window.pushAuditLog(`[WEBHOOK ACK] 收单成功受理！结算批次流水号: ${result.deposit_id}`);
                 }
                 
-                // 动态冲刷大厅顶部的常驻可用头寸卡片（挂账在途水位更新）
                 if (typeof fetchBalances === "function") await fetchBalances();
                 
-                // 捕获并解析后端驱动层吐出来的真实生产参数指纹
                 const vBank = result.generated_bank_name || (result.raw_data && result.raw_data.account_bank_name) || "WEMA BANK";
                 const vAcc = result.generated_account_number || (result.raw_data && result.raw_data.account_number) || "9901428374";
 
@@ -163,26 +170,21 @@ export function handleLivePayinCallback(fetchBalances) {
                 // =====================================================================
                 if (currency === "NGN") {
                     titleEl.innerText = "🏛️ 西非专属虚拟账户清算凭证 (PWBT Live)";
-                    
-                    // 将底部放行按钮改组为长驻核销状态
                     confirmBtn.innerText = "✓ 我已通过本地银行向该账户转账";
                     confirmBtn.className = "px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs select-none";
                     confirmBtn.onclick = () => closePayinModal();
 
-                    // 擦写 Body，像素级注入西非打款凭证卡片
                     bodyEl.innerHTML = `
                         <div class="space-y-4 font-mono text-[11px]">
                             <div class="p-3 bg-emerald-950/20 border border-emerald-900/40 rounded-lg text-emerald-400 font-sans leading-relaxed">
                                 <strong>💡 专用收单通道开凿成功！</strong><br>
-                                请指导客户立即使用随身银行 APP，向系统为您单独开辟的物理托管专用账户发起本币转账。中台清算引擎将实施毫秒级行级悲观锁监听。
+                                请指导客户立即使用随身银行 APP，向系统为您单独开辟的物理托管专用账户发起本币转账。
                             </div>
-                            
                             <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 relative overflow-hidden">
                                 <div class="flex justify-between items-center">
                                     <span class="text-slate-500">🏦 目标清算银行:</span>
                                     <span class="text-slate-100 font-bold text-xs uppercase tracking-wide">${vBank}</span>
                                 </div>
-                                
                                 <div class="flex justify-between items-center border-t border-slate-900 pt-2.5">
                                     <span class="text-slate-500">🎯 专属打款账号:</span>
                                     <div class="flex items-center space-x-2">
@@ -190,7 +192,6 @@ export function handleLivePayinCallback(fetchBalances) {
                                         <button id="copy-acc-btn" onclick="window.copyVoucherText('${vAcc}', 'copy-acc-btn')" class="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-sans hover:bg-slate-700 transition">复制</button>
                                     </div>
                                 </div>
-                                
                                 <div class="flex justify-between items-center border-t border-slate-900 pt-2.5">
                                     <span class="text-slate-500">💵 精准动火金额:</span>
                                     <div class="flex items-center space-x-2">
@@ -198,37 +199,33 @@ export function handleLivePayinCallback(fetchBalances) {
                                         <button id="copy-amt-btn" onclick="window.copyVoucherText('${amount}', 'copy-amt-btn')" class="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-sans hover:bg-slate-700 transition">复制</button>
                                     </div>
                                 </div>
-
                                 <div class="absolute -right-4 -bottom-6 text-5xl font-extrabold text-slate-800/10 select-none">NGN</div>
                             </div>
-
                             <div class="border-t border-slate-800/60 pt-2 text-[10px] text-slate-500 space-y-1">
                                 <div>清算批次单号: <span class="text-slate-400 select-all font-sans">${result.deposit_id}</span></div>
                                 <div class="flex items-center text-amber-500/80 mt-1">
-                                    <span class="mr-1">⚠️</span> 资产已安全注入在途持仓 (Pending Frozen)，大厂清算网关平账后可用持仓自动通电。
+                                    <span class="mr-1">⚠️</span> 资产已安全注入在途持仓 (Pending Frozen)，网关平账后可用持仓自动通电。
                                 </div>
                             </div>
                         </div>
                     `;
                 } else {
-                    // 东非 MoMo 移动货币（KES / UGX）高真回显重绘
-                    titleEl.innerText = "📱 东非移动货币网络清算舱 (MoMo Live)";
-                    
-                    confirmBtn.innerText = "✓ 我已在电子钱包输入 PIN 码验证";
+                    // 东非 MoMo 移动货币（KES / UGX / GHS / TZS / MWK / ZAR）高真回显重绘
+                    titleEl.innerText = "📱 跨境多元本币网络清算舱 (MoMo/EFT Live)";
+                    confirmBtn.innerText = "✓ 我已在本地终端完成 PIN 码/付账验证";
                     confirmBtn.className = "px-4 py-1.5 bg-indigo-600 text-white font-bold rounded text-xs";
-                    confirmBtn.onclick = () => closePayinCallbackSuccess();
+                    confirmBtn.onclick = () => closePayinModal();
 
                     bodyEl.innerHTML = `
                         <div class="space-y-4 font-mono text-[11px]">
                             <div class="p-3 bg-indigo-950/30 border border-indigo-900/40 rounded-lg text-indigo-400 font-sans leading-relaxed">
-                                <strong>📡 跨境东非收单网络已顺利承接！</strong><br>
+                                <strong>📡 跨境收单网络已顺利承接！</strong><br>
                                 信号已成功定向轰击目标账目：<span class="text-slate-200 font-mono font-bold">${phoneNumber}</span>。
                             </div>
-                            
                             <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2 font-mono">
                                 <div class="flex justify-between">
                                     <span class="text-slate-500">地缘清算方向:</span>
-                                    <span class="text-indigo-400 font-bold">PAWAPAY MOMO PUSH</span>
+                                    <span class="text-indigo-400 font-bold uppercase">${displayProvider}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-slate-500">账面名义金额:</span>
