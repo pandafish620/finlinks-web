@@ -114,7 +114,47 @@
                         <div class="h-8 bg-slate-800 rounded w-1/2"></div>
                     </div>
                 </div>
-            </section>
+
+                <div class="mt-8 bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl">
+                    <div class="px-6 py-5 border-b border-slate-800 bg-slate-900/50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mr-2"></span>全球多币种入金清算对账流水 (实时审计)
+                            </h3>
+                            <p class="text-[11px] text-slate-500 mt-1">基于方案 B 多租户隔离域（Tenant Domain）密码嗅探技术数字确权</p>
+                        </div>
+                        <div class="flex items-center space-x-3 shrink-0">
+                            <button onclick="if(typeof window.executeFinancialStatementExport === 'function') window.executeFinancialStatementExport();" 
+                                    class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-mono font-bold px-4 py-2 rounded-lg text-xs transition duration-200 transform active:scale-95 shadow-md shadow-emerald-500/5 flex items-center">
+                                📥 下载当前多币种财务对账单 (CSV)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse font-sans">
+                            <thead>
+                                <tr class="bg-slate-950/40 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                                    <th class="py-3 px-5">System ID / Reference</th>
+                                    <th class="py-3 px-5">租户隔离域 (Domain)</th>
+                                    <th class="py-3 px-5">清算方向</th>
+                                    <th class="py-3 px-4 text-right">拟动火金额</th>
+                                    <th class="py-3 px-4">资产币种</th>
+                                    <th class="py-3 px-5">清算大闸状态</th>
+                                    <th class="py-3 px-5 text-right">微秒级记账时钟</th>
+                                </tr>
+                            </thead>
+                            <tbody id="global-transactions-tbody" class="divide-y divide-slate-800/60 text-xs font-mono text-slate-300">
+                                <tr>
+                                    <td colspan="7" class="py-8 text-center text-slate-600 italic tracking-wide font-sans">
+                                        正在叩击中台中央审计引擎，安全加载全球资产历史血缘...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                </section>
 
             <section id="pane-payin" class="tab-pane hidden space-y-6">
                 <div>
@@ -180,7 +220,7 @@
                                 <option value="MXN">MXN (墨西哥比索 - SPEI 核心网)</option>
                                 <option value="TRY">TRY (土耳其里拉 - 国际 IBAN 清算)</option>
                                 <option value="KES">KES (肯尼亚先令 - M-Pesa 移动放款)</option>
-                                <option value="UGX">UGX (乌干达先令 - MTN 移动打款)</option>
+                                <option value="UGX">UGX (乌加达先令 - MTN 移动打款)</option>
                                 <option value="GHS">GHS (加纳塞地 - Vodafone Mobile Money)</option>
                                 <option value="ZAR">ZAR (南非兰特 - EFT 银行结算大闸)</option>
                             </select>
@@ -345,6 +385,36 @@
                 <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
                     <button onclick="closeFxModal()" class="px-4 py-1.5 bg-slate-800 rounded text-xs text-slate-300 hover:bg-slate-700 transition">拒绝并冲正</button>
                     <button id="fx-submit-btn" onclick="if(typeof window.executeLiveFxConversion === 'function') window.executeLiveFxConversion();" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">确认执行交易 (Execute)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="payout-payin-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition duration-200">
+        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeOrderModal()"></div>
+        <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
+            <div class="modal-content py-6 text-left px-6 space-y-4">
+                <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                    <p class="text-md font-bold text-amber-400" id="order-modal-title">单据确权审查中心 (300s 时钟锁)</p>
+                    <div class="cursor-pointer z-50" onclick="closeOrderModal()">
+                        <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
+                            <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div id="order-modal-body" class="text-xs text-slate-300 bg-slate-950 p-4 rounded border border-slate-800 font-mono space-y-2"></div>
+                <div class="space-y-1">
+                    <div class="flex justify-between text-[10px] text-slate-500 uppercase font-mono">
+                        <span>中台控制流财务独占锁</span>
+                        <span class="text-amber-400 font-bold" id="order-countdown-text">300.0s</span>
+                    </div>
+                    <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                        <div id="order-progress-bar" class="bg-gradient-to-r from-amber-500 to-orange-400 h-full w-full transition-all duration-100"></div>
+                    </div>
+                </div>
+                <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
+                    <button onclick="closeOrderModal()" class="px-4 py-1.5 bg-slate-800 text-slate-300 rounded text-xs hover:bg-slate-700 transition">取消 (Cancel)</button>
+                    <button id="order-confirm-btn" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">确认放行 (Execute)</button>
                 </div>
             </div>
         </div>
