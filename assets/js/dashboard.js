@@ -1,7 +1,7 @@
 // -*- coding: utf-8 -*-
 // 文件位置: assets/js/dashboard.js
 // 🎯 FinLinks 5.2.0 乐高积木第 1 块：微内核主控状态机与多币种影子账本刷盘中枢
-// 勾稽状态：100% 激活换汇与出金双引擎，绝杀隔离墙导致的 Mock 休克
+// 勾稽状态：100% 激活换汇与出金双引擎，全新并线全球流失账单审计看板
 
 import { client } from './finlinks_client.js';
 import { verifyAndPatchToken, logout } from './auth_manager.js';
@@ -24,6 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // 2. 扣动第一块积木扳手：立刻冲刷影子账本多币种余额
     fetchBalances();
+
+    // 🌟 【增量并线电闸】：一开盘同步冲刷多租户隔离清算对账流水大厅！
+    fetchTransactionHistory();
     
     // 3. 点火拉取左上角全局行情 Ticker 血管
     initGlobalFxTicker(); 
@@ -49,7 +52,6 @@ document.addEventListener("DOMContentLoaded", () => {
             modalInput.classList.remove("pointer-events-none", "opacity-0");
             if (typeof window.pushAuditLog === "function") window.pushAuditLog("[FX WINDOW] ⚖️ 换汇指令仓弹起，即期滑点保护链准备点火...");
         } else {
-            // 兼容可能存在的统一大卡片弹窗控制
             document.getElementById("fx-modal")?.classList.remove("pointer-events-none", "opacity-0");
         }
     };
@@ -63,10 +65,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 绑定询价（第一窗）与实弹交割（第二窗）的 onclick 发射纽带
     window.executeLiveQuoteInquiry = () => triggerLiveQuote(pushAuditLog, window.showPremiumNotification || showPremiumNotification);
-    window.executeLiveFxConversion = () => submitFxConversion(null, null, null, pushAuditLog, showPremiumNotification, fetchBalances);
+    window.executeLiveFxConversion = () => submitFxConversion(null, null, null, pushAuditLog, showPremiumNotification, () => {
+        fetchBalances();
+        fetchTransactionHistory(); // 换汇交割大胜后，流水大厅同步冲刷重绘！
+    });
 
-    // ⚡ 积木 3：自主出金放款代付触点通电（传入核心平账刷盘算子）
-    window.executeLivePayoutDisbursal = () => handleLivePayoutDisbursal(fetchBalances);
+    // ⚡ 积木 3：自主出金放款代付触点通电（传入核心平账刷盘算子组）
+    window.executeLivePayoutDisbursal = () => handleLivePayoutDisbursal(() => {
+        fetchBalances();
+        fetchTransactionHistory(); // 代付信号下发大胜后，流水大厅同步冲刷重绘！
+    });
+
+    // =====================================================================
+    // 🖨️ 👑 【增量财务纽带】：金融级物理 CSV 账单外挂流出海下载大闸
+    // =====================================================================
+    window.executeFinancialStatementExport = async () => {
+        if (typeof window.pushAuditLog === "function") window.pushAuditLog("[AUDIT EXPORT] 🖨️ 正在叩击对账单网关，流式导出金融级财务流水 CSV...");
+        try {
+            // 📡 强行向中台外挂隔离路由发起导出请求
+            const response = await client("/api/v1/statements/export/csv", { method: "GET" });
+            if (!response || response.status !== 200) {
+                if (typeof window.pushAuditLog === "function") window.pushAuditLog("❌ [EXPORT FAILED] 账单导出网关拒签或无回执");
+                return;
+            }
+
+            // 💾 内存二进制大对象（Blob）管道组装，接管文件下载流
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const hiddenAnchor = document.createElement("a");
+            hiddenAnchor.href = downloadUrl;
+            
+            // 捞取后端在 CORS 里放行回喷的真实日期文件名，若缺失则降级使用自适应时间戳
+            const contentDisposition = response.headers.get("Content-Disposition");
+            let targetFilename = `FinLinks_Statement_${new Date().toISOString().slice(0,10).replace(/-/g,"")}.csv`;
+            if (contentDisposition && contentDisposition.includes("filename=")) {
+                targetFilename = contentDisposition.split("filename=")[1].replace(/["']/g, "");
+            }
+
+            hiddenAnchor.download = targetFilename;
+            document.body.appendChild(hiddenAnchor);
+            hiddenAnchor.click(); // 物理扣动浏览器内核下载开关
+            document.body.removeChild(hiddenAnchor);
+            window.URL.revokeObjectURL(downloadUrl);
+
+            if (typeof window.pushAuditLog === "function") window.pushAuditLog(`🎉 [EXPORT SUCCESS] 财务对账单物理下载成功 ➔ [${targetFilename}]`);
+        } catch (exportErr) {
+            console.error(">>> [EXPORT CRITICAL] 物理账单流产: ", exportErr);
+            if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[EXPORT EXCEPTION] 导出链路中途猝死: ${exportErr.message}`);
+        }
+    };
 
     // ⏳ 积木 2 保留：入金渠道与保活对账维持沙箱安全拦截状态
     window.triggerMockPayinCallback = window.triggerMockPayinCallback || function() { pushAuditLog("[BUFFER] 📥 积木 2 (跨境收单入金) 尚未通电，回调报文安全隔离..."); };
@@ -98,18 +145,15 @@ async function initGlobalFxTicker() {
 }
 
 /**
- * 👑 2. 【积木 1 核心功能】：影子总账可用头寸刷盘上屏（绝杀 data.balances 历史坏账）
+ * 👑 2. 【积木 1 核心功能】：影子总账可用头寸刷盘上屏
  */
 export async function fetchBalances() {
     const container = document.getElementById("balances-container");
     if (!container) return;
     try {
         console.log("📡 [FRONTEND BALANCES APP] 正在通过 client 总线打捞中台 12 国多币种可用资产...");
-        
-        // 🎯 核心回正 1：刚性补齐 /ledger 路由前缀，并线大厂中台标准大动脉
         const response = await client(`/ledger/balances?_t=${Date.now()}`, { method: "GET" });
         
-        // 🛡️ 防御机制：如果后端不幸返回 500 或 404，前端刚性进行沙箱隔离，绝不向下解包
         if (!response || response.status !== 200) {
             console.error(`❌ [FRONTEND REJECTED] 中台总线断路，物理状态码: ${response ? response.status : '休克'}`);
             if (typeof window.pushAuditLog === "function") {
@@ -127,7 +171,6 @@ export async function fetchBalances() {
             container.innerHTML = "";
             const matrix = data.multi_currency_visibility || {};
             
-            // 👑 100% 无损留存：你原汁原味的 12 国多币种卡片动态填词排版
             Object.keys(matrix).forEach(currency => {
                 const availableValue = matrix[currency];
                 container.innerHTML += `
@@ -138,7 +181,6 @@ export async function fetchBalances() {
                     </div>`;
             });
 
-            // 👑 100% 无损留存：侧边栏可用资产卡片多币种动态刷新变色飙青特效
             document.querySelectorAll(".sidebar-balance-value").forEach(node => {
                 const nodeCurrency = node.dataset.currency ? node.dataset.currency.toUpperCase().trim() : "";
                 if (nodeCurrency && matrix[nodeCurrency] !== undefined) {
@@ -161,6 +203,68 @@ export async function fetchBalances() {
         }
     }
 }
+
+/**
+ * 📊 🧱 【增量核心算子】：实时打捞多租户清算流水并高性能动态重绘 HTML 表格
+ */
+async function fetchTransactionHistory() {
+    const tbody = document.getElementById("global-transactions-tbody");
+    if (!tbody) return;
+    try {
+        console.log("📡 [FRONTEND STATEMENT APP] 正在打捞多币种入金对账历史...");
+        const response = await client("/api/v1/statements/history", { method: "GET" });
+        if (!response || response.status !== 200) {
+            tbody.innerHTML = `<tr><td colspan='7' class='py-4 text-center text-rose-500 font-sans'>❌ 无法建立流行动拆借，审计端点联失通信</td></tr>`;
+            return;
+        }
+
+        const resData = await response.json();
+        if (resData.status === "success" && Array.isArray(resData.data)) {
+            const list = resData.data;
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan='7' class='py-8 text-center text-slate-600 italic tracking-wide font-sans'>📡 影子总账当前无任何跨国结算流水痕迹</td></tr>`;
+                return;
+            }
+
+            // 清空旧的“正在加载”骨架，注入像素重绘容器
+            tbody.innerHTML = "";
+            list.forEach(tx => {
+                // 根据 SUCCESS / FAILED 渲染地缘资产的颜色极性面具
+                let statusBadge = `<span class="px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-500 font-bold text-[10px]">PENDING</span>`;
+                if (tx.status === "SUCCESS") {
+                    statusBadge = `<span class="px-2 py-0.5 rounded bg-emerald-950/40 border border-emerald-900/50 text-emerald-400 font-bold text-[10px]">SUCCESS</span>`;
+                } else if (tx.status === "FAILED") {
+                    statusBadge = `<span class="px-2 py-0.5 rounded bg-rose-950/40 border border-rose-900/50 text-rose-400 font-bold text-[10px]">FAILED</span>`;
+                }
+
+                // 资金流向极性颜色管理
+                const isCredit = tx.tx_type === "CREDIT";
+                const directionBadge = isCredit 
+                    ? `<span class="text-emerald-400 font-bold">📥 贷记(存入)</span>`
+                    : `<span class="text-rose-400 font-bold">💸 借记(支出)</span>`;
+                const amountDisplay = `${isCredit ? '+' : ''}${parseFloat(tx.amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+                // 时间戳本地国际化自适应切分
+                const prettyTime = new Date(tx.timestamp).toLocaleString();
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-950/30 border-b border-slate-800/40 transition">
+                        <td class="py-3.5 px-5 text-slate-400 font-sans font-medium max-w-[180px] truncate" title="${tx.tx_ref}">${tx.tx_ref}</td>
+                        <td class="py-3.5 px-5"><span class="px-1.5 py-0.5 rounded bg-slate-800 text-[11px] font-bold text-slate-300 uppercase">${tx.domain}</span></td>
+                        <td class="py-3.5 px-5 text-[11px]">${directionBadge}</td>
+                        <td class="py-3.5 px-4 text-right font-bold ${isCredit ? 'text-emerald-400' : 'text-rose-400'}">${amountDisplay}</td>
+                        <td class="py-3.5 px-4 font-bold text-slate-200">${tx.currency}</td>
+                        <td class="py-3.5 px-5">${statusBadge}</td>
+                        <td class="py-3.5 px-5 text-right text-slate-500 font-sans text-[11px]">${prettyTime}</td>
+                    </tr>`;
+            });
+        }
+    } catch (err) {
+        console.error(">>> [STATEMENT RE-RENDER ERROR] 看板重绘熔断: ", err);
+        tbody.innerHTML = `<tr><td colspan='7' class='py-4 text-center text-rose-500 font-sans'>⚠️ 财务流水解包发生地缘排异: ${err.message}</td></tr>`;
+    }
+}
+
 /**
  * 📊 3. 基础选项卡纯净切流控制
  */
@@ -180,18 +284,15 @@ window.adaptPayoutFormByGeopolitical = function() {
     
     if (!bankGroup || !mobileGroup) return;
 
-    // 📱 东非/西非移动钱包路由体系
     if (currency === "KES" || currency === "UGX" || currency === "GHS") {
-        mobileGroup.classList.remove("hidden"); // 展示手机号输入框
-        bankGroup.classList.add("hidden");    // 隐藏银行卡账户/编码
+        mobileGroup.classList.remove("hidden"); 
+        bankGroup.classList.add("hidden");    
         if (typeof window.pushAuditLog === "function") {
             window.pushAuditLog(`[UI ROUTER] 📱 币种已切换至 [${currency}]，已自动调谐至移动货币(Mobile Money)放款矩阵。`);
         }
-    } 
-    // 🏦 全球银行卡清算与影子总账体系
-    else {
-        bankGroup.classList.remove("hidden"); // 唤醒传统的账户/网关编码框
-        mobileGroup.classList.add("hidden");  // 关闸隐藏手机号框
+    } else {
+        bankGroup.classList.remove("hidden"); 
+        mobileGroup.classList.add("hidden");  
         if (typeof window.pushAuditLog === "function") {
             window.pushAuditLog(`[UI ROUTER] 🏦 币种已切换至 [${currency}]，已自动调谐至标准跨境银行网关清算矩阵。`);
         }
