@@ -253,7 +253,7 @@ async function fetchTransactionHistory() {
                         <td class="py-3.5 px-5"><span class="px-1.5 py-0.5 rounded bg-slate-800 text-[11px] font-bold text-slate-300 uppercase">${tx.domain}</span></td>
                         <td class="py-3.5 px-5 text-[11px]">${directionBadge}</td>
                         <td class="py-3.5 px-4 text-right font-bold ${isCredit ? 'text-emerald-400' : 'text-rose-400'}">${amountDisplay}</td>
-                        <td class="py-3.5 px-4 font-bold text-slate-200 uppercase">${tx.currency || 'NGN'}</td> 
+                        <td class="py-3.5 px-4 font-bold text-slate-200 uppercase">${tx.currency}</td>
                         <td class="py-3.5 px-5">${statusBadge}</td>
                         <td class="py-3.5 px-5 text-right text-slate-500 font-sans text-[11px]">${prettyTime}</td>
                     </tr>`;
