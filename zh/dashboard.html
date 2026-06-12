@@ -205,7 +205,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">付款人本地账户凭证/手机号</label>
-                                <input type="text" id="collectionPhone" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none font-mono" placeholder="请输入对应地缘清算凭证号">
+                                <input type="text" id="collectionPhone" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none font-mono" placeholder="示例：奈拉输入 10位 纯数字账号">
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">付款人合规全称 (Payer Full Name)</label>
@@ -475,6 +475,35 @@
     <script type="module">
         import { handleLivePayinCallback } from '../assets/js/payin_handler.js';
         import { client } from '../assets/js/finlinks_client.js';
+
+        // 🎯 🌟 局部精准插入：多地缘本币收银台占位符灰度动态提示规则矩阵 🌟
+        window.updatePayinPlaceholder = function() {
+            const curr = document.getElementById("collectionCurrency")?.value || "NGN";
+            const phoneInput = document.getElementById("collectionPhone");
+            if (!phoneInput) return;
+
+            const placeholderMatrix = {
+                "NGN": "示例：10位 纯数字西非 NUBAN 标准银行账号 (如 0123456789)",
+                "PHP": "示例：11位 菲律宾本地 GCash 绑定手机号 (如 09171234567)",
+                "IDR": "示例：印尼本地 DANA 钱包手机号 (如 081234567890)",
+                "THB": "示例：10位 泰国本地手机号或 PromptPay 水单参考号",
+                "KES": "示例：东非 M-Pesa 手机号 (如 254712345678)",
+                "UGX": "示例：乌干达 MTN 手机号 (如 256771234567)",
+                "ZAR": "示例：9-13位 南非本地清算银行账号",
+                // 🎯 🌟 局部精准插入：拉美、中东及东非离岸多边资产灰度指印全量通电 🌟
+                "BRL": "示例：巴西 Pix 实时清算键值 (手机号/税号/随机密钥, 如 11999998888)",
+                "MXN": "示例：墨西哥 18位 标准 CLABE 核心清算银行账户代码",
+                "TRY": "示例：土耳其本地 26位 标准 IBAN 自由清算代码",
+                "MWK": "示例：马拉维本地 Airtel/TNM 移动钱包手机号 (如 265888123456)",
+                "MUR": "示例：7-12位 毛里求斯离岸银行标准清算物理账户"
+            };
+
+            phoneInput.placeholder = placeholderMatrix[curr] || "请输入对应地缘清算凭证号";
+            
+            if (typeof window.pushAuditLog === "function") {
+                window.pushAuditLog(`[UI AUTO-TUNING] 币种已切流至 [${curr}]，收银台凭证号输入框已动态对齐当地核心网格式规则。`);
+            }
+        };
 
         // 👑 桥接全局兜底日志及取消大闸，绝杀 ReferenceError
         window.closeOrderModal = function() {

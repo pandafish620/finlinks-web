@@ -188,8 +188,10 @@ export function handleLivePayinCallback(fetchBalances) {
                             </div>
                         </div>
                     `;
-
-                    setTimeout(() => { window.location.href = result.checkout_url; }, 1200);
+                    setTimeout(() => { 
+                        window.open(result.checkout_url, '_blank');
+                        closePayinModal(); // 抛射后自动安全回收本地弹窗，释放大厅焦点
+                    }, 1200);
                     return; // 🔒 刚性截断断路器：直接在这里安全返回，绝不准跌落进下方西非虚拟银行的重绘污染中！
                 }
 
