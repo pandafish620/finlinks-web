@@ -16,7 +16,11 @@ const RIGID_ACCOUNT_RULES = {
     "TZS": { regex: /^(255|0)?(6|7)\d{8}$/, error: "坦桑尼亚通道校验失败：必须符合本地 Vodacom/Tigo 钱包号段！" },
     "UGX": { regex: /^(256|0)?\d{9}$/, error: "乌干达通道校验失败：必须是标准的乌干达钱包账号/手机号！" },
     "ZAR": { regex: /^\d{9,13}$/, error: "南非通道校验失败：银行物理账户通常为 9 到 13 位纯数字！" },
-    "MUR": { regex: /^\d{7,12}$/, error: "毛里求斯通道校验失败：必须是 7 到 12 位标准离岸结算银行账号！" }
+    "MUR": { regex: /^\d{7,12}$/, error: "毛里求斯通道校验失败：必须是 7 到 12 位标准离岸结算银行账号！" },
+    // 🎯 🌟 局部精准插入：锁死东南亚三强合规过闸绿卡
+    "PHP": { regex: /^\+?\d{7,14}$/, error: "菲律宾通道：请输入合规的 GCash 绑定手机号或凭证！" },
+    "IDR": { regex: /^\+?\d{7,14}$/, error: "印尼通道：DANA 直连代收需要输入合规的印尼手机号！" },
+    "THB": { regex: /^[a-zA-Z0-9_\-+]{5,20}$/, error: "泰国通道：请输入合规的 PromptPay 清算参考标志！" }
 };
 
 /**
@@ -146,11 +150,16 @@ export function handleLivePayinCallback(fetchBalances) {
         if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[PAYIN COMMIT] 操盘手签署确权令，通过 client 总线轰击中台...`);
 
         try {
-            // 🧱 🎯 核心指纹回正：判断当前币种通道，拉美则传 EBANX，非洲 8 国与国际币种统一回正为 FLUTTERWAVE，彻底掐断老旧 PAWAPAY 参数！
-            const assignedProvider = (currencyConfig && currencyConfig.notice.includes("EBANX")) ? "EBANX" : "FLUTTERWAVE";
+            // 🧱 🎯 局部精准回正：清洗老旧参数，东南亚三强（PHP/IDR/THB）独立归位至 XENDIT，绝杀通道日志污染
+            let assignedProvider = "FLUTTERWAVE";
+            if (["PHP", "IDR", "THB"].includes(currency)) {
+                assignedProvider = "XENDIT";
+            } else if (window.FINLINKS_CURRENCY_MATRIX?.[currency]?.notice?.includes("EBANX")) {
+                assignedProvider = "EBANX";
+            }
             
             const url = `/collection/deposit?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(phoneNumber)}&payer_name=${encodeURIComponent(payerName)}&routing_via=${assignedProvider}`;
-            const response = await client(url, { method: "POST" });
+            const response = await client(url, { method: "POST"});
             const result = await response.json();
 
             confirmBtn.disabled = false;
@@ -162,6 +171,28 @@ export function handleLivePayinCallback(fetchBalances) {
                 
                 if (typeof fetchBalances === "function") await fetchBalances();
                 
+                // 🎯 🌟 局部精准插入：拔除跳转暗桩，捕获 checkout_url 秒级击发物理重定向 🌟 🎯
+                if (["PHP", "IDR", "THB"].includes(currency) && result.checkout_url) {
+                    titleEl.innerText = "🚀 正在调拨东南亚有源官方收银台...";
+                    confirmBtn.innerText = "✓ 正在强制重定向跳转...";
+                    confirmBtn.className = "px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs select-none animate-bounce";
+                    
+                    bodyEl.innerHTML = `
+                        <div class="space-y-3 font-mono text-[11px]">
+                            <div class="p-3 bg-emerald-950/40 border border-emerald-900/50 rounded-lg text-emerald-400 font-sans">
+                                <strong>🟢 跨国资金引信已爆绿点亮！</strong><br>
+                                正在无损拉起官方清算网关。若未自动跳转，请点击下方绿色按钮执行人肉变轨。
+                            </div>
+                            <div class="text-center py-2">
+                                <a href="${result.checkout_url}" target="_self" class="inline-block px-6 py-2 bg-emerald-400 text-slate-950 font-bold text-xs rounded-lg shadow-lg hover:bg-emerald-500 transition">立即前往支付收银台</a>
+                            </div>
+                        </div>
+                    `;
+
+                    setTimeout(() => { window.location.href = result.checkout_url; }, 1200);
+                    return; // 🔒 刚性截断断路器：直接在这里安全返回，绝不准跌落进下方西非虚拟银行的重绘污染中！
+                }
+
                 const vBank = result.generated_bank_name || (result.raw_data && result.raw_data.account_bank_name) || "WEMA BANK";
                 const vAcc = result.generated_account_number || (result.raw_data && result.raw_data.account_number) || "9901428374";
 
