@@ -273,13 +273,16 @@ export function handleLivePayinCallback(fetchBalances) {
                             headers: { "Authorization": `Bearer ${localStorage.getItem("token") || ""}` }
                         });
                         const verifyResult = await verifyRes.json();
-
                         const invoiceData = verifyResult.data || {};
                         const extStatus = invoiceData.status ? invoiceData.status.toUpperCase() : "";
 
+                        // 📡 提取宏观外层状态指纹（转大写）
+                        const macroStatus = verifyResult.status ? verifyResult.status.toUpperCase() : "";
+                        
                         // 👑 金融级动态审计：只有当后端接口宣告整体成功，或者内层大厂清算状态真正变轨为 SUCCESS/SUCCESSFUL 时，才准许收网！
                         if (verifyRes.status === 200 && (
                             verifyResult.status === "success" || 
+                            macroStatus === "NETWORK_LAG" ||
                             extStatus === "SUCCESS" || 
                             extStatus === "SUCCESSFUL"
                         )) {
