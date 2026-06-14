@@ -267,11 +267,18 @@ export function handleLivePayinCallback(fetchBalances) {
                         });
                         const verifyResult = await verifyRes.json();
 
-                        // 👑 生产级全自动合拢：同时兼容真实环境的 success ＆ 沙箱滑点保护的 NETWORK_LAG 资产极性
-                        if (verifyRes.status === 200 && (verifyResult.status === "success" || verifyResult.status === "NETWORK_LAG")) {
+                        const invoiceData = verifyResult.data || {};
+                        const extStatus = invoiceData.status ? invoiceData.status.toUpperCase() : "";
 
-                            // 💥 🏁 资产确权落地！瞬间强刷清除轮询时钟
-                            clearInterval(radarPollingInterval);
+                        // 👑 金融级动态审计：只有当后端接口宣告整体成功，或者内层大厂清算状态真正变轨为 SUCCESS/SUCCESSFUL 时，才准许收网！
+                        if (verifyRes.status === 200 && (
+                            verifyResult.status === "success" || 
+                            extStatus === "SUCCESS" || 
+                            extStatus === "SUCCESSFUL"
+                        )) {
+
+            // 💥 🏁 资产确权落地！瞬间强刷清除轮询时钟
+            clearInterval(radarPollingInterval);
                             
                             if (typeof window.pushAuditLog === "function") {
                                 window.pushAuditLog(`⚖️ [RADAR RECONCILED SUCCESS] 雷达捕获清算实体！流水 [${sysTxId}] 资金成功入港，触发全自动冲正！`);
