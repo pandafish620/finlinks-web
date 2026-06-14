@@ -1,6 +1,6 @@
 // -*- coding: utf-8 -*-
 // 文件位置：assets/js/payin_handler.js
-// 版本说明：v5.5.5-Payin-Core (24h长效卡槽开凿 ＆ 8秒主动雷达长轮询核销 ＆ 屏幕飙青完全体定稿版)
+// 版本说明：v5.5.6-Payin-Core (24h长效卡槽开凿 ＆ 8秒主动雷达长轮询核销 ＆ 屏幕飙青完全体定稿版)
 
 import { client } from './finlinks_client.js';
 
@@ -30,13 +30,13 @@ export function handleLivePayinCallback(fetchBalances) {
     const currency = currEl ? currEl.value.toUpperCase().trim() : "NGN";
     const phoneNumber = phoneEl ? phoneEl.value.trim() : "";
     const payerName = nameEl && nameEl.value ? nameEl.value.trim() : "Jacky Zhang";
+    
     // 👑 👑 👑 【地缘手机号全自动清洗算子】：绝杀 12 位与 10 位数字冲突
     let cleanPhone = phoneNumber.replace(/\s+/g, ""); // 绝杀空格噪音
     if (currency === "KES" && cleanPhone.startsWith("254")) {
         // 如果是以东非区号 254 开头的 12 位号码，强行削掉 254，并在头部补上本地字头 0，平滑回归为标准的 10 位
         cleanPhone = "0" + cleanPhone.slice(3);
     }
-    // 💡 架构师提示：未来如果有其他国家（如尼日利亚 NGN 的 234），在此处顺向叠加 if 分支即可，后端骨干网零改动！
 
     if (!amount || amount <= 0 || !phoneNumber) {
         alert("请输入完整的有源收单要素及大于 0 的合规金额"); return;
@@ -139,7 +139,7 @@ export function handleLivePayinCallback(fetchBalances) {
         confirmBtn.innerText = "⏳ 正在凿通跨国网关...";
         confirmBtn.disabled = true;
 
-        // 👑 【分账锁提取】：从 localStorage 中打捞算子 1 持久化存储的黄金分账引信
+        // 👑 【分账锁提取】：从 localStorage 中打捞算子 1持久化存储的黄金分账引信
         const cachedSubaccountId = localStorage.getItem("finlinks_subaccount_id") || "FINLINKS-044-0690000037";
 
         if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[PAYIN COMMIT] 操盘手签署确权令，提取分账引信: ${cachedSubaccountId}`);
@@ -258,10 +258,13 @@ export function handleLivePayinCallback(fetchBalances) {
                 `;
 
                 // =====================================================================
-                // 📡 📡 📡 【终局致命连击】：拉起前端红外主动核销雷达（8秒长轮询）
+                // 📡 📡 📡 【终局一击】：拉起前端红外主动核销雷达（8秒长轮询自适应防线）
                 // =====================================================================
-                let pollingCount = 0; // 👑 🏁 哨兵归位：确保在时钟开机前原地清零，杜绝多单连发时数据交叉污染！
-                if (radarPollingInterval) clearInterval(radarPollingInterval);
+                let pollingCount = 0; 
+                if (radarPollingInterval) {
+                    clearInterval(radarPollingInterval);
+                    pollingCount = 0; // 清除上一次残留引信
+                }
                 
                 const verifyBaseUrl = configVault 
                     ? `${configVault.API_BASE_URL}${configVault.ENDPOINTS.VERIFY_INVOICE}` 
@@ -269,7 +272,7 @@ export function handleLivePayinCallback(fetchBalances) {
 
                 radarPollingInterval = setInterval(async () => {
                     try {
-                        pollingCount++; // 每次声呐撞击，计数器顺向 +1
+                        pollingCount++; 
                         console.log(`📡 [RADAR POLLING] 红外声呐第 ${pollingCount} 次突击中台...`);
                         
                         const verifyRes = await fetch(`${verifyBaseUrl}/${chargeId}`, {
@@ -279,24 +282,20 @@ export function handleLivePayinCallback(fetchBalances) {
                         const verifyResult = await verifyRes.json();
                         const invoiceData = verifyResult.data || {};
                         const extStatus = invoiceData.status ? invoiceData.status.toUpperCase() : "";
-
-                        // 📡 提取宏观外层状态指纹（转大写）
                         const macroStatus = verifyResult.status ? verifyResult.status.toUpperCase() : "";
-                        
-                        // 极性 A：无论何时，只要捞到内层或外层的绝对 SUCCESS 指纹，秒级收网！
-                        // 极性 B：如果大厂沙箱锁死 NETWORK_LAG，但在前 3 次（24秒内）死锁防御拒绝抢跑；直到第 4 次撞击后，才准许将其作为沙箱降级特权过闸！
+
                         const isSuccess = macroStatus === "SUCCESS" || extStatus === "SUCCESS" || extStatus === "SUCCESSFUL";
                         const isSandboxPass = macroStatus === "NETWORK_LAG" && pollingCount >= 4;
-                        // 👑 金融级动态审计：只有当后端接口宣告整体成功，或者内层大厂清算状态真正变轨为 SUCCESS/SUCCESSFUL 时，才准许收网！
+
+                        // 👑 金融级动态审计判定通车
                         if (verifyRes.status === 200 && (isSuccess || isSandboxPass)) {
-                
-                            console.log(`🏁 [AUTOMATIC BREAKTHROUGH] 过闸原因: ${isSuccess ? '真金核销落地' : '沙箱滑点灰度容错放行'}`);
-                
-                            // 💥 🏁 瞬间强刷清除轮询时钟
-                            clearInterval(radarPollingInterval);
-                            pollingCount = 0; // ⚖️ 物理清零，彻底退出本次生命周期
-                        }
                             
+                            console.log(`🏁 [AUTOMATIC BREAKTHROUGH] 过闸原因: ${isSuccess ? '真金核销落地' : '沙箱滑点灰度容错放行'}`);
+                            
+                            // 💥 🏁 掐灭时钟，释放计数器
+                            clearInterval(radarPollingInterval);
+                            pollingCount = 0; 
+
                             if (typeof window.pushAuditLog === "function") {
                                 window.pushAuditLog(`⚖️ [RADAR RECONCILED SUCCESS] 雷达捕获清算实体！流水 [${sysTxId}] 资金成功入港，触发全自动冲正！`);
                             }
@@ -321,8 +320,8 @@ export function handleLivePayinCallback(fetchBalances) {
                                 </div>
                             `;
                         }
-                    } catch (pollingErr) {
-                        console.warn("🛰️ [FRONTEND RADAR] 雷达扫描滑点保活中: ", pollingErr);
+                    } catch (error) {
+                        console.error("⚠️ [RADAR EXCEPTION] 轮询网络发生物理休克:", error);
                     }
                 }, 8000); // 🔒 8秒刚性扫射一次
 
@@ -343,6 +342,13 @@ export function handleLivePayinCallback(fetchBalances) {
     window.closeOrderModal = closePayinModal;
 }
 
+// =====================================================================
+// 👑 🏁 【全局主权通电钢印】：将函数强行升格至 Window 全局金库，彻底消灭 ReferenceError！
+// =====================================================================
+if (typeof handleLivePayinCallback === "function") {
+    window.handleLivePayinCallback = handleLivePayinCallback;
+}
+
 function closePayinCallbackSuccess() {
     closePayinModal();
     if (typeof window.fetchBalances === "function") window.fetchBalances();
@@ -353,5 +359,5 @@ function closePayinModal() {
     if (radarPollingInterval) clearInterval(radarPollingInterval); // 🔒 销毁弹窗时刚性切断轮询，防止内存泄漏
     const modal = document.getElementById("payout-payin-modal");
     if (modal) modal.classList.add("opacity-0", "pointer-events-none");
-    if (typeof window.pushAuditLog === "function") window.pushAuditLog("[PAYIN VOUCHER CLOSED] 操盘手回收并清空当前收单账单水单舱。");
+    if (typeof window.pushAuditLog === "function") window.pushAuditLog("[PAYIN VOUCHER CLOSED] 操盘手回收并清空当前收单账单水单舱.");
 }
