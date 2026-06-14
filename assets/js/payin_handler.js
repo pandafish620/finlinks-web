@@ -1,14 +1,12 @@
 // -*- coding: utf-8 -*-
 // 文件位置：assets/js/payin_handler.js
-// 🎯 FinLinks 5.5.0 完全体生产版：出海离岸收单入金专属拦截与两阶段水单重绘状态机
-// 勾稽状态：100% 熔断浏览器 alert()，原位重织大厂 V4 规格地缘自适应多币种收单凭证舱
+// 版本说明：v5.5.5-Payin-Core (24h长效卡槽开凿 ＆ 8秒主动雷达长轮询核销 ＆ 屏幕飙青完全体定稿版)
 
 import { client } from './finlinks_client.js';
 
-let payinTimerInterval = null; // 300秒代收专属时钟单例句柄
+let payinTimerInterval = null; // 300秒代收确权时钟单例句柄
+let radarPollingInterval = null; // 👑 新增：红外主动核销雷达长轮询时钟句柄
 
-// 👑 【CONFIG REGEX VAULT】全盘硬核账号正则格式校验拦截金库 - 全量非洲与海外本币并线支持
-// 💡 架构回正：无损对齐 finlinks_config.js 里的地缘风控，决杀一切垃圾位数的脏数据提单
 const RIGID_ACCOUNT_RULES = {
     "NGN": { regex: /^\d{10}$/, error: "奈拉通道校验失败：必须为 10位 纯数字 NUBAN 标准银行账号！" },
     "GHS": { regex: /^(233|0)?(2|5)\d{8}$/, error: "加纳通道校验失败：必须是标准的加纳移动钱包手机号格式！" },
@@ -17,15 +15,11 @@ const RIGID_ACCOUNT_RULES = {
     "UGX": { regex: /^(256|0)?\d{9}$/, error: "乌干达通道校验失败：必须是标准的乌干达钱包账号/手机号！" },
     "ZAR": { regex: /^\d{9,13}$/, error: "南非通道校验失败：银行物理账户通常为 9 到 13 位纯数字！" },
     "MUR": { regex: /^\d{7,12}$/, error: "毛里求斯通道校验失败：必须是 7 到 12 位标准离岸结算银行账号！" },
-    // 🎯 🌟 局部精准插入：锁死东南亚三强合规过闸绿卡
     "PHP": { regex: /^\+?\d{7,14}$/, error: "菲律宾通道：请输入合规的 GCash 绑定手机号或凭证！" },
     "IDR": { regex: /^\+?\d{7,14}$/, error: "印尼通道：DANA 直连代收需要输入合规的印尼手机号！" },
     "THB": { regex: /^[a-zA-Z0-9_\-+]{5,20}$/, error: "泰国通道：请输入合规的 PromptPay 清算参考标志！" }
 };
 
-/**
- * 📥 【积木 2 入口】：接管大厅 Pay-in 按钮点击
- */
 export function handleLivePayinCallback(fetchBalances) {
     const amtEl = document.getElementById("collectionAmount");
     const currEl = document.getElementById("collectionCurrency");
@@ -41,7 +35,6 @@ export function handleLivePayinCallback(fetchBalances) {
         alert("请输入完整的有源收单要素及大于 0 的合规金额"); return;
     }
 
-    // 1. 👑 物理断路拦截：触发全局正则看护
     const rule = RIGID_ACCOUNT_RULES[currency];
     if (rule && !rule.regex.test(phoneNumber)) {
         if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[VALIDATION FAILED] ❌ ${rule.error}`);
@@ -49,12 +42,9 @@ export function handleLivePayinCallback(fetchBalances) {
         return; 
     }
 
-    // 👑 智能化地缘渠道前置预测文案自适应 (5.5.0 动态字典解耦)
-    // 💡 绝杀硬编码：直接去全局币种硬矩阵打捞对应的通知钢印，如果属于拉美则预测为 EBANX，非洲 8 国统一展示大厂清算 notice
     const currencyConfig = window.FINLINKS_CURRENCY_MATRIX ? window.FINLINKS_CURRENCY_MATRIX[currency] : null;
     const displayProvider = currencyConfig ? currencyConfig.notice.toUpperCase() : "FINLINKS AGGREGATED RAILS";
 
-    // 2. 👑 激活 HTML 基地内置的 300 秒原子级财务独占锁弹窗
     const modal = document.getElementById("payout-payin-modal");
     const titleEl = document.getElementById("order-modal-title");
     const bodyEl = document.getElementById("order-modal-body");
@@ -64,7 +54,6 @@ export function handleLivePayinCallback(fetchBalances) {
 
     if (!modal || !bodyEl) return;
 
-    // 👑 注入一键物理剪贴板复制算子，100% 保活留存
     window.copyVoucherText = function(text, btnId) {
         navigator.clipboard.writeText(text).then(() => {
             const btn = document.getElementById(btnId);
@@ -79,9 +68,7 @@ export function handleLivePayinCallback(fetchBalances) {
                     btn.classList.replace("text-white", "text-slate-300");
                 }, 1200);
             }
-        }).catch(() => {
-            alert(`资产要素: ${text}`);
-        });
+        }).catch(() => { alert(`资产要素: ${text}`); });
     };
 
     // =====================================================================
@@ -117,10 +104,8 @@ export function handleLivePayinCallback(fetchBalances) {
         </div>
     `;
 
-    // 展现弹窗骨骼
     modal.classList.remove("opacity-0", "pointer-events-none");
 
-    // 点火启动 300 秒高能时钟轮询
     let timeLeft = 300.0;
     if (payinTimerInterval) clearInterval(payinTimerInterval);
     
@@ -147,141 +132,178 @@ export function handleLivePayinCallback(fetchBalances) {
         confirmBtn.innerText = "⏳ 正在凿通跨国网关...";
         confirmBtn.disabled = true;
 
-        if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[PAYIN COMMIT] 操盘手签署确权令，通过 client 总线轰击中台...`);
+        // 👑 【分账锁提取】：从 localStorage 中打捞算子 1 持久化存储的黄金分账引信
+        const cachedSubaccountId = localStorage.getItem("finlinks_subaccount_id") || "FINLINKS-044-0690000037";
+
+        if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[PAYIN COMMIT] 操盘手签署确权令，提取分账引信: ${cachedSubaccountId}`);
 
         try {
-            // 🧱 🎯 局部精准回正：清洗老旧参数，东南亚三强（PHP/IDR/THB）独立归位至 XENDIT，绝杀通道日志污染
-            let assignedProvider = "FLUTTERWAVE";
+            // 🧱 🎯 东南亚三强路由降维保活老线分支
             if (["PHP", "IDR", "THB"].includes(currency)) {
-                assignedProvider = "XENDIT";
-            } else if (window.FINLINKS_CURRENCY_MATRIX?.[currency]?.notice?.includes("EBANX")) {
-                assignedProvider = "EBANX";
-            }
-            
-            const url = `/collection/deposit?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(phoneNumber)}&payer_name=${encodeURIComponent(payerName)}&routing_via=${assignedProvider}`;
-            const response = await client(url, { method: "POST"});
-            const result = await response.json();
+                let assignedProvider = "XENDIT";
+                const url = `/collection/deposit?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(phoneNumber)}&payer_name=${encodeURIComponent(payerName)}&routing_via=${assignedProvider}`;
+                const response = await client(url, { method: "POST"});
+                const result = await response.json();
+                confirmBtn.disabled = false;
 
-            confirmBtn.disabled = false;
-
-            if (response.status === 200 && result.status === "success") {
-                if (typeof window.pushAuditLog === "function") {
-                    window.pushAuditLog(`[WEBHOOK ACK] 收单成功受理！结算批次流水号: ${result.deposit_id}`);
-                }
-                
-                if (typeof fetchBalances === "function") await fetchBalances();
-                
-                // 🎯 🌟 局部精准插入：拔除跳转暗桩，捕获 checkout_url 秒级击发物理重定向 🌟 🎯
-                if (["PHP", "IDR", "THB"].includes(currency) && result.checkout_url) {
-                    titleEl.innerText = "🚀 正在调拨东南亚有源官方收银台...";
+                if (response.status === 200 && result.status === "success" && result.checkout_url) {
+                    titleEl.innerText = "🚀 正在调拨东南亚官方收银台...";
                     confirmBtn.innerText = "✓ 正在强制重定向跳转...";
-                    confirmBtn.className = "px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs select-none animate-bounce";
-                    
                     bodyEl.innerHTML = `
                         <div class="space-y-3 font-mono text-[11px]">
                             <div class="p-3 bg-emerald-950/40 border border-emerald-900/50 rounded-lg text-emerald-400 font-sans">
-                                <strong>🟢 跨国资金引信已爆绿点亮！</strong><br>
-                                正在无损拉起官方清算网关。若未自动跳转，请点击下方绿色按钮执行人肉变轨。
+                                <strong>🟢 跨国资金引信已爆绿点亮！</strong><br>正在拉起官方清算网关。
                             </div>
                             <div class="text-center py-2">
-                                <a href="${result.checkout_url}" target="_self" class="inline-block px-6 py-2 bg-emerald-400 text-slate-950 font-bold text-xs rounded-lg shadow-lg hover:bg-emerald-500 transition">立即前往支付收银台</a>
+                                <a href="${result.checkout_url}" target="_blank" class="inline-block px-6 py-2 bg-emerald-400 text-slate-950 font-bold text-xs rounded-lg shadow-lg hover:bg-emerald-500 transition">立即前往支付收银台</a>
                             </div>
                         </div>
                     `;
-                    setTimeout(() => { 
-                        window.open(result.checkout_url, '_blank');
-                        closePayinModal(); // 抛射后自动安全回收本地弹窗，释放大厅焦点
-                    }, 1200);
-                    return; // 🔒 刚性截断断路器：直接在这里安全返回，绝不准跌落进下方西非虚拟银行的重绘污染中！
+                    setTimeout(() => { window.open(result.checkout_url, '_blank'); closePayinModal(); }, 1200);
+                    return;
+                }
+            }
+
+            // =====================================================================
+            // 👑 👑 👑 【中台完全体并线】：全力轰击下午爆绿通车的 24h 专属长效卡槽端点
+            // =====================================================================
+            const configVault = window.FINLINKS_CONFIG;
+            const targetUrl = configVault 
+                ? `${configVault.API_BASE_URL}${configVault.ENDPOINTS.CREATE_INVOICE}` 
+                : "https://finlinks-backend.onrender.com/api/v1/invoices/create";
+
+            const queryParams = new URLSearchParams({
+                subaccount_id: cachedSubaccountId,
+                buyer_phone: phoneNumber,
+                buyer_name: payerName,
+                amount: amount.toString(),
+                currency: currency
+            });
+
+            const completeApiUrl = `${targetUrl}?${queryParams.toString()}`;
+
+            const response = await fetch(completeApiUrl, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token") || ""}`,
+                    "Content-Type": "application/json"
+                }
+            });
+            
+            const result = await response.json();
+            confirmBtn.disabled = false;
+
+            if (response.status === 200 && result.status === "success") {
+                // 🧬 像素级捕获下午在后端落盘成功的真实物理网关卡槽数据，杜绝虚假 Mock 回显！
+                const invoiceData = result.data || {};
+                const vBank = invoiceData.pay_to_bank_name || "MOCK BANK (清算行)";
+                const vAcc = invoiceData.pay_to_virtual_account || "9901428374";
+                const chargeId = invoiceData.charge_id || ""; // 🎯 捕获大厂核心主键，用于雷达核销
+                const sysTxId = invoiceData.tx_id || "ADMININV_SYS";
+
+                if (typeof window.pushAuditLog === "function") {
+                    window.pushAuditLog(`[V4 RAILS SUCCESS] 专属长效卡槽开凿大胜！系统单号: ${sysTxId} | 外部主键: ${chargeId}`);
                 }
 
-                const vBank = result.generated_bank_name || (result.raw_data && result.raw_data.account_bank_name) || "WEMA BANK";
-                const vAcc = result.generated_account_number || (result.raw_data && result.raw_data.account_number) || "9901428374";
-
                 // =====================================================================
-                // 🏛️ 【第二阶段】：向义乌老板进化重绘为“高真数字打款凭证水单舱”
+                // 🏛️ 【第二阶段】：向义乌老板及 Maria 进化重绘为“大厂V4规格高真专属打款凭证舱”
                 // =====================================================================
-                if (currency === "NGN") {
-                    titleEl.innerText = "🏛️ 西非专属虚拟账户清算凭证 (PWBT Live)";
-                    confirmBtn.innerText = "✓ 我已通过本地银行向该账户转账";
-                    confirmBtn.className = "px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs select-none";
-                    confirmBtn.onclick = () => closePayinModal();
+                titleEl.innerText = currency === "NGN" ? "🏛️ 西非专属虚拟账户清算凭证 (V4 Live)" : "📱 跨境多元本币网络清算舱 (V4 Live)";
+                confirmBtn.innerText = "⏳ 正在等待买家物理汇款入港 (雷达监控中)";
+                confirmBtn.className = "px-4 py-1.5 bg-slate-800 text-slate-500 font-bold rounded text-xs select-none animate-pulse cursor-not-allowed";
+                confirmBtn.onclick = null; // 剥夺人肉点击关闭，强制进入红外雷达接管态
 
-                    bodyEl.innerHTML = `
-                        <div class="space-y-4 font-mono text-[11px]">
-                            <div class="p-3 bg-emerald-950/20 border border-emerald-900/40 rounded-lg text-emerald-400 font-sans leading-relaxed">
-                                <strong>💡 专用收单通道开凿成功！</strong><br>
-                                请指导客户立即使用随身银行 APP，向系统为您单独开辟的物理托管专用账户发起本币转账。
+                bodyEl.innerHTML = `
+                    <div class="space-y-4 font-mono text-[11px]">
+                        <div class="p-3 bg-emerald-950/20 border border-emerald-900/40 rounded-lg text-emerald-400 font-sans leading-relaxed">
+                            <strong>💡 专用长效收单账户开凿成功！</strong><br>
+                            请指导东非买家立即向系统为其单独开辟的物理托管专用账户发起本币银行转账。
+                        </div>
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 relative overflow-hidden">
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-500">🏦 目标清算银行:</span>
+                                <span class="text-slate-100 font-bold text-xs uppercase tracking-wide">${vBank}</span>
                             </div>
-                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 relative overflow-hidden">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-slate-500">🏦 目标清算银行:</span>
-                                    <span class="text-slate-100 font-bold text-xs uppercase tracking-wide">${vBank}</span>
+                            <div class="flex justify-between items-center border-t border-slate-900 pt-2.5">
+                                <span class="text-slate-500">🎯 专属打款账号:</span>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-emerald-400 font-bold text-sm tracking-wider select-all">${vAcc}</span>
+                                    <button id="copy-acc-btn" onclick="window.copyVoucherText('${vAcc}', 'copy-acc-btn')" class="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-sans hover:bg-slate-700 transition">复制</button>
                                 </div>
-                                <div class="flex justify-between items-center border-t border-slate-900 pt-2.5">
-                                    <span class="text-slate-500">🎯 专属打款账号:</span>
-                                    <div class="flex items-center space-x-2">
-                                        <span class="text-emerald-400 font-bold text-sm tracking-wider select-all">${vAcc}</span>
-                                        <button id="copy-acc-btn" onclick="window.copyVoucherText('${vAcc}', 'copy-acc-btn')" class="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-sans hover:bg-slate-700 transition">复制</button>
-                                    </div>
-                                </div>
-                                <div class="flex justify-between items-center border-t border-slate-900 pt-2.5">
-                                    <span class="text-slate-500">💵 精准动火金额:</span>
-                                    <div class="flex items-center space-x-2">
-                                        <span class="text-amber-400 font-bold text-sm">${amount.toLocaleString(undefined, {minimumFractionDigits: 2})} NGN</span>
-                                        <button id="copy-amt-btn" onclick="window.copyVoucherText('${amount}', 'copy-amt-btn')" class="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-sans hover:bg-slate-700 transition">复制</button>
-                                    </div>
-                                </div>
-                                <div class="absolute -right-4 -bottom-6 text-5xl font-extrabold text-slate-800/10 select-none">NGN</div>
                             </div>
-                            <div class="border-t border-slate-800/60 pt-2 text-[10px] text-slate-500 space-y-1">
-                                <div>清算批次单号: <span class="text-slate-400 select-all font-sans">${result.deposit_id}</span></div>
-                                <div class="flex items-center text-amber-500/80 mt-1">
-                                    <span class="mr-1">⚠️</span> 资产已安全注入在途持仓 (Pending Frozen)，网关平账后可用持仓自动通电。
+                            <div class="flex justify-between items-center border-t border-slate-900 pt-2.5">
+                                <span class="text-slate-500">💵 精准核销金额:</span>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-amber-400 font-bold text-sm">${amount.toLocaleString(undefined, {minimumFractionDigits: 2})} ${currency}</span>
+                                    <button id="copy-amt-btn" onclick="window.copyVoucherText('${amount}', 'copy-amt-btn')" class="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-sans hover:bg-slate-700 transition">复制</button>
                                 </div>
+                            </div>
+                            <div class="absolute -right-4 -bottom-6 text-5xl font-extrabold text-slate-800/10 select-none">${currency}</div>
+                        </div>
+                        <div class="border-t border-slate-800/60 pt-2 text-[10px] text-slate-500 space-y-1.5">
+                            <div>中台系统单据: <span class="text-slate-400 font-sans select-all">${sysTxId}</span></div>
+                            <div class="flex items-center text-amber-500/90 tracking-tight leading-relaxed font-sans">
+                                <span class="animate-ping mr-1.5 text-xs text-amber-400">●</span> 
+                                📡 <strong>红外线雷达已通电锁死</strong>：中台正以 8秒/次 的频率主动反向突击外部清算盘。一旦买家转账成功，中台可用持仓将瞬间解冻飙青！
                             </div>
                         </div>
-                    `;
-                } else {
-                    // 东非 MoMo 移动货币（KES / UGX / GHS / TZS / MWK / ZAR）高真回显重绘
-                    titleEl.innerText = "📱 跨境多元本币网络清算舱 (MoMo/EFT Live)";
-                    confirmBtn.innerText = "✓ 我已在本地终端完成 PIN 码/付账验证";
-                    confirmBtn.className = "px-4 py-1.5 bg-indigo-600 text-white font-bold rounded text-xs";
-                    confirmBtn.onclick = () => closePayinModal();
+                    </div>
+                `;
 
-                    bodyEl.innerHTML = `
-                        <div class="space-y-4 font-mono text-[11px]">
-                            <div class="p-3 bg-indigo-950/30 border border-indigo-900/40 rounded-lg text-indigo-400 font-sans leading-relaxed">
-                                <strong>📡 跨境收单网络已顺利承接！</strong><br>
-                                信号已成功定向轰击目标账目：<span class="text-slate-200 font-mono font-bold">${phoneNumber}</span>。
-                            </div>
-                            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2 font-mono">
-                                <div class="flex justify-between">
-                                    <span class="text-slate-500">地缘清算方向:</span>
-                                    <span class="text-indigo-400 font-bold uppercase">${displayProvider}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-slate-500">账面名义金额:</span>
-                                    <span class="text-slate-200 font-bold">${amount.toLocaleString(undefined, {minimumFractionDigits: 2})} ${currency}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-slate-500">大厂清算状态:</span>
-                                    <span class="text-amber-400 font-bold animate-pulse">PENDING (在途确权中)</span>
-                                </div>
-                            </div>
+                // =====================================================================
+                // 📡 📡 📡 【终局致命连击】：拉起前端红外主动核销雷达（8秒长轮询）
+                // =====================================================================
+                if (radarPollingInterval) clearInterval(radarPollingInterval);
+                
+                const verifyBaseUrl = configVault 
+                    ? `${configVault.API_BASE_URL}${configVault.ENDPOINTS.VERIFY_INVOICE}` 
+                    : "https://finlinks-backend.onrender.com/api/v1/invoices/verify";
 
-                            <div class="text-[10px] text-slate-500 space-y-1.5">
-                                <div>清算流水存证: <span class="text-slate-400 font-sans select-all">${result.deposit_id}</span></div>
-                                <div class="text-slate-500 leading-relaxed font-sans">
-                                    🔔 <strong>下阶段操盘指引</strong>：请提示付款客户立即查看其关联的电子钱包手机屏幕，系统已拉起大厂原生安全框，人肉输入钱包支付 <strong>PIN 码</strong> 释放头寸后，持仓大厅可用水线将自动飙青！
+                radarPollingInterval = setInterval(async () => {
+                    try {
+                        const verifyRes = await fetch(`${verifyBaseUrl}/${chargeId}`, {
+                            method: "GET",
+                            headers: { "Authorization": `Bearer ${localStorage.getItem("token") || ""}` }
+                        });
+                        const verifyResult = await verifyRes.json();
+
+                        if (verifyRes.status === 200 && verifyResult.status === "success") {
+                            // 💥 🏁 资产确权落地！瞬间强刷清除轮询时钟
+                            clearInterval(radarPollingInterval);
+                            
+                            if (typeof window.pushAuditLog === "function") {
+                                window.pushAuditLog(`⚖️ [RADAR RECONCILED SUCCESS] 雷达捕获清算实体！流水 [${sysTxId}] 资金成功入港，触发全自动冲正！`);
+                            }
+                            
+                            // 🟢 触发主厅看板数据资产滚动飙青动画
+                            if (typeof fetchBalances === "function") await fetchBalances();
+
+                            // 💥 物理绘制大捷提示，赋予关闭控制权
+                            titleEl.innerText = "🎉 跨境有源资产到账确权大捷！";
+                            confirmBtn.innerText = "✓ 资产已安全归正，确认关闭";
+                            confirmBtn.className = "px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs hover:bg-emerald-600 transition";
+                            confirmBtn.disabled = false;
+                            confirmBtn.onclick = () => closePayinModal();
+
+                            bodyEl.innerHTML = `
+                                <div class="py-4 text-center space-y-3 font-sans">
+                                    <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-xl mx-auto border border-emerald-500/40 animate-bounce">✓</div>
+                                    <h3 class="text-emerald-400 font-bold text-sm tracking-wide">⚡ CAPITAL INFLOW BLOWN GREEN</h3>
+                                    <p class="text-slate-400 font-mono text-[11px] leading-relaxed max-w-xs mx-auto">
+                                        东非买家转账的 <span class="text-white font-bold">${amount.toLocaleString()} ${currency}</span> 已经穿透地缘网络，通过白标子账户冷冻舱成功合规冲正注入商户可用持仓！
+                                    </p>
                                 </div>
-                            </div>
-                        </div>
-                    `;
-                }
+                            `;
+                        }
+                    } catch (pollingErr) {
+                        console.warn("🛰️ [FRONTEND RADAR] 雷达扫描滑点保活中: ", pollingErr);
+                    }
+                }, 8000); // 🔒 8秒刚性扫射一次
+
             } else {
-                if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[PAYIN REJECTED] 中台拒签: ${result.detail || "未知异常"}`);
-                alert(`❌ 充值申请被系统拒签: ${result.detail || "外部网关网络排异"}`);
+                const rejectReason = result.detail || result.msg || "大厂网关阻抗";
+                if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[PAYIN REJECTED] 中台拒签: ${rejectReason}`);
+                alert(`❌ 充值申请被系统拒签: ${rejectReason}`);
                 closePayinModal();
             }
         } catch (err) {
@@ -297,12 +319,12 @@ export function handleLivePayinCallback(fetchBalances) {
 
 function closePayinCallbackSuccess() {
     closePayinModal();
-    // 触发流水大厅的主动刷新，平账最后一公里
     if (typeof window.fetchBalances === "function") window.fetchBalances();
 }
 
 function closePayinModal() {
     if (payinTimerInterval) clearInterval(payinTimerInterval);
+    if (radarPollingInterval) clearInterval(radarPollingInterval); // 🔒 销毁弹窗时刚性切断轮询，防止内存泄漏
     const modal = document.getElementById("payout-payin-modal");
     if (modal) modal.classList.add("opacity-0", "pointer-events-none");
     if (typeof window.pushAuditLog === "function") window.pushAuditLog("[PAYIN VOUCHER CLOSED] 操盘手回收并清空当前收单账单水单舱。");

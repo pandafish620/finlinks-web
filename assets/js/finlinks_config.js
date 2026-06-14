@@ -45,9 +45,21 @@
         "TRY": { pattern: /^TR\d{2}\d{5}[A-Z0-9]{17}$/i, notice: "土耳其中央银行 IBAN 规范，收款账号必须以 TR 开头，后跟 24 位纯数字/字母组合（总长 26 位）" }
     };
 
+    // 👑 资产三：【增量并线合拢】统一中央公网导航大脑
+    // 💡 架构师提示：如果本地测试，只需将 API_BASE_URL 切换为 "http://127.0.0.1:8000" 即可
+    const FINLINKS_CONFIG = {
+        API_BASE_URL: "https://finlinks-backend.onrender.com", // 🔒 刚性挂载你的 Render 后端生产公网骨干
+        ENDPOINTS: {
+            ONBOARDING: "/api/v1/invoices/onboarding",      // 🏢 白标开户端点
+            CREATE_INVOICE: "/api/v1/invoices/create",      // 📤 长效专属卡槽拉起端点
+            VERIFY_INVOICE: "/api/v1/invoices/verify"       // 🔭 红外雷达核销平账端点
+        }
+    };
+
     // 🔌 显式提升挂载至顶级 window，供核心业务总线随时抓取抽血
     window.FINLINKS_CURRENCY_MATRIX = FINLINKS_CURRENCY_MATRIX;
     window.LOCAL_RAILS_FRONTEND_REGEXP = LOCAL_RAILS_FRONTEND_REGEXP;
+    window.FINLINKS_CONFIG = FINLINKS_CONFIG;
 
     console.log("⚙️ [CONFIG VAULT] 全球币种硬矩阵与防爆正则金库无感挂载成功 [OK]");
 })(window);

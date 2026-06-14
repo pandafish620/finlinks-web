@@ -12,6 +12,7 @@ import { submitAdvancedKYB } from './kyb_handler.js';
 // =====================================================================
 import { triggerLiveQuote, submitFxConversion } from './fx_processor.js';
 import { handleLivePayoutDisbursal } from './payout_dispatcher.js';
+import { handleLivePayinCallback } from './payin_handler.js'; // 👑 🏁 增量并线收单入金特种驱动
 
 document.addEventListener("DOMContentLoaded", () => {
     // 📄 追加到 assets/js/dashboard.js 的 DOMContentLoaded 内部第一行
@@ -114,11 +115,17 @@ document.addEventListener("DOMContentLoaded", () => {
             if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[EXPORT EXCEPTION] 导出链路中途猝死: ${exportErr.message}`);
         }
     };
+    // =====================================================================
+    // 📥 👑 【积木 2 全量通电】：将外贸账单发射按钮与 8秒红外雷达双向平账中枢焊死
+    // =====================================================================
+    window.executeLivePayinDeposit = () => handleLivePayinCallback(async () => {
+        await fetchBalances();           // ⚖️ 雷达确权到账瞬间，可用头寸看板数字滚动跳变
+        await fetchTransactionHistory(); // ⚖️ 对账历史流表格同步更新 SUCCESS 状态面具
+    });
 
-    // ⏳ 积木 2 保留：入金渠道与保活对账维持沙箱安全拦截状态
-    window.triggerMockPayinCallback = window.triggerMockPayinCallback || function() { pushAuditLog("[BUFFER] 📥 积木 2 (跨境收单入金) 尚未通电，回调报文安全隔离..."); };
     window.triggerMockReconciliation = window.triggerMockReconciliation || function() { pushAuditLog("[BUFFER] 零信任对账引擎正在缓冲加热中..."); };
 });
+    
 
 /**
  * 📊 1. 动态拉取左上角 Ticker 基准大盘
