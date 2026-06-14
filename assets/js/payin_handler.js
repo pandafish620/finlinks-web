@@ -30,6 +30,13 @@ export function handleLivePayinCallback(fetchBalances) {
     const currency = currEl ? currEl.value.toUpperCase().trim() : "NGN";
     const phoneNumber = phoneEl ? phoneEl.value.trim() : "";
     const payerName = nameEl && nameEl.value ? nameEl.value.trim() : "Jacky Zhang";
+    // 👑 👑 👑 【地缘手机号全自动清洗算子】：绝杀 12 位与 10 位数字冲突
+    let cleanPhone = phoneNumber.replace(/\s+/g, ""); // 绝杀空格噪音
+    if (currency === "KES" && cleanPhone.startsWith("254")) {
+        // 如果是以东非区号 254 开头的 12 位号码，强行削掉 254，并在头部补上本地字头 0，平滑回归为标准的 10 位
+        cleanPhone = "0" + cleanPhone.slice(3);
+    }
+    // 💡 架构师提示：未来如果有其他国家（如尼日利亚 NGN 的 234），在此处顺向叠加 if 分支即可，后端骨干网零改动！
 
     if (!amount || amount <= 0 || !phoneNumber) {
         alert("请输入完整的有源收单要素及大于 0 的合规金额"); return;
@@ -174,7 +181,7 @@ export function handleLivePayinCallback(fetchBalances) {
 
             const queryParams = new URLSearchParams({
                 subaccount_id: cachedSubaccountId,
-                buyer_phone: phoneNumber,
+                buyer_phone: cleanPhone,
                 buyer_name: payerName,
                 amount: amount.toString(),
                 currency: currency
