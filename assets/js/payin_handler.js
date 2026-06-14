@@ -287,8 +287,8 @@ export function handleLivePayinCallback(fetchBalances) {
                             extStatus === "SUCCESSFUL"
                         )) {
 
-            // 💥 🏁 资产确权落地！瞬间强刷清除轮询时钟
-            clearInterval(radarPollingInterval);
+                            // 💥 🏁 资产确权落地！瞬间强刷清除轮询时钟
+                            clearInterval(radarPollingInterval);
                             
                             if (typeof window.pushAuditLog === "function") {
                                 window.pushAuditLog(`⚖️ [RADAR RECONCILED SUCCESS] 雷达捕获清算实体！流水 [${sysTxId}] 资金成功入港，触发全自动冲正！`);
