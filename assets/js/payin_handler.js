@@ -268,6 +268,9 @@ export function handleLivePayinCallback(fetchBalances) {
 
                 radarPollingInterval = setInterval(async () => {
                     try {
+                        pollingCount++; // 每次声呐撞击，计数器顺向 +1
+                        console.log(`📡 [RADAR POLLING] 红外声呐第 ${pollingCount} 次突击中台...`);
+                        
                         const verifyRes = await fetch(`${verifyBaseUrl}/${chargeId}`, {
                             method: "GET",
                             headers: { "Authorization": `Bearer ${localStorage.getItem("token") || ""}` }
@@ -279,15 +282,16 @@ export function handleLivePayinCallback(fetchBalances) {
                         // 📡 提取宏观外层状态指纹（转大写）
                         const macroStatus = verifyResult.status ? verifyResult.status.toUpperCase() : "";
                         
+                        // 极性 A：无论何时，只要捞到内层或外层的绝对 SUCCESS 指纹，秒级收网！
+                        // 极性 B：如果大厂沙箱锁死 NETWORK_LAG，但在前 3 次（24秒内）死锁防御拒绝抢跑；直到第 4 次撞击后，才准许将其作为沙箱降级特权过闸！
+                        const isSuccess = macroStatus === "SUCCESS" || extStatus === "SUCCESS" || extStatus === "SUCCESSFUL";
+                        const isSandboxPass = macroStatus === "NETWORK_LAG" && pollingCount >= 4;
                         // 👑 金融级动态审计：只有当后端接口宣告整体成功，或者内层大厂清算状态真正变轨为 SUCCESS/SUCCESSFUL 时，才准许收网！
-                        if (verifyRes.status === 200 && (
-                            verifyResult.status === "success" || 
-                            macroStatus === "NETWORK_LAG" ||
-                            extStatus === "SUCCESS" || 
-                            extStatus === "SUCCESSFUL"
-                        )) {
-
-                            // 💥 🏁 资产确权落地！瞬间强刷清除轮询时钟
+                        if (verifyRes.status === 200 && (isSuccess || isSandboxPass)) {
+                
+                            console.log(`🏁 [AUTOMATIC BREAKTHROUGH] 过闸原因: ${isSuccess ? '真金核销落地' : '沙箱滑点灰度容错放行'}`);
+                
+                            // 💥 🏁 瞬间强刷清除轮询时钟
                             clearInterval(radarPollingInterval);
                             
                             if (typeof window.pushAuditLog === "function") {
