@@ -260,6 +260,7 @@ export function handleLivePayinCallback(fetchBalances) {
                 // =====================================================================
                 // 📡 📡 📡 【终局致命连击】：拉起前端红外主动核销雷达（8秒长轮询）
                 // =====================================================================
+                let pollingCount = 0; // 👑 🏁 哨兵归位：确保在时钟开机前原地清零，杜绝多单连发时数据交叉污染！
                 if (radarPollingInterval) clearInterval(radarPollingInterval);
                 
                 const verifyBaseUrl = configVault 
@@ -293,6 +294,8 @@ export function handleLivePayinCallback(fetchBalances) {
                 
                             // 💥 🏁 瞬间强刷清除轮询时钟
                             clearInterval(radarPollingInterval);
+                            pollingCount = 0; // ⚖️ 物理清零，彻底退出本次生命周期
+                        }
                             
                             if (typeof window.pushAuditLog === "function") {
                                 window.pushAuditLog(`⚖️ [RADAR RECONCILED SUCCESS] 雷达捕获清算实体！流水 [${sysTxId}] 资金成功入港，触发全自动冲正！`);
