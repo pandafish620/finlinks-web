@@ -123,10 +123,48 @@ document.addEventListener("DOMContentLoaded", () => {
         await fetchTransactionHistory(); // ⚖️ 对账历史流表格同步更新 SUCCESS 状态面具
     });
 
-    window.triggerMockReconciliation = window.triggerMockReconciliation || function() { pushAuditLog("[BUFFER] 零信任对账引擎正在缓冲加热中..."); };
+    // =====================================================================
+    // ⚖️ 👑 【影子总账对账大闸】：100% 调直参数极性，一枪歼灭 422 排异雷！
+    // =====================================================================
+    window.triggerMockReconciliation = async function() {
+        if (typeof window.pushAuditLog === "function") window.pushAuditLog("[RECON TIER] ⚡ 正在扣动影子总账流水轧差审计大闸...");
+        
+        // 1. 动态抓取当前大厅选择的对账本币币种（例如 KES, NGN），保底使用 KES 执行清算
+        const currentCurrency = document.getElementById("payout-curr")?.value || "KES";
+        const cleanCurrency = currentCurrency.toUpperCase().trim();
+        
+        try {
+            // 2. ⚡ 刚性并线：严格按照后端 Query 门禁，将参数直接吊装在 URL 问号后，Body 保持干净！
+            const response = await client(`/ledger/reconcile?currency=${cleanCurrency}`, { 
+                method: "POST" 
+            });
+            
+            if (!response || response.status !== 200) {
+                const errText = response ? await response.text() : "中台休克";
+                if (typeof window.pushAuditLog === "function") {
+                    window.pushAuditLog(`❌ [RECON REJECTED] 轧差审计失败，网关回喷: ${errText}`);
+                }
+                return;
+            }
+            
+            const resData = await response.json();
+            if (typeof window.pushAuditLog === "function") {
+                window.pushAuditLog(`🎉 [RECON SUCCESS] 总账对账核销成功！审计通过。状态: ${resData.recon_status}`);
+                window.pushAuditLog(`💡 [RECON BENEFIT] 本次释放可用资产: +${resData.metrics.net_unfrozen_amount} ${resData.target_currency}`);
+            }
+            
+            // 3. 🏁 大捷收尾：触发跨文件、匿名作用域瞬间重新冲刷影子头寸与账单表格
+            await fetchBalances();
+            await fetchTransactionHistory();
+            
+        } catch (reconErr) {
+            console.error(">>> [RECON CRITICAL] 对账总线中途猝死: ", reconErr);
+            if (typeof window.pushAuditLog === "function") {
+                window.pushAuditLog(`[RECON EXCEPTION] 链路上游超时或死锁: ${reconErr.message}`);
+            }
+        }
+    };
 });
-    
-
 /**
  * 📊 1. 动态拉取左上角 Ticker 基准大盘
  */
