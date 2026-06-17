@@ -20,6 +20,9 @@ const RIGID_ACCOUNT_RULES = {
     "THB": { regex: /^[a-zA-Z0-9_\-+]{5,20}$/, error: "泰国通道：请输入合规的 PromptPay 清算参考标志！" }
 };
 
+// =====================================================================
+// 👑 🧱 修正后的完全体中央击发核心逻辑 (已完美对齐后端 /ledger 血管)
+// =====================================================================
 export function handleLivePayinCallback(fetchBalances) {
     const amtEl = document.getElementById("collectionAmount");
     const currEl = document.getElementById("collectionCurrency");
@@ -31,19 +34,19 @@ export function handleLivePayinCallback(fetchBalances) {
     const phoneNumber = phoneEl ? phoneEl.value.trim() : "";
     const payerName = nameEl && nameEl.value ? nameEl.value.trim() : "Jacky Zhang";
     
-    // 👑 👑 👑 【地缘手机号全自动清洗算子】：绝杀 12 位与 10 位数字冲突
+    // 👑 👑 👑 【地缘手机号全自动清洗算子】
     let cleanPhone = phoneNumber.replace(/\s+/g, ""); // 绝杀空格噪音
     if (currency === "KES" && cleanPhone.startsWith("254")) {
-        // 如果是以东非区号 254 开头的 12 位号码，强行削掉 254，并在头部补上本地字头 0，平滑回归为标准的 10 位
         cleanPhone = "0" + cleanPhone.slice(3);
     }
 
-    if (!amount || amount <= 0 || !phoneNumber) {
+    if (!amount || amount <= 0 || !cleanPhone) {
         alert("请输入完整的有源收单要素及大于 0 的合规金额"); return;
     }
 
+    // 💉 补丁 1: 正则表达式必须校验【已洗净的 cleanPhone】，拒绝错位拦截
     const rule = RIGID_ACCOUNT_RULES[currency];
-    if (rule && !rule.regex.test(phoneNumber)) {
+    if (rule && !rule.regex.test(cleanPhone)) {
         if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[VALIDATION FAILED] ❌ ${rule.error}`);
         alert(`🚨 账户格式非法: ${rule.error}`);
         return; 
@@ -78,9 +81,6 @@ export function handleLivePayinCallback(fetchBalances) {
         }).catch(() => { alert(`资产要素: ${text}`); });
     };
 
-    // =====================================================================
-    // 🛡️ 【第一阶段】：灌入业务审计要素数据 (确权审查状态)
-    // =====================================================================
     titleEl.innerText = "📥 出海收单入金确权审查 (300s 财务锁)";
     confirmBtn.style.display = "inline-block"; 
     confirmBtn.innerText = "确认放行 (Execute)";
@@ -98,7 +98,7 @@ export function handleLivePayinCallback(fetchBalances) {
             </div>
             <div class="flex justify-between">
                 <span class="text-slate-500">付款人账号:</span>
-                <span class="text-slate-200">${phoneNumber}</span>
+                <span class="text-slate-200">${cleanPhone}</span>
             </div>
             <div class="flex justify-between">
                 <span class="text-slate-500">拟注入水线:</span>
@@ -129,26 +129,25 @@ export function handleLivePayinCallback(fetchBalances) {
     }, 500);
 
     // =====================================================================
-    // ⚡ 核心击发：签署确权令后的“二阶段细胞分裂式重绘”
+    // ⚡ 核心击发：签署确权令
     // =====================================================================
     confirmBtn.onclick = async function() {
-        clearInterval(payinTimerInterval);
-        if (progressBar) progressBar.style.width = "100%";
-        if (countdownText) countdownText.innerText = "LOCKED";
-        
         confirmBtn.innerText = "⏳ 正在凿通跨国网关...";
         confirmBtn.disabled = true;
 
-        // 👑 【分账锁提取】：从 localStorage 中打捞算子 1持久化存储的黄金分账引信
         const cachedSubaccountId = localStorage.getItem("finlinks_subaccount_id") || "FINLINKS-044-0690000037";
-
         if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[PAYIN COMMIT] 操盘手签署确权令，提取分账引信: ${cachedSubaccountId}`);
 
         try {
             // 🧱 🎯 东南亚三强路由降维保活老线分支
             if (["PHP", "IDR", "THB"].includes(currency)) {
                 let assignedProvider = "XENDIT";
-                const url = `/collection/deposit?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(phoneNumber)}&payer_name=${encodeURIComponent(payerName)}&routing_via=${assignedProvider}`;
+                // 💉 补丁 2: 原位修复 URL 路径，补上遗漏的 /ledger 前缀，对齐后端 FastAPI 血管
+                const url = `/ledger/collection/deposit?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(cleanPhone)}&payer_name=${encodeURIComponent(payerName)}&routing_via=${assignedProvider}`;
+                
+                // 清理倒计时，防止跳转后定时器在后台继续轰炸导致弹窗关闭
+                if (payinTimerInterval) clearInterval(payinTimerInterval);
+
                 const response = await client(url, { method: "POST"});
                 const result = await response.json();
                 confirmBtn.disabled = false;
@@ -168,11 +167,17 @@ export function handleLivePayinCallback(fetchBalances) {
                     `;
                     setTimeout(() => { window.open(result.checkout_url, '_blank'); closePayinModal(); }, 1200);
                     return;
+                } else {
+                    // 💉 补丁 3: 如果 Xendit 返回非 200 拦截，抛出友好提示，防止页面死锁
+                    const failMsg = result.detail || result.message || "大厂网关拒绝";
+                    alert(`❌ 东南亚网关请求失败: ${failMsg}`);
+                    closePayinModal();
+                    return;
                 }
             }
 
             // =====================================================================
-            // 👑 👑 👑 【中台完全体并线】：全力轰击下午爆绿通车的 24h 专属长效卡槽端点
+            // 👑 👑 👑 【中台完全体并线】：非洲专属虚拟账户长效卡槽端点（保持不动）
             // =====================================================================
             const configVault = window.FINLINKS_CONFIG;
             const targetUrl = configVault 
@@ -187,8 +192,11 @@ export function handleLivePayinCallback(fetchBalances) {
                 currency: currency
             });
 
-            const completeApiUrl = `${targetUrl}?${queryParams.toString()}`;
+            if (payinTimerInterval) clearInterval(payinTimerInterval);
+            if (progressBar) progressBar.style.width = "100%";
+            if (countdownText) countdownText.innerText = "LOCKED";
 
+            const completeApiUrl = `${targetUrl}?${queryParams.toString()}`;
             const response = await fetch(completeApiUrl, {
                 method: "POST",
                 headers: {
@@ -201,30 +209,26 @@ export function handleLivePayinCallback(fetchBalances) {
             confirmBtn.disabled = false;
 
             if (response.status === 200 && result.status === "success") {
-                // 🧬 像素级捕获下午在后端落盘成功的真实物理网关卡槽数据，杜绝虚假 Mock 回显！
                 const invoiceData = result.data || {};
                 const vBank = invoiceData.pay_to_bank_name || "MOCK BANK (清算行)";
                 const vAcc = invoiceData.pay_to_virtual_account || "9901428374";
-                const chargeId = invoiceData.charge_id || ""; // 🎯 捕获大厂核心主键，用于雷达核销
+                const chargeId = invoiceData.charge_id || ""; 
                 const sysTxId = invoiceData.tx_id || "ADMININV_SYS";
 
                 if (typeof window.pushAuditLog === "function") {
                     window.pushAuditLog(`[V4 RAILS SUCCESS] 专属长效卡槽开凿大胜！系统单号: ${sysTxId} | 外部主键: ${chargeId}`);
                 }
 
-                // =====================================================================
-                // 🏛️ 【第二阶段】：向义乌老板及 Maria 进化重绘为“大厂V4规格高真专属打款凭证舱”
-                // =====================================================================
                 titleEl.innerText = currency === "NGN" ? "🏛️ 西非专属虚拟账户清算凭证 (V4 Live)" : "📱 跨境多元本币网络清算舱 (V4 Live)";
                 confirmBtn.innerText = "⏳ 正在等待买家物理汇款入港 (雷达监控中)";
                 confirmBtn.className = "px-4 py-1.5 bg-slate-800 text-slate-500 font-bold rounded text-xs select-none animate-pulse cursor-not-allowed";
-                confirmBtn.onclick = null; // 剥夺人肉点击关闭，强制进入红外雷达接管态
+                confirmBtn.onclick = null; 
 
                 bodyEl.innerHTML = `
                     <div class="space-y-4 font-mono text-[11px]">
                         <div class="p-3 bg-emerald-950/20 border border-emerald-900/40 rounded-lg text-emerald-400 font-sans leading-relaxed">
                             <strong>💡 专用长效收单账户开凿成功！</strong><br>
-                            请指导东非买家立即向系统为其单独开辟的物理托管专用账户发起本币银行转账。
+                            请指导买家立即向系统为其单独开辟的物理托管专用账户发起本币银行转账。
                         </div>
                         <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 relative overflow-hidden">
                             <div class="flex justify-between items-center">
@@ -257,14 +261,8 @@ export function handleLivePayinCallback(fetchBalances) {
                     </div>
                 `;
 
-                // =====================================================================
-                // 📡 📡 📡 【终局一击】：拉起前端红外主动核销雷达（8秒长轮询自适应防线）
-                // =====================================================================
                 let pollingCount = 0; 
-                if (radarPollingInterval) {
-                    clearInterval(radarPollingInterval);
-                    pollingCount = 0; // 清除上一次残留引信
-                }
+                if (radarPollingInterval) { clearInterval(radarPollingInterval); pollingCount = 0; }
                 
                 const verifyBaseUrl = configVault 
                     ? `${configVault.API_BASE_URL}${configVault.ENDPOINTS.VERIFY_INVOICE}` 
@@ -287,12 +285,7 @@ export function handleLivePayinCallback(fetchBalances) {
                         const isSuccess = macroStatus === "SUCCESS" || extStatus === "SUCCESS" || extStatus === "SUCCESSFUL";
                         const isSandboxPass = macroStatus === "NETWORK_LAG" && pollingCount >= 4;
 
-                        // 👑 金融级动态审计判定通车
                         if (verifyRes.status === 200 && (isSuccess || isSandboxPass)) {
-                            
-                            console.log(`🏁 [AUTOMATIC BREAKTHROUGH] 过闸原因: ${isSuccess ? '真金核销落地' : '沙箱滑点灰度容错放行'}`);
-                            
-                            // 💥 🏁 掐灭时钟，释放计数器
                             clearInterval(radarPollingInterval);
                             pollingCount = 0; 
 
@@ -300,10 +293,8 @@ export function handleLivePayinCallback(fetchBalances) {
                                 window.pushAuditLog(`⚖️ [RADAR RECONCILED SUCCESS] 雷达捕获清算实体！流水 [${sysTxId}] 资金成功入港，触发全自动冲正！`);
                             }
                             
-                            // 🟢 触发主厅看板数据资产滚动飙青动画
                             if (typeof fetchBalances === "function") await fetchBalances();
 
-                            // 💥 物理绘制大捷提示，赋予关闭控制权
                             titleEl.innerText = "🎉 跨境有源资产到账确权大捷！";
                             confirmBtn.innerText = "✓ 资产已安全归正，确认关闭";
                             confirmBtn.className = "px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs hover:bg-emerald-600 transition";
@@ -315,7 +306,7 @@ export function handleLivePayinCallback(fetchBalances) {
                                     <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-xl mx-auto border border-emerald-500/40 animate-bounce">✓</div>
                                     <h3 class="text-emerald-400 font-bold text-sm tracking-wide">⚡ CAPITAL INFLOW BLOWN GREEN</h3>
                                     <p class="text-slate-400 font-mono text-[11px] leading-relaxed max-w-xs mx-auto">
-                                        东非买家转账的 <span class="text-white font-bold">${amount.toLocaleString()} ${currency}</span> 已经穿透地缘网络，通过白标子账户冷冻舱成功合规冲正注入商户可用持仓！
+                                        买家转账的 <span class="text-white font-bold">${amount.toLocaleString()} ${currency}</span> 已经穿透地缘网络，通过白标子账户冷冻舱成功合规冲正注入商户可用持仓！
                                     </p>
                                 </div>
                             `;
@@ -323,7 +314,7 @@ export function handleLivePayinCallback(fetchBalances) {
                     } catch (error) {
                         console.error("⚠️ [RADAR EXCEPTION] 轮询网络发生物理休克:", error);
                     }
-                }, 8000); // 🔒 8秒刚性扫射一次
+                }, 8000); 
 
             } else {
                 const rejectReason = result.detail || result.msg || "大厂网关阻抗";
