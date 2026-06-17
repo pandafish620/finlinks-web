@@ -293,7 +293,18 @@ export function handleLivePayinCallback(fetchBalances) {
                                 window.pushAuditLog(`⚖️ [RADAR RECONCILED SUCCESS] 雷达捕获清算实体！流水 [${sysTxId}] 资金成功入港，触发全自动冲正！`);
                             }
                             
-                            if (typeof fetchBalances === "function") await fetchBalances();
+                            if (typeof fetchBalances === "function") {
+                                const currentActiveCurrency = currency ? currency.toUpperCase().trim() : "THB";
+                                console.log(`🧼 [SANITIZER] 掐灭僵尸对账流！捕获当前闭包活跃本币: ${currentActiveCurrency}`);
+                                try {
+                                    // 2. 绕过外部紊乱的全局函数，直接用 client 动态对账当前币种，把 KES 彻底剥离
+                                    await client(`/ledger/reconcile?currency=${currentActiveCurrency}`, { method: "POST" });
+                                    // 3. 动态刷新全量多币种持仓看板 UI
+                                    await fetchBalances();
+                                } catch (reconErr) {
+                                    console.error("⚠️ [SANITIZER CRITICAL] 动态定向对账大闸网络抖动:", reconErr);
+                                }
+                            }
 
                             titleEl.innerText = "🎉 跨境有源资产到账确权大捷！";
                             confirmBtn.innerText = "✓ 资产已安全归正，确认关闭";
