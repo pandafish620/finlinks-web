@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinLinks - Redirecting Telemetry Stream...</title>
+    <style>
+        body { background-color: #020617; margin: 0; padding: 0; }
+    </style>
+    <script>
+        // 🔒 [GEOGRAPHIC ROUTING COUNTERMEASURE] 中央地缘分流大闸
+        window.onload = function() {
+            try {
+                // 1. 动态打捞买家当前的浏览器语言环境环境（zh-CN / en-US）
+                const userLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+                
+                // 2. 提取当前 URL 后面大厂 Xendit 带回来的所有对账参数（如 ?payment_request_id=pr-...）
+                const urlParams = window.location.search;
+                
+                console.log("📡 [GATEWAY ROUTER] Detected User Language:", userLang);
+                console.log("📊 [GATEWAY ROUTER] Forwarding Telemetry Telemetry Matrix:", urlParams);
+
+                // 3. 核心断路判定：只要包含 zh（中文语境），顺畅原位滑移至中文专属凭证舱
+                if (userLang.includes('zh')) {
+                    window.location.href = '/zh/success.html' + urlParams;
+                } else {
+                    // 4. 其他所有国际法域，刚性甩进英文完全体凭证舱
+                    window.location.href = '/en/success.html' + urlParams;
+                }
+            } catch (err) {
+                // 🛑 极端防御仓：如果发生未知休克，兜底回切到中文主控制台，绝不向商户暴露 404
+                window.location.href = '/zh/dashboard.html';
+            }
+        };
+    </script>
+</head>
+<body>
+    </body>
+</html>
