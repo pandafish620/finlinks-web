@@ -197,10 +197,15 @@ export function handleLivePayinCallback(fetchBalances) {
             if (countdownText) countdownText.innerText = "LOCKED";
 
             const completeApiUrl = `${targetUrl}?${queryParams.toString()}`;
+            // 🟢 [STRICT AUTH NORMALIZATION] 像素级清洗指纹
+            const rawToken = localStorage.getItem("token") || "";
+            const cleanToken = rawToken.replace(/Bearer\s+/gi, '').trim(); // 核心：彻底剔除一切前缀
+
             const response = await fetch(completeApiUrl, {
                 method: "POST",
                 headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("token") || ""}`,
+                // 只有当 cleanToken 存在时，才进行组装，避免传出 "Bearer " 空串
+                    "Authorization": cleanToken ? `Bearer ${cleanToken}` : "",
                     "Content-Type": "application/json"
                 }
             });
