@@ -419,10 +419,12 @@
                 if (displayCName) displayCName.innerText = cName;
                 if (formSuccessStatus) formSuccessStatus.classList.remove("hidden");
                 
-                // 💉 [TOKEN HARDENING]：强行对齐后端标准的 Bearer 校验格式，彻底绝杀 401 假死
+                // 💉 [TOKEN ISOLATION REFACTOR]：全面切除原位覆盖，改用沙箱专享隔离键值
+                // 彻底斩断对真实管理员生产 JWT（token / finlinks_auth_token）的血缘连坐污染！
                 const cleanToken = "sandbox_session_secret_token_" + btoa(encodeURIComponent(cName + ":" + uContact));
-                localStorage.setItem("token", cleanToken);
-                localStorage.setItem("finlinks_auth_token", cleanToken);
+                localStorage.setItem("finlinks_sandbox_token", cleanToken);
+
+                // 🔒 【风控核销】原有的 localStorage.setItem("token") 与 localStorage.setItem("finlinks_auth_token") 已执行物理摘除，不再留存！
 
                 // 顺滑滚动到激活凭证处
                 formSuccessStatus.scrollIntoView({ behavior: 'smooth' });

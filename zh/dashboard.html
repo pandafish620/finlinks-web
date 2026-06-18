@@ -539,21 +539,104 @@
             console.log(`[AUDIT LOG] ${message}`);
         };
 
-        // 📥 稳固并网：出海顺向收单代收入口（绝杀 AI 接口降级硬伤）
-        window.triggerMockPayinCallback = function() {
+        // 📥 稳固并网：出海顺向收单代收入口（彻底结扎外部 .js 盲目调用与 401 降级硬伤）
+        window.triggerMockPayinCallback = async function() {
+            const amtEl = document.getElementById("collectionAmount");
             const currEl = document.getElementById("collectionCurrency");
-            if (currEl && currEl.value) {
-                localStorage.setItem("FINLINKS_LAST_ACTIVE_CURRENCY", currEl.value.toUpperCase().trim());
+            const phoneEl = document.getElementById("collectionPhone");
+            const nameEl = document.getElementById("collectionPayerName");
+
+            const amount = amtEl && amtEl.value ? parseFloat(amtEl.value) : 0;
+            const currency = currEl ? currEl.value.toUpperCase().trim() : "NGN";
+            const phoneNumber = phoneEl ? phoneEl.value.trim() : "";
+            const payerName = nameEl && nameEl.value ? nameEl.value.trim() : "Jacky Zhang";
+
+            // 1. 地缘号码多边脱洗清洗算子
+            let cleanPhone = phoneNumber.replace(/\s+/g, "");
+            if (currency === "KES" && cleanPhone.startsWith("254")) {
+                cleanPhone = "0" + cleanPhone.slice(3);
             }
-            // 调用老版原装 payin_handler，阻断 KES 交叉感染，触发 300S 独占锁表
-            handleLivePayinCallback(() => {
-                setTimeout(async () => {
-                    if (typeof window.fetchBalances === "function") {
-                        await window.fetchBalances();
-                        window.pushAuditLog("[LIVE UPDATE] 📥 入金成功头寸已全量同步到工作台。");
+
+            if (!amount || amount <= 0 || !cleanPhone) {
+                alert("请输入完整的有源收单要素及大于 0 的合规金额！");
+                return;
+            }
+
+            // 2. 强行截留锁定当前活跃通货，防止跨通货关联感染
+            localStorage.setItem("FINLINKS_LAST_ACTIVE_CURRENCY", currency);
+
+            // 3. 拦截外部高危旧 JS 回调，直接利用内聚 client 发起标准的 V3 收单创建
+            const modal = document.getElementById("payout-payin-modal");
+            const titleEl = document.getElementById("order-modal-title");
+            const bodyEl = document.getElementById("order-modal-body");
+            const confirmBtn = document.getElementById("order-confirm-btn");
+
+            if (!modal || !bodyEl || !confirmBtn) return;
+
+            titleEl.innerText = "📥 出海收单入金确权审查 (300s 财务锁)";
+            modal.classList.remove("opacity-0", "pointer-events-none");
+
+            bodyEl.innerHTML = `
+                <div class="space-y-2 font-mono text-[11px] leading-relaxed">
+                    <div class="flex justify-between border-b border-slate-800/60 pb-1.5">
+                        <span class="text-slate-500">业务定性:</span>
+                        <span class="text-slate-300 font-bold">跨境离岸有源收单挂账 (Pay-in)</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">目标注入金额:</span>
+                        <span class="text-emerald-400 font-extrabold text-xs">+${amount.toLocaleString(undefined, {minimumFractionDigits: 2})} ${currency}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">清算通道账户:</span>
+                        <span class="text-slate-200">${cleanPhone}</span>
+                    </div>
+                </div>
+            `;
+
+            // 签署确认放行授权，点火击发
+            confirmBtn.onclick = async function() {
+                confirmBtn.innerText = "⏳ 正在打通地缘网关...";
+                confirmBtn.disabled = true;
+
+                try {
+                    // 刚性对齐 Render 后端标准的纯净 Pay-in 接口，拒绝任何外部 /auth/login 的流氓刷新
+                    const url = `/ledger/collection/deposit?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(cleanPhone)}&payer_name=${encodeURIComponent(payerName)}`;
+                    const response = await client(url, { method: "POST" });
+                    
+                    if (response.status === 200) {
+                        window.pushAuditLog(`[PAYIN SUCCESS] 🟢 收单电报下发大捷！系统账目已就绪。`);
+                        
+                        // 原位触发雷达流水记账模拟，可用头寸秒级放行
+                        const tbody = document.getElementById("global-transactions-tbody");
+                        if (tbody) {
+                            if (tbody.innerHTML.includes("正在叩击中台")) tbody.innerHTML = "";
+                            const mockRef = "TX-" + Math.floor(10000+Math.random()*90000) + `-${currency}-FLK`;
+                            const row = document.createElement("tr");
+                            row.className = "hover:bg-slate-950/25 transition";
+                            row.innerHTML = `
+                                <td class="py-3 px-6 text-slate-400 font-bold select-all">${mockRef}</td>
+                                <td class="py-3 px-6 text-slate-500">${currency} Corridor 网关线</td>
+                                <td class="py-3 px-6 text-emerald-500 font-bold">📥 离岸有源收单</td>
+                                <td class="py-3 px-6 text-right text-emerald-400 font-bold">+${amount.toLocaleString()}</td>
+                                <td class="py-3 px-6">${currency}</td>
+                                <td class="py-3 px-6 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold text-[9px] border border-emerald-500/20">🟢 轧差冲正核销完成</span></td>
+                                <td class="py-3 px-6 text-right text-slate-500">${new Date().toISOString().slice(0, 19).replace('T', ' ')}</td>
+                            `;
+                            tbody.insertBefore(row, tbody.firstChild);
+                        }
+
+                        alert("✓ 收单确权成功！可用在途头寸已记账飙青。");
+                        modal.classList.add("opacity-0", "pointer-events-none");
+                    } else {
+                        alert("🚨 后端网关拦截：代收通道高阻抗震荡，请核销要素后重试。");
                     }
-                }, 400);
-            });
+                } catch (err) {
+                    alert("💥 物理链条异常：未能成功叩击 Render 收单大闸。");
+                } finally {
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerText = "签署放行授权";
+                }
+            };
         };
 
         // ⚖️ 零信任复式总账自动化对账
@@ -794,6 +877,5 @@
         })();
     </script>
     
-    <script type="module" src="../assets/js/dashboard.js"></script>
 </body>
 </html>
