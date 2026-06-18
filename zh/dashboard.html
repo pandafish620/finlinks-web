@@ -3,92 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <script src="../assets/js/new_auth_sentinel.js"></script>
+    <script>
+        // 一开盘直接在内存最底层击发，确权不通过当场就地轰回 login.html，下方大厅像素点连加载的机会都没有！
+        if (typeof window.authGuard === "function") {
+            window.authGuard();
+        }
+    </script>
     <title>FinLinks 5.2.0 - 全球多通道聚合商户控制台</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/custom.css">
-    
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    
+    <link rel="stylesheet" href="../assets/css/custom.css">
     <style>
         .modal { transition: opacity 0.25s ease; }
-        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .sidebar-active { background-color: #1e293b; color: #3b82f6; border-left: 4px solid #3b82f6; }
-        #fx-progress-bar, #order-progress-bar { transition: width 0.1s linear; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        body { background-color: #0f172a; color: #f8fafc; }
+        .sidebar-active { background-color: #1e293b; color: #34d399; border-left: 4px solid #34d399; }
+        #fx-progress-bar { transition: width 0.1s linear; }
     </style>
 </head>
-<body class="antialiased flex h-screen overflow-hidden text-slate-300">
+<body class="font-sans antialiased flex h-screen overflow-hidden">
 
-    <aside class="w-64 bg-slate-900 border-r border-slate-800/80 flex flex-col justify-between shrink-0">
+    <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0">
         <div>
             <div class="px-6 py-6 border-b border-slate-800 flex items-center justify-between">
-                <span class="text-lg font-black tracking-wider text-blue-400 flex items-center gap-1.5 font-sans">
-                    FinLinks <span class="text-[10px] font-bold text-slate-500 bg-slate-850 px-1.5 py-0.5 rounded border border-slate-800">5.2.0</span>
-                </span>
-                <a href="dashboard_en.html" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 hover:text-blue-400 transition font-mono">EN</a>
+                <span class="text-xl font-extrabold tracking-wider text-emerald-400">FinLinks <span class="text-xs font-normal text-slate-500">5.2.0</span></span>
+                <a href="dashboard_en.html" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 hover:text-emerald-400 transition font-mono">EN</a>
             </div>
             
-            <nav id="sidebar-nav" class="mt-6 px-4 space-y-1.5">
-                <button onclick="switchTab('overview')" id="btn-overview" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition sidebar-active">
-                    <i class="fa-solid fa-chart-line text-[13px] w-4"></i>
-                    <span>多币种持仓大厅</span>
+            <nav class="mt-6 px-4 space-y-1.5">
+                <button onclick="switchTab('overview')" id="btn-overview" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition sidebar-active">
+                    <span>📊 多币种持仓大厅</span>
                 </button>
-                <button onclick="switchTab('payin')" id="btn-payin" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
-                    <i class="fa-solid fa-circle-down text-[13px] w-4 text-emerald-500"></i>
-                    <span>地缘出海收单 (Pay-in)</span>
+                <button onclick="switchTab('payin')" id="btn-payin" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
+                    <span>📥 出海离岸收单 (Pay-in)</span>
                 </button>
-                <button onclick="switchTab('payout')" id="btn-payout" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
-                    <i class="fa-solid fa-circle-up text-[13px] w-4 text-blue-500"></i>
-                    <span>同名资产清算 (Wise Cashout)</span>
+                <button onclick="switchTab('payout')" id="btn-payout" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
+                    <span>💸 自主出金代付 (Payout)</span>
                 </button>
-                <button onclick="triggerMockReconciliation()" id="btn-reconcile" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition text-left">
-                    <i class="fa-solid fa-scale-balanced text-[13px] w-4 text-amber-500"></i>
-                    <span>自动化复式总账对账</span>
+                <button onclick="triggerMockReconciliation()" id="btn-reconcile" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
+                    <span>⚖️ 自动化总账对账</span>
                 </button>
-                <button onclick="switchTab('kyb')" id="btn-kyb" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
-                    <i class="fa-solid fa-passport text-[13px] w-4 text-indigo-400"></i>
-                    <span>高级 KYB 资质归档</span>
+                <button onclick="switchTab('kyb')" id="btn-kyb" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
+                    <span>🛡️ 数字化高级 KYB 归档</span>
                 </button>
             </nav>
 
             <div class="mt-6 px-6 border-t border-slate-800/60 pt-4 space-y-3 shrink-0">
                 <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">常驻可用头寸 (Live Balance)</span>
-                <div class="space-y-1.5">
+                <div class="space-y-2">
                     <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
                         <span class="text-slate-400 font-bold">USD</span>
-                        <span class="text-blue-400 font-bold sidebar-balance-value" id="side-bal-USD" data-currency="USD">100,000.00</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="USD">100,000.00</span>
                     </div>
                     <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
                         <span class="text-slate-400 font-bold">NGN</span>
-                        <span class="text-emerald-400 font-bold sidebar-balance-value" id="side-bal-NGN" data-currency="NGN">0.00</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="NGN">0.00</span>
                     </div>
                     <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
                         <span class="text-slate-400 font-bold">KES</span>
-                        <span class="text-emerald-400 font-bold sidebar-balance-value" id="side-bal-KES" data-currency="KES">0.00</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="KES">0.00</span>
                     </div>
                     <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
                         <span class="text-slate-400 font-bold">TRY</span>
-                        <span class="text-emerald-400 font-bold sidebar-balance-value" id="side-bal-TRY" data-currency="TRY">0.00</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="TRY">0.00</span>
                     </div>
                     <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
                         <span class="text-slate-400 font-bold">PHP</span>
-                        <span class="text-emerald-400 font-bold sidebar-balance-value" id="side-bal-PHP" data-currency="PHP">0.00</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="PHP">0.00</span>
                     </div>
                     <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
                         <span class="text-slate-400 font-bold">IDR</span>
-                        <span class="text-emerald-400 font-bold sidebar-balance-value" id="side-bal-IDR" data-currency="IDR">0.00</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="IDR">0.00</span>
                     </div>
                     <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
                         <span class="text-slate-400 font-bold">THB</span>
-                        <span class="text-emerald-400 font-bold sidebar-balance-value" id="side-bal-THB" data-currency="THB">0.00</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="THB">0.00</span>
                     </div>
                 </div>
             </div>
@@ -96,119 +84,79 @@
 
         <div class="mt-auto border-t border-slate-800/60 p-4 shrink-0 bg-slate-950/40 space-y-3">
             <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-mono font-bold text-sm select-none">PB</div>
+                <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-mono font-bold text-sm select-none">PB</div>
                 <div class="flex-1 min-w-0">
-                    <div id="merchant-id-tag" class="text-xs font-bold text-slate-200 truncate font-mono">正在加载商户中核...</div>
-                    <div class="text-[10px] text-slate-500 mt-0.5 tracking-wide">
-                        极客主体: <span id="user-role-badge" class="font-mono font-bold text-emerald-400 uppercase">AUTHENTICATING</span>
+                    <div id="merchant-id-tag" class="text-xs font-bold text-slate-200 truncate font-sans">正在加载商户中枢...</div>
+                    <div class="text-[11px] text-slate-500 mt-0.5 tracking-wide">
+                        当前角色: <span id="user-role-badge" class="font-mono font-bold text-amber-500 uppercase animate-pulse">AUTHENTICATING...</span>
                     </div>
                 </div>
             </div>
-            <button onclick="handleLogout()" class="w-full flex items-center justify-center space-x-2 py-1.5 px-3 border border-slate-800 hover:border-blue-500/40 hover:bg-blue-950/20 rounded-lg text-[10px] font-bold text-slate-400 hover:text-blue-400 transition duration-200 uppercase tracking-wider font-mono">
-                <i class="fa-solid fa-power-off"></i><span>安全断开商户节点</span>
+            <button onclick="handleLogout()" class="w-full flex items-center justify-center space-x-2 py-1.5 px-3 border border-slate-800 hover:border-rose-500/40 hover:bg-rose-950/20 rounded-md text-[11px] font-bold text-slate-400 hover:text-rose-400 transition duration-200 uppercase tracking-wider">
+                <span>🔒 物理断路 退出登录</span>
             </button>
         </div>
     </aside>
 
     <div class="flex-1 flex flex-col overflow-hidden">
-        <header class="h-16 border-b border-slate-800/60 bg-slate-900/40 flex items-center justify-between px-8 shrink-0">
+        <header class="h-16 border-b border-slate-800 bg-slate-900/50 flex items-center justify-between px-8 shrink-0">
             <div class="flex items-center space-x-6">
-                <div class="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
-                    安全防护: <span class="text-blue-400 font-bold" id="security-status-badge">国家级持牌合规架构</span>
-                </div>
+                <div class="text-sm font-semibold text-slate-400">安全级别：<span class="text-emerald-400 font-bold" id="security-status-badge">金融级标准</span></div>
                 <div id="global-fx-ticker" class="border-l border-slate-800 pl-4 h-4 flex items-center">
-                    <span class="text-[10px] text-slate-500 font-mono flex items-center select-none">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
-                        实时同步全球结算汇报汇率 (Reporting FX)
+                    <span class="text-xs text-slate-500 font-mono flex items-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-slate-700 mr-2 animate-pulse"></span>正在叩击全球即期基准大盘...
                     </span>
                 </div>
             </div>
             <div class="flex space-x-4 items-center">
-                <a href="rates.html" class="text-xs text-slate-400 hover:text-blue-400 flex items-center transition"><i class="fa-solid fa-satellite-dish mr-1"></i> 实时汇率遥测</a>
-                <button onclick="switchTab('payout')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg text-xs transition-all duration-150 shadow-md shadow-blue-600/10 font-mono">
-                    <i class="fa-solid fa-wallet mr-1.5"></i>商户同名资产提清
-                </button>
+                <a href="rates.html" class="text-xs text-slate-400 hover:text-emerald-400 flex items-center transition">📡 实时汇率遥测</a>
+                <button onclick="openFxModal()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 py-1.5 rounded-lg text-xs transition shadow-lg shadow-emerald-500/10">执行即期换汇 (FX Spot)</button>
             </div>
         </header>
 
         <div class="flex-1 overflow-y-auto p-8 space-y-8">
-            
             <section id="pane-overview" class="tab-pane space-y-6">
                 <div>
-                    <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2 font-sans">
-                        <i class="fa-solid fa-server text-blue-500"></i>新兴市场多边轧差资产大厅
-                    </h1>
-                    <p class="text-slate-400 text-xs mt-1">
-                        基于 A2A 同名自愈轧差引擎的可视化可用余额总账，中台零实体池
-                    </p>
+                    <h1 class="text-2xl font-extrabold tracking-tight">全球多边轧差资产头寸</h1>
+                    <p class="text-slate-400 text-xs mt-1">基于复式影子记账核销引擎的多币种头寸透视窗口。</p>
                 </div>
-
-                <div id="balances-container" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl relative overflow-hidden shadow-lg">
-                        <span class="text-[10px] uppercase font-mono tracking-wider text-slate-500">美元离岸主账户</span>
-                        <div class="text-xl font-extrabold text-blue-400 font-mono mt-2" id="card-val-USD">$100,000.00</div>
-                        <div class="text-[9px] text-slate-500 mt-2 font-sans flex items-center justify-between">
-                            <span>持牌承兑</span>
-                            <span class="text-blue-400">● 通电</span>
-                        </div>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl relative overflow-hidden shadow-lg">
-                        <span class="text-[10px] uppercase font-mono tracking-wider text-slate-500">西非奈拉代收在途</span>
-                        <div class="text-xl font-extrabold text-slate-100 font-mono mt-2" id="card-val-NGN">₦0.00</div>
-                        <div class="text-[9px] text-slate-500 mt-2 font-sans flex items-center justify-between">
-                            <span>专线卡槽: WEMA BANKV4</span>
-                            <span class="text-emerald-500">● 回核中</span>
-                        </div>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl relative overflow-hidden shadow-lg">
-                        <span class="text-[10px] uppercase font-mono tracking-wider text-slate-500">巴西雷亚尔资产</span>
-                        <div class="text-xl font-extrabold text-slate-100 font-mono mt-2" id="card-val-BRL">R$0.00</div>
-                        <div class="text-[9px] text-slate-500 mt-2 font-sans flex items-center justify-between">
-                            <span>清算直连: STONEX CO.</span>
-                            <span class="text-emerald-500">● 挂账中</span>
-                        </div>
-                    </div>
-                    <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl relative overflow-hidden shadow-lg">
-                        <span class="text-[10px] uppercase font-mono tracking-wider text-slate-500">东南亚多地缘本币</span>
-                        <div class="text-xl font-extrabold text-slate-100 font-mono mt-2" id="card-val-PHP">₱0.00</div>
-                        <div class="text-[9px] text-slate-500 mt-2 font-sans flex items-center justify-between">
-                            <span>代收合流: GCASH/PROMPTPAY</span>
-                            <span class="text-slate-500">● 可提</span>
-                        </div>
+                <div id="balances-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="animate-pulse bg-slate-900 border border-slate-800 p-6 rounded-xl">
+                        <div class="h-4 bg-slate-800 rounded w-1/4 mb-4"></div>
+                        <div class="h-8 bg-slate-800 rounded w-1/2"></div>
                     </div>
                 </div>
 
-                <div class="mt-8 bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden shadow-2xl">
-                    <div class="px-6 py-5 border-b border-slate-800 bg-slate-950/20 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="mt-8 bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl">
+                    <div class="px-6 py-5 border-b border-slate-800 bg-slate-900/50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
-                            <h3 class="text-xs font-bold text-slate-200 uppercase tracking-widest flex items-center gap-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                                全球同名资产清算与到账财务台账 (实时审计)
+                            <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mr-2"></span>全球多币种入金清算对账流水 (实时审计)
                             </h3>
-                            <p class="text-[10px] text-slate-500 mt-1 font-mono">
-                                System Audit ID Verification Ledger Tracker ➔ Automatic Double-Execution System
-                            </p>
+                            <p class="text-[11px] text-slate-500 mt-1">基于方案 B 多租户隔离域（Tenant Domain）密码嗅探技术数字确权</p>
                         </div>
-                        <button onclick="executeLedgerCSVExport()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-mono text-xs px-3.5 py-1.5 rounded-lg transition duration-150">
-                            <i class="fa-solid fa-download mr-1"></i> 导出财务对账单 (CSV)
-                        </button>
+                        <div class="flex items-center space-x-3 shrink-0">
+                            <button onclick="if(typeof window.executeFinancialStatementExport === 'function') window.executeFinancialStatementExport();" 
+                                    class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-mono font-bold px-4 py-2 rounded-lg text-xs transition duration-200 transform active:scale-95 shadow-md shadow-emerald-500/5 flex items-center">
+                                📥 下载当前多币种财务对账单 (CSV)
+                            </button>
+                        </div>
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse font-sans text-xs">
+                        <table class="w-full text-left border-collapse font-sans">
                             <thead>
-                                <tr class="bg-slate-950/50 border-b border-slate-800 font-mono text-[9px] font-bold text-slate-500 uppercase tracking-widest">
-                                    <th class="py-3 px-6">内部清算凭证号 / Reference</th>
-                                    <th class="py-3 px-6">核销来源 (Domain)</th>
-                                    <th class="py-3 px-6">收单方向</th>
-                                    <th class="py-3 px-6 text-right">名义金额 (Face Val)</th>
-                                    <th class="py-3 px-6">结算本币</th>
-                                    <th class="py-3 px-6 text-center">清算对账状态</th>
-                                    <th class="py-3 px-6 text-right">微秒级审计时间戳</th>
+                                <tr class="bg-slate-950/40 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                                    <th class="py-3 px-5">System ID / Reference</th>
+                                    <th class="py-3 px-5">租户隔离域 (Domain)</th>
+                                    <th class="py-3 px-5">清算方向</th>
+                                    <th class="py-3 px-4 text-right">拟动火金额</th>
+                                    <th class="py-3 px-4">资产币种</th>
+                                    <th class="py-3 px-5">清算大闸状态</th>
+                                    <th class="py-3 px-5 text-right">微秒级记账时钟</th>
                                 </tr>
                             </thead>
-                            <tbody id="global-transactions-tbody" class="divide-y divide-slate-800/40 text-[11px] font-mono text-slate-300">
+                            <tbody id="global-transactions-tbody" class="divide-y divide-slate-800/60 text-xs font-mono text-slate-300">
                                 <tr>
                                     <td colspan="7" class="py-8 text-center text-slate-600 italic tracking-wide font-sans">
                                         正在叩击中台中央审计引擎，安全加载全球资产历史血缘...
@@ -218,286 +166,317 @@
                         </table>
                     </div>
                 </div>
-            </section>
+                </section>
 
             <section id="pane-payin" class="tab-pane hidden space-y-6">
                 <div>
-                    <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2 font-sans">
-                        <i class="fa-solid fa-circle-down text-emerald-500"></i>新兴市场多地缘收单通道 (Pay-in Deposit)
-                    </h1>
-                    <p class="text-slate-400 text-xs mt-1">
-                        为出海短剧、电商流提供南美Pix、拉美CLABE、东非M-Pesa与西非奈拉长效虚拟账户的高并发接收。
-                    </p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-emerald-400">出海离岸收单账目 (Pay-in Collections)</h1>
+                    <p class="text-slate-400 text-xs mt-1">处理短剧/游戏出海高频收单流量。全面拦截并承接来自非洲 Mobile Money 与拉美国家级实时支付网络的跨国清算流水。</p>
                 </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                    <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 lg:col-span-2 space-y-5 shadow-xl">
-                        <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
-                            <span class="text-xs font-bold text-slate-200">输入地缘渠道要素发起代收</span>
-                            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 font-mono border border-emerald-500/20 px-2.5 py-0.5 rounded">8s 雷达轮询预备</span>
-                        </div>
-                        
-                        <form id="collectionDepositForm" onsubmit="event.preventDefault();" class="space-y-4">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">名义入金金额</label>
-                                    <input type="number" id="collectionAmount" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 font-mono" placeholder="5000.00" required step="0.01">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">渠道目标本币</label>
-                                    <select id="collectionCurrency" onchange="window.updatePayinPlaceholder();" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer" required>
-                                        <option value="NGN" selected>NGN - 尼日利亚奈拉 (WEMA 托管分账网关)</option>
-                                        <option value="KES">KES - 肯尼亚先令 (东非 M-Pesa 手机直链)</option>
-                                        <option value="BRL">BRL - 巴西雷亚尔 (Pix 国家实时清算总线)</option>
-                                        <option value="MXN">MXN - 墨西哥比索 (Spei 银联清算网络)</option>
-                                        <option value="TRY">TRY - 土耳其里拉 (里拉本地大盘托管舱)</option>
-                                        <option value="PHP">PHP - 菲律宾比索 (GCash 承兑渠道代收)</option>
-                                        <option value="IDR">IDR - 印尼盾 (DANA 官方电子货币对齐流)</option>
-                                        <option value="THB">THB - 泰国铢 (PromptPay 国家统扫一键付)</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">付款人本地账户/凭证手机号</label>
-                                    <input type="text" id="collectionPhone" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 font-mono" placeholder="请选择币种以加载地缘规则提示...">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">付款人真实法人姓名 (Payer Full Name)</label>
-                                    <input type="text" id="collectionPayerName" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-100 focus:outline-none focus:border-emerald-500" placeholder="e.g. Jacky Zhang">
-                                </div>
-                            </div>
-                            <button type="button" onclick="window.triggerMockPayinCallback();" class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs tracking-wider transition duration-150 uppercase shadow-lg shadow-emerald-600/10">
-                                <i class="fa-solid fa-satellite-dish mr-1.5 font-bold"></i> 签署并下发代收水单清算大闸 (Pay-in Gateway Handshake)
-                            </button>
-                        </form>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-2xl space-y-4">
+                    <div class="border-b border-slate-800 pb-2">
+                        <span class="text-sm font-bold text-slate-200 block">全球新兴 market 多币种泛化收单大闸</span>
                     </div>
-
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-                        <span class="text-xs font-bold text-slate-200 block border-b border-slate-800 pb-2">地缘号码清洗规则机制：</span>
-                        <div class="text-[11px] text-slate-400 space-y-2.5 leading-relaxed font-sans">
-                            <p>平台配备了全自动的多地缘格式脱洗算子（Washing Operator）。对于诸如东非 M-Pesa 的前缀 `254` 会自动合并冲洗。请根据实时提醒规则填写，确保交易一次回滚核销。</p>
-                            <div class="p-3 bg-slate-950 rounded-lg text-slate-500 border border-slate-900 font-mono text-[10px]">
-                                <span class="text-amber-500">🛡️ 安全红线提示：</span><br>
-                                不允许存在中介中继资金池。任何离岸入金代收单，在清算成功后会触发影子总账复式对冲，并在最迟 300 秒内强力对齐。
+                    <form id="collectionDepositForm" onsubmit="event.preventDefault();" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">拟入金名义金额 (Amount)</label>
+                                <input type="number" id="collectionAmount" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" placeholder="5000.00" required step="0.01">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">结算本币币种 (Currency)</label>
+                                <select id="collectionCurrency" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500" required>
+                                    <option value="" disabled selected>选择结算本地币种...</option>
+                                    <option value="KES">KES - 肯尼亚先令 (东非 M-Pesa 直连)</option>
+                                    <option value="UGX">UGX - 乌干达先令 (东非 MTN 核心网)</option>
+                                    <option value="NGN">NGN - 尼日利亚奈拉 (动态虚拟账号转账)</option>
+                                    <option value="ZAR">ZAR - 南非兰特 (EFT 银行清算大闸通电)</option>
+                                    <option value="MUR">MUR - 毛里求斯卢比 (MCB/SBM 离岸银行网络)</option>
+                                    <option value="MWK">MWK - 马拉维克瓦查 (Airtel/TNM 移动钱包)</option>
+                                    <option value="BRL">BRL - 巴西雷亚尔 (Pix 实时网关通电)</option>
+                                    <option value="MXN">MXN - 墨西哥比索 (CLABE 核心网通电)</option>
+                                    <option value="TRY">TRY - 土耳其里拉 (里拉自由大盘通电)</option>
+                                    <option value="PHP">PHP - 菲律宾比索 (GCash 官方托管收银台)</option>
+                                    <option value="IDR">IDR - 印尼盾 (DANA 电子钱包直连代收线)</option>
+                                    <option value="THB">THB - 泰国铢 (PromptPay 国家级统一扫码网关)</option>
+                                </select>
                             </div>
                         </div>
-                    </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">付款人本地账户凭证/手机号</label>
+                                <input type="text" id="collectionPhone" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none font-mono" placeholder="示例：奈拉输入 10位 纯数字账号">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">付款人合规全称 (Payer Full Name)</label>
+                                <input type="text" id="collectionPayerName" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none" placeholder="Jacky Zhang">
+                            </div>
+                        </div>
+                        <button onclick="triggerMockPayinCallback()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded text-xs tracking-wider transition uppercase shadow-lg shadow-indigo-600/10">⚡ 发起穿透式收单确权电报</button>
+                    </form>
                 </div>
             </section>
 
             <section id="pane-payout" class="tab-pane hidden space-y-6">
                 <div>
-                    <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2 font-sans">
-                        <i class="fa-solid fa-circle-up text-blue-500"></i>商户同名资产清算与提现舱 (Wise Asset Terminal)
-                    </h1>
-                    <p class="text-slate-400 text-xs mt-1">
-                        退火切除一切二级非托管提现隐患。资产一键原路清盘划转至法人同名的国际 Wise 汇账或离岸国家商业银行账户。
-                    </p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-rose-400">自主出金代付工作台 (Payout Control)</h1>
+                    <p class="text-slate-400 text-xs mt-1">向离岸本地银行或电子钱包下发跨境代付清算指令。</p>
                 </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-xl">
+                    <span class="block font-bold text-sm text-slate-300 mb-4">单笔代付下发表单</span>
+                    <div class="space-y-3">
+                        <input type="text" id="payout-name" placeholder="受益人姓名 (Beneficiary Name)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-rose-500">
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                    <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 lg:col-span-2 space-y-5 shadow-xl">
-                        <div class="border-b border-slate-800 pb-3">
-                            <span class="text-xs font-bold text-slate-200 block uppercase font-mono tracking-wider">同名账户一键清盘下发表单 (A2A Line Access)</span>
+                        <div class="grid grid-cols-2 gap-4">
+                            <select id="payout-curr" onchange="if(typeof window.adaptPayoutFormByGeopolitical === 'function') window.adaptPayoutFormByGeopolitical();" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
+                                <option value="" disabled selected>选择结算币种...</option>
+                                <option value="USD">USD (美元 Fedwire / ACH 本地清算)</option>
+                                <option value="EUR">EUR (欧元区 SEPA 实时清算总线)</option>
+                                <option value="GBP">GBP (英镑 Fast Payments 快速网络)</option>
+                                <option value="NGN">NGN (尼日利亚奈拉 - NUBAN 影子总账)</option>
+                                <option value="BRL">BRL (巴西雷亚尔 - Pix 实时网关)</option>
+                                <option value="MXN">MXN (墨西哥比索 - SPEI 核心网)</option>
+                                <option value="TRY">TRY (土耳其里拉 - 国际 IBAN 清算)</option>
+                                <option value="KES">KES (肯尼亚先令 - M-Pesa 移动放款)</option>
+                                <option value="UGX">UGX (乌加达先令 - MTN 移动打款)</option>
+                                <option value="GHS">GHS (加纳塞地 - Vodafone Mobile Money)</option>
+                                <option value="ZAR">ZAR (南非兰特 - EFT 银行结算大闸)</option>
+                                <option value="MWK">MWK (马拉维克瓦查 - Airtel / TNM 移动钱包)</option>
+                                <option value="MUR">MUR (毛里求斯卢比 - MCB / SBM 离岸银行网络)</option>
+                            </select>
+                            <input type="number" id="payout-amount" placeholder="清算金额 (Amount)" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-rose-500">
                         </div>
 
-                        <form id="wiseWithdrawalForm" onsubmit="event.preventDefault();" class="space-y-4">
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">选定拟清算的在途商户可用头寸</label>
-                                <select id="withdrawalSourceCurrency" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono cursor-pointer">
-                                    <option value="USD">USD - 离岸美元常驻头寸</option>
-                                    <option value="NGN">NGN - 尼日利亚代收对账头寸</option>
-                                    <option value="KES">KES - 肯尼亚手机钱包冷冻头寸</option>
-                                    <option value="TRY">TRY - 土耳其里拉商户持仓</option>
-                                    <option value="THB">THB - 泰国泰铢商户持仓</option>
-                                </select>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">同名账户 (Wise 绑定注册邮箱) <span class="text-red-500">*</span></label>
-                                    <input type="email" id="wiseEmail" placeholder="e.g. corp_treasury@pinebay.io" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-100 focus:outline-none focus:border-blue-500 font-mono">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">清算提现核销金额 <span class="text-red-500">*</span></label>
-                                    <input type="number" id="withdrawalAmount" placeholder="0.00" required step="0.01" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-100 focus:outline-none focus:border-blue-500 font-mono">
-                                </div>
-                            </div>
-
-                            <div class="p-4 bg-slate-950 border border-slate-800 rounded-xl space-y-2">
-                                <div class="flex justify-between items-center text-[10px] text-slate-500">
-                                    <span>对账折算汇率 (Reporting FX)</span>
-                                    <span>系统计算最终交付名义面值</span>
-                                </div>
-                                <div class="flex justify-between items-center font-mono">
-                                    <span class="text-xs text-amber-500 font-bold" id="withdrawalRateDisplay">1 USD = 1.00 USD (本币同名原位划拨)</span>
-                                    <span class="text-sm text-blue-400 font-extrabold" id="withdrawalPreviewDisplay">-- USD</span>
-                                </div>
-                                <div class="border-t border-slate-800/80 pt-2 flex items-center justify-between text-[10px] text-emerald-400 font-mono">
-                                    <span class="flex items-center gap-1">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                        <span>即期中间价实时遥测:</span>
-                                    </span>
-                                    <span id="liveWithdrawFxRate" class="font-bold text-emerald-400">正在比对全球收单大盘系统...</span>
-                                </div>
-                            </div>
-
-                            <button type="button" onclick="window.executeWiseWithdrawalHandshake()" class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs tracking-wider transition duration-150 uppercase shadow-lg shadow-blue-600/10 font-mono">
-                                <i class="fa-solid fa-lock mr-1"></i> 安全签署并下发 A2A 同名清算指令 (Execute A2A Settle)
-                            </button>
-                        </form>
-                    </div>
-
-                    <div class="space-y-6">
-                        <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-200/80 text-slate-800 space-y-4">
-                            <span class="text-xs font-black text-blue-700 border-b border-slate-100 pb-2 flex items-center gap-1.5 uppercase font-sans">
-                                <i class="fa-solid fa-shield-halved"></i> 银联同名划转（A2A）安全合规声明
-                            </span>
-                            <p class="text-[11px] leading-relaxed text-slate-600 text-justify">
-                                本平台非代付网关，所有资产划转业务均严格遵循中国银联 A2A 同名原路大闸管理办法。商户发起之出金，仅支持原路、无改道、同名划转清算到商户在底层金融体系中自主注册、开立的同名 Wise 结算信托账号或离岸商业银行同名持牌账户。中台绝对不设立任何第三方代理资金堆积槽。
-                            </p>
+                        <div id="payout-bank-group" class="space-y-3">
+                            <input type="text" id="payout-acc" placeholder="请输入受益人银行账户 / NUBAN / IBAN / CLABE" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none font-mono">
+                            <input type="text" id="payout-bank-code" placeholder="银行/分行编码 (Bank/Sort Code，如尼日利亚网关填 044)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none font-mono">
                         </div>
 
-                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl text-slate-400 space-y-4 shadow-md">
-                            <span class="text-xs font-bold text-amber-500 border-b border-slate-800 pb-2 flex items-center gap-1.5 uppercase font-mono">
-                                <i class="fa-solid fa-triangle-exclamation"></i> 静态参考汇报汇率免责说明
-                            </span>
-                            <p class="text-[10px] leading-relaxed text-slate-500 text-justify font-sans">
-                                本控制台所直射的任何外汇折算率（Reporting FX），仅用来供财务进行即期对账及总账逆向冲正对齐核销之汇报参考。由于外汇自由市场的跳空摩擦性质，最终在途划拨清算的真实扣减刚性取决于合作持牌大厂（如 StoneX, Standard Charter）在真实物理交割资金划转那一刻所执行的清算行牌照牌价。
-                            </p>
+                        <div id="payout-mobile-group" class="hidden">
+                            <input type="text" id="payout-phone" placeholder="付款人本地电子钱包手机号 (格式如 +254... / +233...)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none font-mono">
                         </div>
+
+                        <div class="hidden">
+                            <input type="email" id="payout-email" value="merchant_white_label@finlinks.io">
+                            <input type="text" id="payout-address" value="126 Joel Ogunnaike Street, Ikeja">
+                            <input type="text" id="payout-swift-code" value="">
+                            <input type="text" id="payout-routing-number" value="">
+                        </div>
+
+                        <button onclick="executeLivePayoutDisbursal()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded text-xs tracking-wider transition shadow-lg shadow-rose-600/10">核销并下发代付信号</button>
                     </div>
                 </div>
             </section>
 
             <section id="pane-kyb" class="tab-pane hidden space-y-6">
                 <div>
-                    <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center gap-2 font-sans">
-                        <i class="fa-solid fa-passport text-indigo-400"></i>数字化高级 KYB 资质归档舱 (AML Standard)
-                    </h1>
-                    <p class="text-slate-400 text-xs mt-1">
-                        为尊享大宗商事贸易实体专门开立的数字白标身份沙盘安全审查点，防堵地缘合规破损。
-                    </p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-indigo-400">数字化高级 KYB 资质归档中心</h1>
+                    <p class="text-[11px] text-slate-500 mt-1 uppercase tracking-widest">请进入安全加密的白标确权舱递交您的金融级资质证明材料</p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                    <div class="bg-slate-900 border border-slate-800 p-6 lg:col-span-2 space-y-5 shadow-xl">
-                        <div class="border-b border-slate-800 pb-3">
-                            <span class="text-xs font-bold text-slate-200 uppercase font-mono tracking-wider block">当前授权商户主体资质血缘</span>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
-                                    <span class="text-[9px] text-slate-500 uppercase font-mono tracking-wider">法人公司全称</span>
-                                    <div class="text-xs text-slate-300 font-bold mt-1" id="kyb-company-name">正在获取注册凭证...</div>
-                                </div>
-                                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800">
-                                    <span class="text-[9px] text-slate-500 uppercase font-mono tracking-wider">分账主体 ID / Sub-ID</span>
-                                    <div class="text-xs text-blue-400 font-mono font-bold mt-1" id="kyb-subaccount-id">正在提取令箭...</div>
-                                </div>
-                            </div>
-
-                            <div class="p-4 bg-indigo-950/20 border border-indigo-900/40 rounded-xl flex items-start space-x-3 text-xs leading-relaxed text-indigo-300">
-                                <span class="bg-indigo-500/10 p-1.5 rounded text-indigo-400"><i class="fa-solid fa-server"></i></span>
-                                <div>
-                                    <strong class="text-white">合规加密安全舱对接建议：</strong><br>
-                                    基于国际多边反洗钱公约（AML-V5）法律红线，所有商户的实质受益人（UBO）、护照指纹及地缘离岸注册文件均直接在物理加密确权仓进行独立传输审核，不保存于当前中台会话中，力守零缓存隔离。
-                                </div>
-                            </div>
-
-                            <button id="submitKybBtn" type="button" onclick="window.triggerKybAuditUploadSimulation()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold uppercase rounded-xl text-xs tracking-widest transition duration-150 shadow-lg shadow-indigo-600/10">
-                                <i class="fa-solid fa-cloud-arrow-up mr-2 text-white"></i> 递交法人最新境外主体资证复审包 (Encryption Tunnel Entry)
-                            </button>
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-xl space-y-5 shadow-sm">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">当前注册主体</label>
+                        <div class="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-xs text-slate-400 font-mono select-none">
+                            Pine Bay Advisory (HK)
                         </div>
                     </div>
 
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-slate-400 space-y-4">
-                        <span class="text-xs font-bold text-indigo-400 border-b border-slate-800 pb-2 block uppercase font-mono">KYB Compliance Logs</span>
-                        <div class="text-[10px] space-y-2 font-mono text-slate-500 leading-relaxed">
-                            <div>➔ SHA256 fingerprints: <span class="text-slate-400">9c8112d...</span></div>
-                            <div>➔ Active Gate: <span class="text-slate-400">HK-OFFSHORE-01</span></div>
-                            <div>➔ Audit status: <span class="text-emerald-500 font-bold">● APPROVED_ACTIVE</span></div>
-                        </div>
+                    <a href="./kyb_portal.html" target="_blank" 
+                       class="flex items-center justify-center space-x-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded text-[11px] tracking-widest transition-all duration-300 uppercase shadow-lg shadow-indigo-500/20 active:scale-[0.98]">
+                        <span>📤 进入数字化高级 KYB 合规官审计问卷舱</span>
+                    </a>
+
+                    <div class="flex items-start space-x-2 p-3 bg-indigo-950/20 border border-indigo-900/50 rounded text-[10px] text-indigo-400">
+                        <span class="mt-0.5">ℹ️</span>
+                        <p>基于全球合规反洗钱（AML）指引，所有证明文件需在新的确权舱内经过加密传输。此操作不会在当前 Dashboard 留下任何中间态缓存，确保您的企业法律指纹安全。</p>
                     </div>
                 </div>
             </section>
 
-            <div class="bg-slate-900 border border-slate-805 rounded-2xl p-6 shadow-2xl">
-                <h3 class="text-xs font-bold text-slate-300 mb-3 flex items-center uppercase tracking-wider font-mono">
-                    <span class="w-2 h-2 rounded-full bg-blue-500 inline-block mr-2 animate-pulse"></span>
-                    FinLinks 核心全量中台自动流行为 system 遥测域
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+                <h3 class="text-xs font-bold text-slate-300 mb-3 flex items-center uppercase tracking-wider">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-2 animate-ping"></span>FinLinks 核心全量自动化行为遥测流
                 </h3>
-                <div id="audit-log-box" class="bg-slate-950 rounded-xl p-4 font-mono text-[11px] text-slate-400 h-36 overflow-y-auto space-y-1.5 border border-slate-850">
-                    <div>[SYSTEM] 全球多通道智能路由分账底座加载成功。防震风控双时钟锁系统上线。</div>
+                <div id="audit-log-box" class="bg-slate-950 rounded-lg p-4 font-mono text-[11px] text-slate-400 h-36 overflow-y-auto space-y-1">
+                    <div>[SYSTEM] 全球多通道智能路由聚合底座通电成功。加强级防御机制与 30s/300s 双轨制时钟锁正式并线。</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="payout-payin-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 overflow-hidden">
-        <div class="modal-overlay absolute w-full h-full bg-slate-950/80" onclick="window.closeOrderModal()"></div>
-        <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-2xl shadow-2xl z-50 overflow-y-auto">
-            <div class="modal-content py-6 text-left px-6 space-y-5">
+    <div id="fx-modal-input" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeFxModal()"></div>
+        <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
+            <div class="modal-content py-6 text-left px-6 space-y-4">
                 <div class="flex justify-between items-center pb-3 border-b border-slate-800">
-                    <p class="text-sm font-bold text-amber-500 uppercase tracking-wider" id="order-modal-title">出海收单确权审查中</p>
-                    <div class="cursor-pointer z-50 text-slate-400 hover:text-white" onclick="window.closeOrderModal()">
-                        <i class="fa-solid fa-xmark text-lg"></i>
+                    <p class="text-md font-bold text-slate-200">即期轧差外汇兑换 (FX Spot Input)</p>
+                    <div class="cursor-pointer z-50" onclick="closeFxModal()">
+                        <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
+                            <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
+                        </svg>
                     </div>
                 </div>
                 
-                <div id="order-modal-body" class="text-xs text-slate-300 bg-slate-950 p-4 rounded-xl border border-slate-850 font-mono space-y-2"></div>
-
-                <div class="space-y-1.5">
-                    <div class="flex justify-between text-[10px] text-slate-500 uppercase font-mono">
-                        <span class="flex items-center gap-1"><i class="fa-solid fa-clock-rotate-left"></i> 财务中枢独占锁定倒计时 (300S Financial Lock)</span>
-                        <span class="text-amber-500 font-bold" id="order-countdown-text">300.0s</span>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">卖出（扣减）币种 (Sell Currency)</label>
+                        <select id="sell-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                            <option value="USD">USD (美元离岸头寸)</option>
+                            <option value="NGN">NGN (尼日利亚奈拉)</option>
+                            <option value="KES">KES (肯尼亚先令)</option>
+                            <option value="TRY">TRY (土耳其里拉)</option>
+                        </select>
                     </div>
-                    <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
-                        <div id="order-progress-bar" class="bg-gradient-to-r from-amber-500 to-orange-400 h-full w-full"></div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">卖出名义金额 (Sell Amount)</label>
+                        <input type="number" id="sell-amount" placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">买入（增加）币种 (Buy Currency)</label>
+                        <select id="buy-currency" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                            <option value="NGN" selected>NGN (尼日利亚奈拉)</option>
+                            <option value="KES">KES (肯尼亚先令)</option>
+                            <option value="USD">USD (美元离岸头寸)</option>
+                            <option value="TRY">TRY (土耳其里拉)</option>
+                        </select>
+                    </div>
+
+                    <div class="hidden">
+                        <input type="text" id="beneficiary-name" value="Ajadi Jackson">
+                        <input type="email" id="beneficiary-email" value="jacky.xiaoyu.zhang@pinebay.io">
+                        <input type="text" id="beneficiary-phone" value="+2348012345678">
+                        <input type="text" id="beneficiary-address" value="126 Joel Ogunnaike Street, Ikeja">
+                        <input type="text" id="beneficiary-account-type" value="individual">
+                        <input type="text" id="bank-account-number" value="0690000031">
+                        <input type="text" id="bank-code" value="044">
+                        <input type="text" id="swift-code" value="">
+                        <input type="text" id="routing-number" value="">
                     </div>
                 </div>
-
-                <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2.5">
-                    <button onclick="window.closeOrderModal()" class="px-4 py-2 bg-slate-850 text-slate-400 border border-slate-800 rounded-lg text-xs hover:bg-slate-800 hover:text-white transition">中断签署</button>
-                    <button id="order-confirm-btn" class="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-lg text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">签署放行授权</button>
+                
+                <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
+                    <button onclick="closeFxModal()" class="px-4 py-1.5 bg-slate-800 rounded text-xs hover:bg-slate-700 transition">取消</button>
+                    <button id="fx-inquiry-btn" onclick="if(typeof window.executeLiveQuoteInquiry === 'function') window.executeLiveQuoteInquiry();" class="px-4 py-1.5 bg-emerald-500 text-slate-950 font-bold rounded text-xs hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/10">获取即期汇率报价 (Request Quote)</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // 📥 绝杀：改由全局 window 命名空间打捞核心客户端血管，抹去流氓 type="module" 沙箱隔离
-        const handleLivePayinCallback = window.handleLivePayinCallback;
-        const client = window.client;
+    <div id="fx-modal-confirm" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeFxModal()"></div>
+        <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
+            <div class="modal-content py-6 text-left px-6 space-y-4">
+                <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                    <p class="text-md font-bold text-amber-400">固价清算签署合同 (30S Slip Protection)</p>
+                    <div class="cursor-pointer z-50" onclick="closeFxModal()">
+                        <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
+                            <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-950 p-4 rounded border border-slate-800 font-mono text-xs space-y-3">
+                    <input type="hidden" id="fx-quote-timestamp" value="0">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">拟扣减卖出金额:</span>
+                        <span id="fx-confirm-sell-display" class="text-slate-200 font-bold">0.00 USD</span>
+                    </div>
+                    <div class="flex justify-between border-b border-slate-800/60 pb-2">
+                        <span class="text-slate-500">预计入账买入金额:</span>
+                        <span id="buy-amount-preview" class="text-emerald-400 font-bold">0.00 NGN</span>
+                    </div>
+                    <div class="flex justify-between pt-1">
+                        <span class="text-slate-400">中台 SOR 锁定汇率:</span>
+                        <span class="text-amber-400 font-bold text-sm fx-rate-display">--</span>
+                    </div>
+                    
+                    <div class="pt-2">
+                        <div class="flex justify-between text-[10px] uppercase tracking-wider mb-1 font-sans">
+                            <span class="text-slate-500 font-bold">即期滑点保护时钟锁</span>
+                            <span class="text-amber-400 font-bold animate-pulse" id="fx-countdown-timer">30.0s</span>
+                        </div>
+                        <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+                            <div id="fx-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full w-full"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
+                    <button onclick="closeFxModal()" class="px-4 py-1.5 bg-slate-800 rounded text-xs text-slate-300 hover:bg-slate-700 transition">拒绝并冲正</button>
+                    <button id="fx-submit-btn" onclick="if(typeof window.executeLiveFxConversion === 'function') window.executeLiveFxConversion();" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">确认执行交易 (Execute)</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // 绑定全量生命周期状态机
-        let payinTimerInterval = null;
-        let radarPollingInterval = null;
+    <div id="payout-payin-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition duration-200">
+        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeOrderModal()"></div>
+        <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
+            <div class="modal-content py-6 text-left px-6 space-y-4">
+                <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                    <p class="text-md font-bold text-amber-400" id="order-modal-title">单据确权审查中心 (300s 时钟锁)</p>
+                    <div class="cursor-pointer z-50" onclick="closeOrderModal()">
+                        <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
+                            <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div id="order-modal-body" class="text-xs text-slate-300 bg-slate-950 p-4 rounded border border-slate-800 font-mono space-y-2"></div>
+                <div class="space-y-1">
+                    <div class="flex justify-between text-[10px] text-slate-500 uppercase font-mono">
+                        <span>中台控制流财务独占锁</span>
+                        <span class="text-amber-400 font-bold" id="order-countdown-text">300.0s</span>
+                    </div>
+                    <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                        <div id="order-progress-bar" class="bg-gradient-to-r from-amber-500 to-orange-400 h-full w-full transition-all duration-100"></div>
+                    </div>
+                </div>
+                <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
+                    <button onclick="closeOrderModal()" class="px-4 py-1.5 bg-slate-800 text-slate-300 rounded text-xs hover:bg-slate-700 transition">取消 (Cancel)</button>
+                    <button id="order-confirm-btn" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">确认放行 (Execute)</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // 全球批发大盘即期参考汇率矩阵骨架
-        const REPORTING_FX_RATES = {
-            "USD": 1.00, "NGN": 1480.00, "KES": 128.50, "TRY": 32.80,
-            "PHP": 58.40, "IDR": 15650.00, "THB": 36.40, "BRL": 5.25, "MXN": 18.15
-        };
+    <div id="payout-payin-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition duration-200">
+        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeOrderModal()"></div>
+        <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
+            <div class="modal-content py-6 text-left px-6 space-y-4">
+                <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                    <p class="text-md font-bold text-amber-400" id="order-modal-title">单据确权审查中心 (300s 时钟锁)</p>
+                    <div class="cursor-pointer z-50" onclick="closeOrderModal()">
+                        <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
+                            <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div id="order-modal-body" class="text-xs text-slate-300 bg-slate-950 p-4 rounded border border-slate-800 font-mono space-y-2"></div>
+                <div class="space-y-1">
+                    <div class="flex justify-between text-[10px] text-slate-500 uppercase font-mono">
+                        <span>中台控制流财务独占锁</span>
+                        <span class="text-amber-400 font-bold" id="order-countdown-text">300.0s</span>
+                    </div>
+                    <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                        <div id="order-progress-bar" class="bg-gradient-to-r from-amber-500 to-orange-400 h-full w-full transition-all duration-100"></div>
+                    </div>
+                </div>
+                <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
+                    <button onclick="closeOrderModal()" class="px-4 py-1.5 bg-slate-800 text-slate-300 rounded text-xs hover:bg-slate-700 transition">取消 (Cancel)</button>
+                    <button id="order-confirm-btn" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">确认放行 (Execute)</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // 🟢 【复原通电：全量内聚型面板 Tab 切换状态机】绝杀多米诺 Reference 崩溃
-        window.switchTab = function(tabName) {
-            document.querySelectorAll(".tab-pane").forEach(pane => pane.classList.add("hidden"));
-            const targetPane = document.getElementById(`pane-${tabName}`);
-            if (targetPane) targetPane.classList.remove("hidden");
-            
-            document.querySelectorAll("#sidebar-nav button").forEach(btn => {
-                btn.classList.remove("sidebar-active");
-            });
-            const activeBtn = document.getElementById(`btn-${tabName}`);
-            if (activeBtn) activeBtn.classList.add("sidebar-active");
+    <script type="module" src="../assets/js/dashboard.js"></script>
 
-            window.pushAuditLog(`[NAVIGATION] 开辟安全轧差面板通道: [${tabName}]`);
-        };
+    <script type="module">
+        import { handleLivePayinCallback } from '../assets/js/payin_handler.js';
+        import { client } from '../assets/js/finlinks_client.js';
 
-        // 🎯 🌟 完备对账：地缘本币收银台占位符动态提示规则矩阵 🌟
+        // 🎯 🌟 局部精准插入：多地缘本币收银台占位符灰度动态提示规则矩阵 🌟
         window.updatePayinPlaceholder = function() {
             const curr = document.getElementById("collectionCurrency")?.value || "NGN";
             const phoneInput = document.getElementById("collectionPhone");
@@ -511,24 +490,30 @@
                 "KES": "示例：东非 M-Pesa 手机号 (如 254712345678)",
                 "UGX": "示例：乌干达 MTN 手机号 (如 256771234567)",
                 "ZAR": "示例：9-13位 南非本地清算银行账号",
-                "BRL": "示例：巴西 Pix 实时清算键值 (手机号/税号/随机密钥)",
+                // 🎯 🌟 局部精准插入：拉美、中东及东非离岸多边资产灰度指印全量通电 🌟
+                "BRL": "示例：巴西 Pix 实时清算键值 (手机号/税号/随机密钥, 如 11999998888)",
                 "MXN": "示例：墨西哥 18位 标准 CLABE 核心清算银行账户代码",
-                "TRY": "示例：土耳其本地 26位 标准 IBAN 自由清算代码"
+                "TRY": "示例：土耳其本地 26位 标准 IBAN 自由清算代码",
+                "MWK": "示例：马拉维本地 Airtel/TNM 移动钱包手机号 (如 265888123456)",
+                "MUR": "示例：7-12位 毛里求斯离岸银行标准清算物理账户"
             };
 
             phoneInput.placeholder = placeholderMatrix[curr] || "请输入对应地缘清算凭证号";
+            
+            if (typeof window.pushAuditLog === "function") {
+                window.pushAuditLog(`[UI AUTO-TUNING] 币种已切流至 [${curr}]，收银台凭证号输入框已动态对齐当地核心网格式规则。`);
+            }
         };
 
-        // 👑 还原原厂老前端全局保护大闸，绝杀 ReferenceError 假死
+        // 👑 桥接全局兜底日志及取消大闸，绝杀 ReferenceError
         window.closeOrderModal = function() {
             const modal = document.getElementById("payout-payin-modal");
             if (modal) modal.classList.add("opacity-0", "pointer-events-none");
-            if (payinTimerInterval) clearInterval(payinTimerInterval);
-            if (radarPollingInterval) clearInterval(radarPollingInterval);
             window.pushAuditLog("[ORDER CANCEL] 操盘手主动中断签署权，在途单据安全撤销。");
         };
 
         window.closeFxModal = function() {
+            if (typeof window.forceCancelFxTimer === "function") window.forceCancelFxTimer();
             document.getElementById("fx-modal-input")?.classList.add("pointer-events-none", "opacity-0");
             document.getElementById("fx-modal-confirm")?.classList.add("pointer-events-none", "opacity-0");
         };
@@ -537,336 +522,74 @@
             const box = document.getElementById("audit-log-box");
             if (box) {
                 const time = new Date().toLocaleTimeString();
-                box.innerHTML += `<div class="text-slate-400 font-mono text-[10px]"><span class="text-slate-600">[${time}]</span> ${message}</div>`;
+                box.innerHTML += `<div class="text-slate-300 font-mono text-[11px]">[${time}] ${message}</div>`;
                 box.scrollTop = box.scrollHeight;
             }
             console.log(`[AUDIT LOG] ${message}`);
         };
 
-        // 📥 【核心无损并网：顺向代收业务逻辑 100% 完全内聚】
-        window.triggerMockPayinCallback = async function() {
-            const amtEl = document.getElementById("collectionAmount");
+        // 📥 挂载积木 2：出海收单代收入口
+        window.triggerMockPayinCallback = function() {
             const currEl = document.getElementById("collectionCurrency");
-            const phoneEl = document.getElementById("collectionPhone");
-            const nameEl = document.getElementById("collectionPayerName");
-
-            const amount = amtEl && amtEl.value ? parseFloat(amtEl.value) : 0;
-            const currency = currEl ? currEl.value.toUpperCase().trim() : "NGN";
-            const phoneNumber = phoneEl ? phoneEl.value.trim() : "";
-            const payerName = nameEl && nameEl.value ? nameEl.value.trim() : "Jacky Zhang";
-
-            // 地缘号码清洗过滤
-            let cleanPhone = phoneNumber.replace(/\s+/g, "");
-            if (currency === "KES" && cleanPhone.startsWith("254")) {
-                cleanPhone = "0" + cleanPhone.slice(3);
+            if (currEl && currEl.value) {
+                localStorage.setItem("FINLINKS_LAST_ACTIVE_CURRENCY", currEl.value.toUpperCase().trim());
             }
-
-            if (!amount || amount <= 0 || !cleanPhone) {
-                alert("请输入完整的有源收单要素及大于 0 的合规金额！");
-                return;
-            }
-
-            localStorage.setItem("FINLINKS_LAST_ACTIVE_CURRENCY", currency);
-
-            const modal = document.getElementById("payout-payin-modal");
-            const titleEl = document.getElementById("order-modal-title");
-            const bodyEl = document.getElementById("order-modal-body");
-            const confirmBtn = document.getElementById("order-confirm-btn");
-
-            if (!modal || !bodyEl || !confirmBtn) return;
-
-            titleEl.innerText = "📥 出海收单入金确权审查 (300s 财务锁)";
-            modal.classList.remove("opacity-0", "pointer-events-none");
-
-            bodyEl.innerHTML = `
-                <div class="space-y-2 font-mono text-[11px] leading-relaxed">
-                    <div class="flex justify-between border-b border-slate-800/60 pb-1.5">
-                        <span class="text-slate-500">业务定性:</span>
-                        <span class="text-slate-300 font-bold">跨境离岸有源收单挂账 (Pay-in)</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">目标注入金额:</span>
-                        <span class="text-emerald-400 font-extrabold text-xs">+${amount.toLocaleString(undefined, {minimumFractionDigits: 2})} ${currency}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-slate-500">清算通道账户:</span>
-                        <span class="text-slate-200">${cleanPhone}</span>
-                    </div>
-                </div>
-            `;
-
-            // 签署授权放行，直接叩击 Render 生产网闸
-            confirmBtn.onclick = async function() {
-                confirmBtn.innerText = "⏳ 正在打通地缘网关...";
-                confirmBtn.disabled = true;
-
-                try {
-                    const url = `/ledger/collection/deposit?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(cleanPhone)}&payer_name=${encodeURIComponent(payerName)}`;
-                    const response = await client(url, { method: "POST" });
-                    
-                    if (response.status === 200) {
-                        window.pushAuditLog(`[PAYIN SUCCESS] 🟢 收单电报下发大捷！系统账目已就绪。`);
-                        appendTransactionLog("TX-" + Math.floor(10000+Math.random()*90000) + `-${currency}-FLK`, `${currency} Corridor 网关线`, "📥 离岸有源收单", amount, currency, "🟢 轧差冲正核销完成");
-                        await window.fetchBalances(); // 异步自愈刷新可用卡片
-                        modal.classList.add("opacity-0", "pointer-events-none");
-                    } else {
-                        alert("🚨 后端网关拦截：代收通道高阻抗震荡，请核销要素后重试。");
+            handleLivePayinCallback(() => {
+                setTimeout(async () => {
+                    if (typeof window.fetchBalances === "function") {
+                        await window.fetchBalances();
+                        window.pushAuditLog("[LIVE UPDATE] 📥 入金成功头寸已全量同步到工作台。");
                     }
-                } catch (err) {
-                    alert("💥 物理链条异常：未能成功叩击 Render 收单大闸。");
-                } finally {
-                    confirmBtn.disabled = false;
-                    confirmBtn.innerText = "签署放行授权";
-                }
-            };
+                }, 400);
+            });
         };
 
         // ⚖️ 零信任复式总账自动化对账
         window.triggerMockReconciliation = async function() {
             const vaultCurrency = localStorage.getItem("FINLINKS_LAST_ACTIVE_CURRENCY");
             const payinCurr = document.getElementById("collectionCurrency")?.value;
-            const finalCurrency = (vaultCurrency || payinCurr || "NGN").toUpperCase().trim();
+            const payoutCurr = document.getElementById("payout-curr")?.value;
+            const finalCurrency = (vaultCurrency || payinCurr || payoutCurr || "NGN").toUpperCase().trim();
 
             window.pushAuditLog(`[AUDIT START] 零信任对账引擎点火：正在提取金库凭证，刚性轧差 [${finalCurrency}] 影子总账...`);
             try {
                 const response = await client(`/reconcile?currency=${finalCurrency}`, { method: "POST" });
+                const data = await response.json();
                 if (response.status === 200) {
                     window.pushAuditLog(`[RECON SUCCESS] 🟢 [${finalCurrency}] 内部流水轧差大胜！结构体自愈成功。`);
-                    await window.fetchBalances();
+                    if (typeof window.fetchBalances === "function") {
+                        await window.fetchBalances();
+                    }
                 } else {
-                    window.pushAuditLog(`[RECON REJECTED] 中台对账熔断: 轧差条件未满足`);
+                    window.pushAuditLog(`[RECON REJECTED] 中台对账熔断: ${data.detail || "条件不满足"}`);
                 }
             } catch (error) {
-                window.pushAuditLog(`[RECON FALLBACK] 本地自愈大闸开启，已强行冲零对齐 [${finalCurrency}] 走廊。`);
+                window.pushAuditLog(`[RECON CRITICAL] 物理对账通信链路猝死: ${error.message}`);
             }
         };
 
-        // 📥 纯内聚财务离白账单（CSV）全量一键秒级导出
-        window.executeLedgerCSVExport = function() {
-            const activeCompany = localStorage.getItem("FINLINKS_COMPANY_NAME") || "FinLinks 商户";
-            window.pushAuditLog(`[LEDGER CSV] 正在对齐复式大账并导出 [${activeCompany}] 物理多币种财务报表...`);
-            
-            const tableRows = document.querySelectorAll("#global-transactions-tbody tr");
-            let csvContent = "Reference,Domain,Type,Amount,Currency,Status,Timestamp\n";
-            
-            if (tableRows.length > 0 && !tableRows[0].innerText.includes("正在叩击中台")) {
-                tableRows.forEach(row => {
-                    const cols = row.querySelectorAll("td");
-                    if (cols.length >= 7) {
-                        csvContent += `${cols[0].innerText.trim()},${cols[1].innerText.trim().replace(/,/g, '')},${cols[2].innerText.trim()},${cols[3].innerText.trim().replace(/,/g, '')},${cols[4].innerText.trim()},${cols[5].innerText.trim()},${cols[6].innerText.trim()}\n`;
-                    }
-                });
-            } else {
-                csvContent += "TX-91024-KES-FLK,KES Corridor (M-Pesa API),PAYIN,+120000.00,KES,RECONCILED,2026-06-17 19:12:44\n";
-                csvContent += "TX-48825-NGN-FLK,NGN Vault (Wema Bankv4),PAYIN,+1500000.00,NGN,RECONCILED,2026-06-17 18:44:12\n";
-                csvContent += "TX-90214-USD-A2A,Wise Asset Terminal (USD),WITHDRAWAL,-25000.00,USD,CLEARED,2026-06-17 16:30:00\n";
-            }
-            
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute("download", `finlinks_ledger_audit_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.pushAuditLog("📥 对账表格导出任务完成，财务离线账目归档大捷。");
-        };
-
-        function appendTransactionLog(ref, domain, type, amt, curr, statusLabel) {
-            const tbody = document.getElementById("global-transactions-tbody");
-            if (!tbody) return;
-            if (tbody.innerHTML.includes("正在叩击中台")) tbody.innerHTML = "";
-
-            const row = document.createElement("tr");
-            row.className = "hover:bg-slate-950/25 transition";
-            row.innerHTML = `
-                <td class="py-3 px-6 text-slate-400 font-bold select-all">${ref}</td>
-                <td class="py-3 px-6 text-slate-500">${domain}</td>
-                <td class="py-3 px-6 text-emerald-500 font-bold">${type}</td>
-                <td class="py-3 px-6 text-right text-emerald-400 font-bold">+${amt.toLocaleString()}</td>
-                <td class="py-3 px-6">${curr}</td>
-                <td class="py-3 px-6 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold text-[9px] border border-emerald-500/20">${statusLabel}</span></td>
-                <td class="py-3 px-6 text-right text-slate-500">${new Date().toISOString().slice(0, 19).replace('T', ' ')}</td>
-            `;
-            tbody.insertBefore(row, tbody.firstChild);
-        }
-
-        // 📤 [A2A WITHDRAWAL] 同名 Wise 取现终端动态计算引擎
-        const sourceCcyEl = document.getElementById("withdrawalSourceCurrency");
-        const withdrawAmtEl = document.getElementById("withdrawalAmount");
-        const rateDisplayEl = document.getElementById("withdrawalRateDisplay");
-        const previewDisplayEl = document.getElementById("withdrawalPreviewDisplay");
-        const liveWithdrawFxRate = document.getElementById("liveWithdrawFxRate");
-
-        function updateWithdrawalRateCalc() {
-            if (!sourceCcyEl || !withdrawAmtEl) return;
-            const curr = sourceCcyEl.value;
-            const amt = parseFloat(withdrawAmtEl.value) || 0;
-            const rate = REPORTING_FX_RATES[curr] || 1.0;
-
-            if (rateDisplayEl) rateDisplayEl.innerText = `1 USD = ${rate.toFixed(2)} ${curr} (对账汇报参考率)`;
-            const usdEquiv = amt / rate;
-            if (previewDisplayEl) previewDisplayEl.innerText = `$${usdEquiv.toLocaleString(undefined, {minimumFractionDigits: 2})} USD`;
-        }
-
-        // 📤 同名提清划拔大闸实弹击发
-        window.executeWiseWithdrawalHandshake = function() {
-            const email = document.getElementById("wiseEmail")?.value.trim();
-            const amt = parseFloat(withdrawAmtEl.value) || 0;
-            const curr = sourceCcyEl.value;
-
-            if (!email || !amt || amt <= 0) {
-                alert("请填写完整的同名 Wise 账户及合规出金清算金额！");
-                return;
-            }
-
-            const modal = document.getElementById("payout-payin-modal");
-            const titleEl = document.getElementById("order-modal-title");
-            const bodyEl = document.getElementById("order-modal-body");
-            const confirmBtn = document.getElementById("order-confirm-btn");
-
-            if (!modal || !bodyEl) return;
-            titleEl.innerText = "📤 同名提清划拔大闸审检 (300s 财务锁)";
-            modal.classList.remove("opacity-0", "pointer-events-none");
-
-            bodyEl.innerHTML = `
-                <div class="space-y-2 font-mono text-[11px]">
-                    <div class="p-2 bg-blue-950/40 border border-blue-900/30 text-blue-400">
-                        <b>A2A 严格同名交收审查：</b>所提本金仅限安全划拨到持有人名义相同的 Wise 离岸美元资金仓。
-                    </div>
-                    <div class="flex justify-between"><span>Wise 注册邮箱:</span><span class="text-white font-bold">${email}</span></div>
-                    <div class="flex justify-between"><span>拟扣减面值:</span><span class="text-rose-400 font-bold">-{amt.toLocaleString()} ${curr}</span></div>
-                </div>
-            `;
-
-            confirmBtn.onclick = async function() {
-                confirmBtn.innerText = "⏳ 正在签署电子指纹并划转...";
-                confirmBtn.disabled = true;
-                setTimeout(async () => {
-                    modal.classList.add("opacity-0", "pointer-events-none");
-                    confirmBtn.disabled = false;
-                    confirmBtn.innerText = "签署放行授权";
-                    window.pushAuditLog(`[A2A SETTLE SUCCESS] 🟢 联合审查已通过！同名资金已原路放付。`);
-                    
-                    // 原位追加出金流水
-                    const tbody = document.getElementById("global-transactions-tbody");
-                    if (tbody) {
-                        if (tbody.innerHTML.includes("正在叩击中台")) tbody.innerHTML = "";
-                        const row = document.createElement("tr");
-                        row.className = "hover:bg-slate-950/25 transition";
-                        row.innerHTML = `
-                            <td class="py-3 px-6 text-slate-400 font-bold select-all">A2A-TX-${Math.floor(100000+Math.random()*900000)}</td>
-                            <td class="py-3 px-6 text-slate-500">Wise Asset Terminal</td>
-                            <td class="py-3 px-6 text-blue-400 font-bold">📤 同名提现清算</td>
-                            <td class="py-3 px-6 text-right text-blue-400 font-bold">-${amt.toLocaleString()}</td>
-                            <td class="py-3 px-6">${curr}</td>
-                            <td class="py-3 px-6 text-center"><span class="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-bold text-[9px]">🔵 同名外卡原路清发</span></td>
-                            <td class="py-3 px-6 text-right text-slate-500">${new Date().toISOString().slice(0, 19).replace('T', ' ')}</td>
-                        `;
-                        tbody.insertBefore(row, tbody.firstChild);
-                    }
-
-                    alert("✓ 操盘总账签署通过！同名清盘资金已进入 Wise 企业结算网络。");
-                    await window.fetchBalances();
-                }, 1200);
-            };
-        };
-
-        // 🟢 【有源影子持仓拉步算子并网】对接后端核心，渲染侧边栏与主卡大盘
-        window.fetchBalances = async function() {
-            try {
-                const token = localStorage.getItem("token") || "MOCK_TOKEN";
-                const response = await client('/balances', { method: "GET" });
-                
-                if (response.ok) {
-                    const resData = await response.json();
-                    if (resData && resData.balances) {
-                        for (const [ccy, val] of Object.entries(resData.balances)) {
-                            // 1. 动态渲染主面板 Card 核心可用流动性资产
-                            const cardEl = document.getElementById(`card-val-${ccy}`);
-                            if (cardEl) cardEl.innerText = `${ccy === 'USD' ? '$' : ccy === 'NGN' ? '₦' : ccy === 'THB' ? '฿' : ''}${val.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-                            // 2. 动态渲染侧边栏 Live Balance 实时常驻可用头寸
-                            const sideEl = document.getElementById(`side-bal-${ccy}`);
-                            if (sideEl) sideEl.innerText = val.toLocaleString(undefined, {minimumFractionDigits: 2});
-                        }
-                    }
-                    if (resData && resData.multi_currency_visibility) {
-                        for (const [ccy, rate] of Object.entries(resData.multi_currency_visibility)) {
-                            REPORTING_FX_RATES[ccy] = rate;
-                        }
-                    }
-                }
-            } catch (error) {
-                console.warn("[FETCH BALANCES] 叩击 Render 失败，底层触发自动影子防震对齐。");
-            }
-            updateWithdrawalRateCalc();
-            if (liveWithdrawFxRate) {
-                liveWithdrawFxRate.innerText = `1 USD = ${(REPORTING_FX_RATES["NGN"]||1480).toFixed(2)} NGN | 1 USD = ${(REPORTING_FX_RATES["THB"]||36.4).toFixed(2)} THB`;
-            }
-        };
-
-        // 📡 15秒心跳：像素级抓取 rates.html 批发大盘中间价
-        async function fetchLiveRatesForWithdrawal() {
-            await window.fetchBalances();
-        }
-
-        // 🛡️ KYB 高级资质沙箱审查递交
-        window.triggerKybAuditUploadSimulation = function() {
-            window.pushAuditLog(`[KYB Handshake] 开辟密评通道。正在打包递交最新法人境外持牌执照及持股人加密UBO包裹...`);
-            const submitKybBtn = document.getElementById("submitKybBtn");
-            if (submitKybBtn) {
-                submitKybBtn.innerText = "⏳ 正在抗量子加密隧道传输 (ZK-Tunnel)...";
-                submitKybBtn.disabled = true;
-                setTimeout(() => {
-                    submitKybBtn.innerText = "✓ 递交成功！合规官将于1个工作日内复核验真";
-                    submitKybBtn.className = "w-full py-4 bg-emerald-600 text-white font-extrabold uppercase rounded-xl text-xs tracking-widest cursor-default";
-                    window.pushAuditLog(`[KYB INSTALLED] 🟢 公司证件包裹传输完成。SHA256: d8d721fa0c22e47...`);
-                }, 1500);
-            }
-        };
-
-        // 安全退出断路大闸
-        window.handleLogout = function() {
-            if (confirm("是否确认彻底断开和物理中台的安全会话？")) {
-                localStorage.removeItem("token");
-                localStorage.removeItem("finlinks_auth_token");
-                window.location.href = "index.html";
-            }
-        };
-
-        // 绑定出金计算表单监听器
-        sourceCcyEl.addEventListener("change", updateWithdrawalRateCalc);
-        withdrawAmtEl.addEventListener("input", updateWithdrawalRateCalc);
-
-        // 👑 自动点火初始化大厅生命周期结构树
-        (async function bootSequence() {
+        // =================================================================
+        // 👑 🟢 【商户法人主体血缘流同步点火】
+        // =================================================================
+        (async function() {
             const activeMerchantId = localStorage.getItem("FINLINKS_ACTIVE_MID") || "admin";
             const activeCompanyName = localStorage.getItem("FINLINKS_COMPANY_NAME") || "FinLinks 研发期商户舱";
             
             const elMerchantLabel = document.getElementById("merchant-id-tag");
             if (elMerchantLabel) {
                 elMerchantLabel.innerText = activeMerchantId;
-                elMerchantLabel.className = "text-blue-400 font-bold font-mono truncate";
+                elMerchantLabel.classList.add("text-emerald-400", "font-bold");
             }
             
             const elRoleLabel = document.getElementById("user-role-badge");
             if (elRoleLabel) {
                 elRoleLabel.innerText = activeMerchantId === "admin" ? "SUPER_ADMIN" : "MERCHANT_OPERATOR";
-                elRoleLabel.className = "font-mono font-bold text-blue-400 uppercase";
+                elRoleLabel.classList.remove("text-amber-500", "animate-pulse");
+                elRoleLabel.classList.add("text-emerald-400");
             }
 
             window.pushAuditLog(`[IDENTITY] ⚖️ 零信任确权成功！当前登录主体: [${activeMerchantId}] | 实体: [${activeCompanyName}]`);
-            
-            // 初次拉步打捞可用流水与卡片
-            await window.fetchBalances();
-
-            // 💉 [刚性时序归位引信]：在最末一米、所有函数与变量 100% 装载后，精准点火更新代收占位符，完美击碎 ReferenceError 锁死！
-            window.updatePayinPlaceholder();
-
-            // 激活 15s 生产环境异步通信长心跳
-            setInterval(window.fetchBalances, 15000);
         })();
     </script>
-
-    </body>
+</body>
 </html>
