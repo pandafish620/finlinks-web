@@ -395,3 +395,51 @@ function closePayinModal() {
     if (modal) modal.classList.add("opacity-0", "pointer-events-none");
     if (typeof window.pushAuditLog === "function") window.pushAuditLog("[PAYIN VOUCHER CLOSED] 操盘手回收并清空当前收单账单水单舱.");
 }
+
+// =====================================================================
+// 👑 📱 【前端自适应联动算子】：选择币种时，动态隐现清洗账号输入框格式
+// =====================================================================
+const DYNAMIC_PLACEHOLDER_MATRIX = {
+    "NGN": { tip: "🇳🇬 奈拉：请输入 10位 纯数字 NUBAN 标准银行账号", max: "10" },
+    "GHS": { tip: "加纳：请输入标准的加纳移动钱包手机号", max: "12" },
+    "KES": { tip: "🇰🇪 先令：请输入 M-Pesa 手机号 (如 07XXXXXXXX)", max: "12" },
+    "TZS": { tip: "坦桑尼亚：请输入 Vodacom/Tigo 钱包手机号", max: "12" },
+    "UGX": { tip: "🇺🇬 乌干达：请输入 MTN/Airtel 钱包手机号", max: "12" },
+    "ZAR": { tip: "南非：请输入 9 到 13 位纯数字本地银行账号", max: "13" },
+    "MUR": { tip: "毛里求斯：请输入标准离岸结算结算账号", max: "12" },
+    "PHP": { tip: "🇵🇭 菲律宾：请输入合规的 GCash 绑定手机号", max: "14" },
+    "IDR": { tip: "🇮🇩 印尼：DANA 直连代收请输入合规手机号", max: "14" },
+    "THB": { tip: "🇹🇭 泰国：请输入 PromptPay 清算参考标志", max: "20" }
+};
+
+export function initCurrencyAccountLinkage() {
+    const currEl = document.getElementById("collectionCurrency");
+    const phoneEl = document.getElementById("collectionPhone");
+
+    if (!currEl || !phoneEl) return;
+
+    const executeLinkage = (currency) => {
+        const config = DYNAMIC_PLACEHOLDER_MATRIX[currency] || { tip: "请输入目标法域合规账号/手机钱包号", max: "50" };
+        phoneEl.placeholder = config.tip;
+        phoneEl.setAttribute("maxlength", config.max);
+        console.log(`📡 [LINKAGE ENGAGED] 币种变更为 ➔ ${currency} | 刷新占位符特征`);
+    };
+
+    // 1. 挂载实时变更监听器
+    currEl.addEventListener("change", function() {
+        executeLinkage(this.value.toUpperCase().trim());
+        phoneEl.value = ""; // 切换币种时顺手清空输入框，严防历史残留产生格式排异
+    });
+
+    // 2. 页面加载完成时执行冷启动初始化点火
+    executeLinkage(currEl.value.toUpperCase().trim());
+}
+
+// 自动化自我执行注入，确保模块一导入即立刻通电生效
+if (typeof document !== "undefined") {
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initCurrencyAccountLinkage);
+    } else {
+        initCurrencyAccountLinkage();
+    }
+}
