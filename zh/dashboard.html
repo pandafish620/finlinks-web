@@ -475,10 +475,10 @@
         </div>
     </div>
 
-    <script type="module">
-        // 📥 像素级引入旧前端原厂顶流脚本底座
-        import { handleLivePayinCallback } from '../assets/js/payin_handler.js';
-        import { client } from '../assets/js/finlinks_client.js';
+    <script>
+        // 📥 [GLOBAL BRIDGING REFACTOR] 绝杀：既然摘除了 type="module"，就改由全局 window 命名空间打捞核心血管
+        const handleLivePayinCallback = window.handleLivePayinCallback;
+        const client = window.client;
 
         // 绑定老版外部 dashboard.js 的账本生命周期挂载
         let payinTimerInterval = null;
