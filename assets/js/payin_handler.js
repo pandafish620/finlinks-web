@@ -198,23 +198,28 @@ export function handleLivePayinCallback(fetchBalances) {
 
             const completeApiUrl = `${targetUrl}?${queryParams.toString()}`;
             // 🟢 [STRICT AUTH NORMALIZATION] 像素级清洗指纹
-            const rawToken = localStorage.getItem("token") || "";
-            const cleanToken = rawToken.replace(/Bearer\s+/gi, '').trim(); // 核心：彻底剔除一切前缀
+            // 🚩 [FINAL FIX] 对齐存储协议：强制读取正确的 Key
+            const tokenKey = "finlinks_auth_token"; 
+            const rawToken = localStorage.getItem(tokenKey) || "";
 
-            // 必须在这一行打个断点或日志
-            console.log("最终注入的 Token 值:", cleanToken);
+            if (!rawToken) {
+                console.error(`💥 [AUTH FAIL] 在 localStorage 中找不到 Key 为 '${tokenKey}' 的凭证！`);
+                // 强制 UI 反馈，确保你不再进行无效的点击
+                alert("系统检测到登录凭证丢失，请重新登录。");
+                return;
+            }
 
-            if (!cleanToken) {
-                console.error("💥 致命错误：localStorage 里根本没有 token！");
-                return; // 终止执行
-}
+            const cleanToken = rawToken.replace(/Bearer\s+/gi, '').trim();
+            console.log("🟢 [AUTH OK] 成功锁定凭证指纹，准备发起投送...");
+
+            // 接下来继续执行 fetch，不要再动这个 token 获取逻辑了
             const response = await fetch(completeApiUrl, {
                 method: "POST",
                 headers: {
-                // 只有当 cleanToken 存在时，才进行组装，避免传出 "Bearer " 空串
-                    "Authorization": "Bearer " + cleanToken,
+                    "Authorization": `Bearer ${cleanToken}`,
                     "Content-Type": "application/json"
-                }
+                },
+                body: JSON.stringify({ /* ... */ })
             });
             
             const result = await response.json();
