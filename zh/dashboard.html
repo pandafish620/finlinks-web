@@ -491,7 +491,7 @@
         };
 
         // 🎯 🌟 局部精准插入：多地缘本币收银台占位符灰度动态提示规则矩阵 🌟
-        window.updatePayinPlaceholder = function() {
+        //window.updatePayinPlaceholder = function() {
             const curr = document.getElementById("collectionCurrency")?.value || "NGN";
             const phoneInput = document.getElementById("collectionPhone");
             if (!phoneInput) return;
@@ -874,6 +874,11 @@
             // 激活 15s 心跳
             fetchLiveRatesForWithdrawal();
             setInterval(fetchLiveRatesForWithdrawal, 15000);
+
+            // 💉 [PATCH] 刚性时序纠偏：将代收占位符点火引信顺延至此处，彻底绝杀 window.pushAuditLog 未定义报错！
+            if (typeof window.updatePayinPlaceholder === "function") {
+                window.updatePayinPlaceholder();
+            }
         })();
     </script>
     
