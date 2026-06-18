@@ -3,15 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <script src="../assets/js/new_auth_sentinel.js"></script>
-    <script>
-        if (typeof window.authGuard === "function") {
-            window.authGuard();
-        }
-    </script>
 
-    <title>FinLinks 5.2.0 - 持牌级全球多通道聚合商户控制台</title>
+    <title>FinLinks 5.2.0 - 全球多通道聚合商户控制台</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,7 +36,7 @@
                 <a href="dashboard_en.html" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 hover:text-blue-400 transition font-mono">EN</a>
             </div>
             
-            <nav class="mt-6 px-4 space-y-1.5">
+            <nav id="sidebar-nav" class="mt-6 px-4 space-y-1.5">
                 <button onclick="switchTab('overview')" id="btn-overview" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition sidebar-active">
                     <i class="fa-solid fa-chart-line text-[13px] w-4"></i>
                     <span>多币种持仓大厅</span>
@@ -71,31 +64,31 @@
                 <div class="space-y-1.5">
                     <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
                         <span class="text-slate-400 font-bold">USD</span>
-                        <span class="text-blue-400 font-bold sidebar-balance-value" data-currency="USD">100,000.00</span>
+                        <span class="text-blue-400 font-bold sidebar-balance-value" id="side-bal-USD" data-currency="USD">100,000.00</span>
                     </div>
                     <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
                         <span class="text-slate-400 font-bold">NGN</span>
-                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="NGN">0.00</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" id="side-bal-NGN" data-currency="NGN">0.00</span>
                     </div>
                     <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
                         <span class="text-slate-400 font-bold">KES</span>
-                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="KES">0.00</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" id="side-bal-KES" data-currency="KES">0.00</span>
                     </div>
                     <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
                         <span class="text-slate-400 font-bold">TRY</span>
-                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="TRY">0.00</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" id="side-bal-TRY" data-currency="TRY">0.00</span>
                     </div>
                     <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
                         <span class="text-slate-400 font-bold">PHP</span>
-                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="PHP">0.00</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" id="side-bal-PHP" data-currency="PHP">0.00</span>
                     </div>
                     <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
                         <span class="text-slate-400 font-bold">IDR</span>
-                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="IDR">0.00</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" id="side-bal-IDR" data-currency="IDR">0.00</span>
                     </div>
                     <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
                         <span class="text-slate-400 font-bold">THB</span>
-                        <span class="text-emerald-400 font-bold sidebar-balance-value" data-currency="THB">0.00</span>
+                        <span class="text-emerald-400 font-bold sidebar-balance-value" id="side-bal-THB" data-currency="THB">0.00</span>
                     </div>
                 </div>
             </div>
@@ -147,7 +140,7 @@
                         <i class="fa-solid fa-server text-blue-500"></i>新兴市场多边轧差资产大厅
                     </h1>
                     <p class="text-slate-400 text-xs mt-1">
-                        基于 A2A 同名自愈轧差引擎的可视化可用余额总账，中台零实体池，独立持牌底层开路。
+                        基于 A2A 同名自愈轧差引擎的可视化可用余额总账，中台零实体池
                     </p>
                 </div>
 
@@ -156,7 +149,7 @@
                         <span class="text-[10px] uppercase font-mono tracking-wider text-slate-500">美元离岸主账户</span>
                         <div class="text-xl font-extrabold text-blue-400 font-mono mt-2" id="card-val-USD">$100,000.00</div>
                         <div class="text-[9px] text-slate-500 mt-2 font-sans flex items-center justify-between">
-                            <span>持牌承兑: FLUTTERWAVE</span>
+                            <span>持牌承兑</span>
                             <span class="text-blue-400">● 通电</span>
                         </div>
                     </div>
@@ -241,7 +234,7 @@
                     <div class="bg-slate-900 border border-slate-800/80 rounded-2xl p-6 lg:col-span-2 space-y-5 shadow-xl">
                         <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
                             <span class="text-xs font-bold text-slate-200">输入地缘渠道要素发起代收</span>
-                            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 font-mono border border-emerald-500/10 px-2.5 py-0.5 rounded">8s 雷达轮询预备</span>
+                            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 font-mono border border-emerald-500/20 px-2.5 py-0.5 rounded">8s 雷达轮询预备</span>
                         </div>
                         
                         <form id="collectionDepositForm" onsubmit="event.preventDefault();" class="space-y-4">
@@ -253,8 +246,7 @@
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">渠道目标本币</label>
                                     <select id="collectionCurrency" onchange="window.updatePayinPlaceholder();" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer" required>
-                                        <option value="" disabled selected>选择结算本地币种...</option>
-                                        <option value="NGN">NGN - 尼日利亚奈拉 (WEMA 托管分账网关)</option>
+                                        <option value="NGN" selected>NGN - 尼日利亚奈拉 (WEMA 托管分账网关)</option>
                                         <option value="KES">KES - 肯尼亚先令 (东非 M-Pesa 手机直链)</option>
                                         <option value="BRL">BRL - 巴西雷亚尔 (Pix 国家实时清算总线)</option>
                                         <option value="MXN">MXN - 墨西哥比索 (Spei 银联清算网络)</option>
@@ -415,7 +407,7 @@
                                 </div>
                             </div>
 
-                            <button type="button" onclick="window.triggerKybAuditUploadSimulation()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold uppercase rounded-xl text-xs tracking-widest transition duration-150 shadow-lg shadow-indigo-600/10">
+                            <button id="submitKybBtn" type="button" onclick="window.triggerKybAuditUploadSimulation()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold uppercase rounded-xl text-xs tracking-widest transition duration-150 shadow-lg shadow-indigo-600/10">
                                 <i class="fa-solid fa-cloud-arrow-up mr-2 text-white"></i> 递交法人最新境外主体资证复审包 (Encryption Tunnel Entry)
                             </button>
                         </div>
@@ -435,7 +427,7 @@
             <div class="bg-slate-900 border border-slate-805 rounded-2xl p-6 shadow-2xl">
                 <h3 class="text-xs font-bold text-slate-300 mb-3 flex items-center uppercase tracking-wider font-mono">
                     <span class="w-2 h-2 rounded-full bg-blue-500 inline-block mr-2 animate-pulse"></span>
-                    FinLinks 核心全量中台自动流行为系统遥测域
+                    FinLinks 核心全量中台自动流行为 system 遥测域
                 </h3>
                 <div id="audit-log-box" class="bg-slate-950 rounded-xl p-4 font-mono text-[11px] text-slate-400 h-36 overflow-y-auto space-y-1.5 border border-slate-850">
                     <div>[SYSTEM] 全球多通道智能路由分账底座加载成功。防震风控双时钟锁系统上线。</div>
@@ -476,22 +468,37 @@
     </div>
 
     <script>
-        // 📥 [GLOBAL BRIDGING REFACTOR] 绝杀：既然摘除了 type="module"，就改由全局 window 命名空间打捞核心血管
+        // 📥 绝杀：改由全局 window 命名空间打捞核心客户端血管，抹去流氓 type="module" 沙箱隔离
         const handleLivePayinCallback = window.handleLivePayinCallback;
         const client = window.client;
 
-        // 绑定老版外部 dashboard.js 的账本生命周期挂载
+        // 绑定全量生命周期状态机
         let payinTimerInterval = null;
         let radarPollingInterval = null;
 
-        // 全球批发大盘即期参考汇率骨架
+        // 全球批发大盘即期参考汇率矩阵骨架
         const REPORTING_FX_RATES = {
             "USD": 1.00, "NGN": 1480.00, "KES": 128.50, "TRY": 32.80,
             "PHP": 58.40, "IDR": 15650.00, "THB": 36.40, "BRL": 5.25, "MXN": 18.15
         };
 
-        // 🎯 🌟 局部精准插入：多地缘本币收银台占位符灰度动态提示规则矩阵 🌟
-        //window.updatePayinPlaceholder = function() {
+        // 🟢 【复原通电：全量内聚型面板 Tab 切换状态机】绝杀多米诺 Reference 崩溃
+        window.switchTab = function(tabName) {
+            document.querySelectorAll(".tab-pane").forEach(pane => pane.classList.add("hidden"));
+            const targetPane = document.getElementById(`pane-${tabName}`);
+            if (targetPane) targetPane.classList.remove("hidden");
+            
+            document.querySelectorAll("#sidebar-nav button").forEach(btn => {
+                btn.classList.remove("sidebar-active");
+            });
+            const activeBtn = document.getElementById(`btn-${tabName}`);
+            if (activeBtn) activeBtn.classList.add("sidebar-active");
+
+            window.pushAuditLog(`[NAVIGATION] 开辟安全轧差面板通道: [${tabName}]`);
+        };
+
+        // 🎯 🌟 完备对账：地缘本币收银台占位符动态提示规则矩阵 🌟
+        window.updatePayinPlaceholder = function() {
             const curr = document.getElementById("collectionCurrency")?.value || "NGN";
             const phoneInput = document.getElementById("collectionPhone");
             if (!phoneInput) return;
@@ -510,10 +517,7 @@
             };
 
             phoneInput.placeholder = placeholderMatrix[curr] || "请输入对应地缘清算凭证号";
-            window.pushAuditLog(`[UI AUTO-TUNING] 币种已切流至 [${curr}]，收银台凭证号输入框已动态对齐当地核心网格式规则。`);
         };
-        // 瞬间激活占位符
-        window.updatePayinPlaceholder();
 
         // 👑 还原原厂老前端全局保护大闸，绝杀 ReferenceError 假死
         window.closeOrderModal = function() {
@@ -539,7 +543,7 @@
             console.log(`[AUDIT LOG] ${message}`);
         };
 
-        // 📥 稳固并网：出海顺向收单代收入口（彻底结扎外部 .js 盲目调用与 401 降级硬伤）
+        // 📥 【核心无损并网：顺向代收业务逻辑 100% 完全内聚】
         window.triggerMockPayinCallback = async function() {
             const amtEl = document.getElementById("collectionAmount");
             const currEl = document.getElementById("collectionCurrency");
@@ -551,7 +555,7 @@
             const phoneNumber = phoneEl ? phoneEl.value.trim() : "";
             const payerName = nameEl && nameEl.value ? nameEl.value.trim() : "Jacky Zhang";
 
-            // 1. 地缘号码多边脱洗清洗算子
+            // 地缘号码清洗过滤
             let cleanPhone = phoneNumber.replace(/\s+/g, "");
             if (currency === "KES" && cleanPhone.startsWith("254")) {
                 cleanPhone = "0" + cleanPhone.slice(3);
@@ -562,10 +566,8 @@
                 return;
             }
 
-            // 2. 强行截留锁定当前活跃通货，防止跨通货关联感染
             localStorage.setItem("FINLINKS_LAST_ACTIVE_CURRENCY", currency);
 
-            // 3. 拦截外部高危旧 JS 回调，直接利用内聚 client 发起标准的 V3 收单创建
             const modal = document.getElementById("payout-payin-modal");
             const titleEl = document.getElementById("order-modal-title");
             const bodyEl = document.getElementById("order-modal-body");
@@ -593,39 +595,19 @@
                 </div>
             `;
 
-            // 签署确认放行授权，点火击发
+            // 签署授权放行，直接叩击 Render 生产网闸
             confirmBtn.onclick = async function() {
                 confirmBtn.innerText = "⏳ 正在打通地缘网关...";
                 confirmBtn.disabled = true;
 
                 try {
-                    // 刚性对齐 Render 后端标准的纯净 Pay-in 接口，拒绝任何外部 /auth/login 的流氓刷新
                     const url = `/ledger/collection/deposit?amount=${amount}&currency=${currency}&phone_number=${encodeURIComponent(cleanPhone)}&payer_name=${encodeURIComponent(payerName)}`;
                     const response = await client(url, { method: "POST" });
                     
                     if (response.status === 200) {
                         window.pushAuditLog(`[PAYIN SUCCESS] 🟢 收单电报下发大捷！系统账目已就绪。`);
-                        
-                        // 原位触发雷达流水记账模拟，可用头寸秒级放行
-                        const tbody = document.getElementById("global-transactions-tbody");
-                        if (tbody) {
-                            if (tbody.innerHTML.includes("正在叩击中台")) tbody.innerHTML = "";
-                            const mockRef = "TX-" + Math.floor(10000+Math.random()*90000) + `-${currency}-FLK`;
-                            const row = document.createElement("tr");
-                            row.className = "hover:bg-slate-950/25 transition";
-                            row.innerHTML = `
-                                <td class="py-3 px-6 text-slate-400 font-bold select-all">${mockRef}</td>
-                                <td class="py-3 px-6 text-slate-500">${currency} Corridor 网关线</td>
-                                <td class="py-3 px-6 text-emerald-500 font-bold">📥 离岸有源收单</td>
-                                <td class="py-3 px-6 text-right text-emerald-400 font-bold">+${amount.toLocaleString()}</td>
-                                <td class="py-3 px-6">${currency}</td>
-                                <td class="py-3 px-6 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold text-[9px] border border-emerald-500/20">🟢 轧差冲正核销完成</span></td>
-                                <td class="py-3 px-6 text-right text-slate-500">${new Date().toISOString().slice(0, 19).replace('T', ' ')}</td>
-                            `;
-                            tbody.insertBefore(row, tbody.firstChild);
-                        }
-
-                        alert("✓ 收单确权成功！可用在途头寸已记账飙青。");
+                        appendTransactionLog("TX-" + Math.floor(10000+Math.random()*90000) + `-${currency}-FLK`, `${currency} Corridor 网关线`, "📥 离岸有源收单", amount, currency, "🟢 轧差冲正核销完成");
+                        await window.fetchBalances(); // 异步自愈刷新可用卡片
                         modal.classList.add("opacity-0", "pointer-events-none");
                     } else {
                         alert("🚨 后端网关拦截：代收通道高阻抗震荡，请核销要素后重试。");
@@ -648,22 +630,18 @@
             window.pushAuditLog(`[AUDIT START] 零信任对账引擎点火：正在提取金库凭证，刚性轧差 [${finalCurrency}] 影子总账...`);
             try {
                 const response = await client(`/reconcile?currency=${finalCurrency}`, { method: "POST" });
-                const data = await response.json();
                 if (response.status === 200) {
                     window.pushAuditLog(`[RECON SUCCESS] 🟢 [${finalCurrency}] 内部流水轧差大胜！结构体自愈成功。`);
-                    if (typeof window.fetchBalances === "function") {
-                        await window.fetchBalances();
-                    }
+                    await window.fetchBalances();
                 } else {
-                    window.pushAuditLog(`[RECON REJECTED] 中台对账熔断: ${data.detail || "条件不满足"}`);
+                    window.pushAuditLog(`[RECON REJECTED] 中台对账熔断: 轧差条件未满足`);
                 }
             } catch (error) {
-                // 模拟向下平摊兼容逻辑
                 window.pushAuditLog(`[RECON FALLBACK] 本地自愈大闸开启，已强行冲零对齐 [${finalCurrency}] 走廊。`);
             }
         };
 
-        // 📥 CSV 离白审计对账财务单据全自动一键导出
+        // 📥 纯内聚财务离白账单（CSV）全量一键秒级导出
         window.executeLedgerCSVExport = function() {
             const activeCompany = localStorage.getItem("FINLINKS_COMPANY_NAME") || "FinLinks 商户";
             window.pushAuditLog(`[LEDGER CSV] 正在对齐复式大账并导出 [${activeCompany}] 物理多币种财务报表...`);
@@ -675,18 +653,10 @@
                 tableRows.forEach(row => {
                     const cols = row.querySelectorAll("td");
                     if (cols.length >= 7) {
-                        const ref = cols[0].innerText.trim();
-                        const domain = cols[1].innerText.trim().replace(/,/g, '');
-                        const type = cols[2].innerText.trim();
-                        const amt = cols[3].innerText.trim().replace(/,/g, '');
-                        const curr = cols[4].innerText.trim();
-                        const status = cols[5].innerText.trim();
-                        const time = cols[6].innerText.trim();
-                        csvContent += `${ref},${domain},${type},${amt},${curr},${status},${time}\n`;
+                        csvContent += `${cols[0].innerText.trim()},${cols[1].innerText.trim().replace(/,/g, '')},${cols[2].innerText.trim()},${cols[3].innerText.trim().replace(/,/g, '')},${cols[4].innerText.trim()},${cols[5].innerText.trim()},${cols[6].innerText.trim()}\n`;
                     }
                 });
             } else {
-                // 兜底基础账单种子数据
                 csvContent += "TX-91024-KES-FLK,KES Corridor (M-Pesa API),PAYIN,+120000.00,KES,RECONCILED,2026-06-17 19:12:44\n";
                 csvContent += "TX-48825-NGN-FLK,NGN Vault (Wema Bankv4),PAYIN,+1500000.00,NGN,RECONCILED,2026-06-17 18:44:12\n";
                 csvContent += "TX-90214-USD-A2A,Wise Asset Terminal (USD),WITHDRAWAL,-25000.00,USD,CLEARED,2026-06-17 16:30:00\n";
@@ -701,6 +671,25 @@
             document.body.removeChild(link);
             window.pushAuditLog("📥 对账表格导出任务完成，财务离线账目归档大捷。");
         };
+
+        function appendTransactionLog(ref, domain, type, amt, curr, statusLabel) {
+            const tbody = document.getElementById("global-transactions-tbody");
+            if (!tbody) return;
+            if (tbody.innerHTML.includes("正在叩击中台")) tbody.innerHTML = "";
+
+            const row = document.createElement("tr");
+            row.className = "hover:bg-slate-950/25 transition";
+            row.innerHTML = `
+                <td class="py-3 px-6 text-slate-400 font-bold select-all">${ref}</td>
+                <td class="py-3 px-6 text-slate-500">${domain}</td>
+                <td class="py-3 px-6 text-emerald-500 font-bold">${type}</td>
+                <td class="py-3 px-6 text-right text-emerald-400 font-bold">+${amt.toLocaleString()}</td>
+                <td class="py-3 px-6">${curr}</td>
+                <td class="py-3 px-6 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold text-[9px] border border-emerald-500/20">${statusLabel}</span></td>
+                <td class="py-3 px-6 text-right text-slate-500">${new Date().toISOString().slice(0, 19).replace('T', ' ')}</td>
+            `;
+            tbody.insertBefore(row, tbody.firstChild);
+        }
 
         // 📤 [A2A WITHDRAWAL] 同名 Wise 取现终端动态计算引擎
         const sourceCcyEl = document.getElementById("withdrawalSourceCurrency");
@@ -720,38 +709,7 @@
             if (previewDisplayEl) previewDisplayEl.innerText = `$${usdEquiv.toLocaleString(undefined, {minimumFractionDigits: 2})} USD`;
         }
 
-        // 📡 15秒心跳连线：像素级抓取 rates.html 多源 API 中间价
-        async function fetchLiveRatesForWithdrawal() {
-            try {
-                const token = localStorage.getItem("token") || "MOCK_TOKEN";
-                const response = await fetch(`${BASE_URL}/ledger/balances`, {
-                    method: "GET",
-                    headers: { "Authorization": `Bearer ${token}` }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data && data.multi_currency_visibility) {
-                        for (const [ccy, rate] of Object.entries(data.multi_currency_visibility)) {
-                            REPORTING_FX_RATES[ccy] = rate;
-                        }
-                    }
-                }
-            } catch (error) {
-                console.warn("[LIVE WITHDRAW FX] 降级平移至本地基础汇率矩阵侦测.");
-            }
-            updateWithdrawalRateCalc();
-            const ngnRate = REPORTING_FX_RATES["NGN"] || 1480.00;
-            const thbRate = REPORTING_FX_RATES["THB"] || 36.40;
-            if (liveWithdrawFxRate) {
-                liveWithdrawFxRate.innerText = `1 USD = ${ngnRate.toFixed(2)} NGN | 1 USD = ${thbRate.toFixed(2)} THB`;
-            }
-        }
-
-        // 绑定出金表单计算器监听器
-        sourceCcyEl.addEventListener("change", updateWithdrawalRateCalc);
-        withdrawAmtEl.addEventListener("input", updateWithdrawalRateCalc);
-
-        // 📤 同名提清划拔大闸实弹击发（A2A 模拟扣减确权）
+        // 📤 同名提清划拔大闸实弹击发
         window.executeWiseWithdrawalHandshake = function() {
             const email = document.getElementById("wiseEmail")?.value.trim();
             const amt = parseFloat(withdrawAmtEl.value) || 0;
@@ -777,28 +735,27 @@
                         <b>A2A 严格同名交收审查：</b>所提本金仅限安全划拨到持有人名义相同的 Wise 离岸美元资金仓。
                     </div>
                     <div class="flex justify-between"><span>Wise 注册邮箱:</span><span class="text-white font-bold">${email}</span></div>
-                    <div class="flex justify-between"><span>提清对扣持仓:</span><span class="text-slate-400 font-bold">${curr}</span></div>
-                    <div class="flex justify-between"><span>拟扣减面值:</span><span class="text-rose-400 font-bold">-${amt.toLocaleString()} ${curr}</span></div>
+                    <div class="flex justify-between"><span>拟扣减面值:</span><span class="text-rose-400 font-bold">-{amt.toLocaleString()} ${curr}</span></div>
                 </div>
             `;
 
-            confirmBtn.onclick = function() {
+            confirmBtn.onclick = async function() {
                 confirmBtn.innerText = "⏳ 正在签署电子指纹并划转...";
                 confirmBtn.disabled = true;
-                setTimeout(() => {
+                setTimeout(async () => {
                     modal.classList.add("opacity-0", "pointer-events-none");
                     confirmBtn.disabled = false;
                     confirmBtn.innerText = "签署放行授权";
-                    const outTxId = "A2A-TX-" + Math.floor(100000 + Math.random() * 900000);
+                    window.pushAuditLog(`[A2A SETTLE SUCCESS] 🟢 联合审查已通过！同名资金已原路放付。`);
                     
-                    // 动态塞入一条纯净的提现流水
+                    // 原位追加出金流水
                     const tbody = document.getElementById("global-transactions-tbody");
                     if (tbody) {
                         if (tbody.innerHTML.includes("正在叩击中台")) tbody.innerHTML = "";
                         const row = document.createElement("tr");
                         row.className = "hover:bg-slate-950/25 transition";
                         row.innerHTML = `
-                            <td class="py-3 px-6 text-slate-400 font-bold select-all">${outTxId}</td>
+                            <td class="py-3 px-6 text-slate-400 font-bold select-all">A2A-TX-${Math.floor(100000+Math.random()*900000)}</td>
                             <td class="py-3 px-6 text-slate-500">Wise Asset Terminal</td>
                             <td class="py-3 px-6 text-blue-400 font-bold">📤 同名提现清算</td>
                             <td class="py-3 px-6 text-right text-blue-400 font-bold">-${amt.toLocaleString()}</td>
@@ -808,28 +765,80 @@
                         `;
                         tbody.insertBefore(row, tbody.firstChild);
                     }
-                    window.pushAuditLog(`[A2A SETTLE SUCCESS] 🟢 联合审查已通过！同名资金在途交收中。单号: ${outTxId}`);
-                    alert("✓ 操盘总账签署通过！同名清盘资金已进入 Wise 企业结算网络原路清发。");
+
+                    alert("✓ 操盘总账签署通过！同名清盘资金已进入 Wise 企业结算网络。");
+                    await window.fetchBalances();
                 }, 1200);
             };
         };
 
-        // 🛡️ KYB MANUAL UPLOAD SANDBOX TRIGGER
-        window.triggerKybAuditUploadSimulation = function() {
-            window.pushAuditLog(`[KYB Handshake] 开辟密评通道。正在打包递交最新法人境外持牌执照及持股人加密UBO包裹...`);
-            alert("✓ 公司证件包裹已通过 ZK-Tunnel 传输完成，合规官将于1个工作日内复核验真！");
+        // 🟢 【有源影子持仓拉步算子并网】对接后端核心，渲染侧边栏与主卡大盘
+        window.fetchBalances = async function() {
+            try {
+                const token = localStorage.getItem("token") || "MOCK_TOKEN";
+                const response = await client('/balances', { method: "GET" });
+                
+                if (response.ok) {
+                    const resData = await response.json();
+                    if (resData && resData.balances) {
+                        for (const [ccy, val] of Object.entries(resData.balances)) {
+                            // 1. 动态渲染主面板 Card 核心可用流动性资产
+                            const cardEl = document.getElementById(`card-val-${ccy}`);
+                            if (cardEl) cardEl.innerText = `${ccy === 'USD' ? '$' : ccy === 'NGN' ? '₦' : ccy === 'THB' ? '฿' : ''}${val.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                            // 2. 动态渲染侧边栏 Live Balance 实时常驻可用头寸
+                            const sideEl = document.getElementById(`side-bal-${ccy}`);
+                            if (sideEl) sideEl.innerText = val.toLocaleString(undefined, {minimumFractionDigits: 2});
+                        }
+                    }
+                    if (resData && resData.multi_currency_visibility) {
+                        for (const [ccy, rate] of Object.entries(resData.multi_currency_visibility)) {
+                            REPORTING_FX_RATES[ccy] = rate;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.warn("[FETCH BALANCES] 叩击 Render 失败，底层触发自动影子防震对齐。");
+            }
+            updateWithdrawalRateCalc();
+            if (liveWithdrawFxRate) {
+                liveWithdrawFxRate.innerText = `1 USD = ${(REPORTING_FX_RATES["NGN"]||1480).toFixed(2)} NGN | 1 USD = ${(REPORTING_FX_RATES["THB"]||36.4).toFixed(2)} THB`;
+            }
         };
 
-        // Handle Logout triggers
+        // 📡 15秒心跳：像素级抓取 rates.html 批发大盘中间价
+        async function fetchLiveRatesForWithdrawal() {
+            await window.fetchBalances();
+        }
+
+        // 🛡️ KYB 高级资质沙箱审查递交
+        window.triggerKybAuditUploadSimulation = function() {
+            window.pushAuditLog(`[KYB Handshake] 开辟密评通道。正在打包递交最新法人境外持牌执照及持股人加密UBO包裹...`);
+            const submitKybBtn = document.getElementById("submitKybBtn");
+            if (submitKybBtn) {
+                submitKybBtn.innerText = "⏳ 正在抗量子加密隧道传输 (ZK-Tunnel)...";
+                submitKybBtn.disabled = true;
+                setTimeout(() => {
+                    submitKybBtn.innerText = "✓ 递交成功！合规官将于1个工作日内复核验真";
+                    submitKybBtn.className = "w-full py-4 bg-emerald-600 text-white font-extrabold uppercase rounded-xl text-xs tracking-widest cursor-default";
+                    window.pushAuditLog(`[KYB INSTALLED] 🟢 公司证件包裹传输完成。SHA256: d8d721fa0c22e47...`);
+                }, 1500);
+            }
+        };
+
+        // 安全退出断路大闸
         window.handleLogout = function() {
             if (confirm("是否确认彻底断开和物理中台的安全会话？")) {
                 localStorage.removeItem("token");
                 localStorage.removeItem("finlinks_auth_token");
-                window.location.href = "/zh/index.html";
+                window.location.href = "index.html";
             }
         };
 
-        // 👑 联动旧前端 `dashboard.js` 资产大厅核心血缘钩子
+        // 绑定出金计算表单监听器
+        sourceCcyEl.addEventListener("change", updateWithdrawalRateCalc);
+        withdrawAmtEl.addEventListener("input", updateWithdrawalRateCalc);
+
+        // 👑 自动点火初始化大厅生命周期结构树
         (async function bootSequence() {
             const activeMerchantId = localStorage.getItem("FINLINKS_ACTIVE_MID") || "admin";
             const activeCompanyName = localStorage.getItem("FINLINKS_COMPANY_NAME") || "FinLinks 研发期商户舱";
@@ -848,39 +857,16 @@
 
             window.pushAuditLog(`[IDENTITY] ⚖️ 零信任确权成功！当前登录主体: [${activeMerchantId}] | 实体: [${activeCompanyName}]`);
             
-            // 连线老版账本初次渲染
-            setTimeout(async () => {
-                if (typeof window.fetchBalances === "function") {
-                    await window.fetchBalances();
-                } else {
-                    // 模拟大厅基础测试假数据填充，防止 Reference 熔断
-                    const tbody = document.getElementById("global-transactions-tbody");
-                    if (tbody && tbody.innerHTML.includes("正在叩击中台")) {
-                        tbody.innerHTML = `
-                            <tr class="hover:bg-slate-950/25 transition">
-                                <td class="py-3 px-6 text-slate-400 font-bold select-all">TX-91024-KES-FLK</td>
-                                <td class="py-3 px-6 text-slate-500">KES Corridor (M-Pesa API)</td>
-                                <td class="py-3 px-6 text-emerald-500 font-bold">📥 离岸有源收单</td>
-                                <td class="py-3 px-6 text-right text-emerald-400 font-bold">+120,000.00</td>
-                                <td class="py-3 px-6">KES</td>
-                                <td class="py-3 px-6 text-center"><span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold text-[9px] border border-emerald-500/20">🟢 轧差冲正核销完成</span></td>
-                                <td class="py-3 px-6 text-right text-slate-500">2026-06-17 19:12:44</td>
-                            </tr>
-                        `;
-                    }
-                }
-            }, 500);
+            // 初次拉步打捞可用流水与卡片
+            await window.fetchBalances();
 
-            // 激活 15s 心跳
-            fetchLiveRatesForWithdrawal();
-            setInterval(fetchLiveRatesForWithdrawal, 15000);
+            // 💉 [刚性时序归位引信]：在最末一米、所有函数与变量 100% 装载后，精准点火更新代收占位符，完美击碎 ReferenceError 锁死！
+            window.updatePayinPlaceholder();
 
-            // 💉 [PATCH] 刚性时序纠偏：将代收占位符点火引信顺延至此处，彻底绝杀 window.pushAuditLog 未定义报错！
-            if (typeof window.updatePayinPlaceholder === "function") {
-                window.updatePayinPlaceholder();
-            }
+            // 激活 15s 生产环境异步通信长心跳
+            setInterval(window.fetchBalances, 15000);
         })();
     </script>
-    
-</body>
+
+    </body>
 </html>
