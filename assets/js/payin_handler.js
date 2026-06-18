@@ -201,11 +201,18 @@ export function handleLivePayinCallback(fetchBalances) {
             const rawToken = localStorage.getItem("token") || "";
             const cleanToken = rawToken.replace(/Bearer\s+/gi, '').trim(); // 核心：彻底剔除一切前缀
 
+            // 必须在这一行打个断点或日志
+            console.log("最终注入的 Token 值:", cleanToken);
+
+            if (!cleanToken) {
+                console.error("💥 致命错误：localStorage 里根本没有 token！");
+                return; // 终止执行
+}
             const response = await fetch(completeApiUrl, {
                 method: "POST",
                 headers: {
                 // 只有当 cleanToken 存在时，才进行组装，避免传出 "Bearer " 空串
-                    "Authorization": cleanToken ? `Bearer ${cleanToken}` : "",
+                    "Authorization": "Bearer " + cleanToken,
                     "Content-Type": "application/json"
                 }
             });
