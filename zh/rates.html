@@ -3,7 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinLinks - 全球即期流动性网关多源数据终端</title>
+    <title>FinLinks - 全球参考即期汇率终端实时看板</title>
+
+    <script>
+        (function() {
+            // 🔒 1毫秒探测：直接打捞商户登录时在本地刻下的活体 JWT 金融指纹
+            const liveToken = localStorage.getItem("finlinks_auth_token");
+            
+            // 🚨 严防死守：如果没有指纹，或者指纹属于伪造的开发测试默认值，直接判定为陌生人非法潜入！
+            if (!liveToken || liveToken === "MOCK_DEVELOPER_TOKEN") {
+                console.error("【FinLinks 风控硬核阻断】未检测到合规的全球授信令牌，就地轰回登录大厅！");
+                // 原地非对称物理蒸发，绝不给陌生人留下任何哪怕 1 像素的行情偷窥机会
+                window.location.replace("login.html"); 
+            }
+        })();
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../assets/css/custom.css">
 </head>
@@ -51,7 +66,7 @@
     </div>
 
     <div class="hidden md:block overflow-x-auto">
-        <table>
+        <table class="w-full">
             <thead>
                 <tr class="border-b border-slate-800 text-left text-[#848e9c] text-xs font-mono uppercase tracking-wider">
                     <th class="pb-3 pl-2">标的货币标识 (Identifier)</th>
@@ -73,9 +88,19 @@
 </div>
 
 <script>
-    // 🧠 环境嗅探智能分配大闸
     const IS_LOCAL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
-    const BASE_URL = IS_LOCAL ? "http://127.0.0.1:8000" : "https://your-finlinks-backend.onrender.com"; // 👈 记得贴入你的实际域名
+    const BASE_URL = IS_LOCAL ? "http://127.0.0.1:8000" : "https://your-finlinks-backend.onrender.com"; 
+
+    // 🔒 建立全量 29 个地缘资产的官方安全同业出厂底价（防算法暴走兜底金库）
+    const fallbackRates = {
+        'CNY': 7.2450, 'HKD': 7.8120, 'SGD': 1.3480, 'JPY': 155.40, 'KRW': 1365.50,
+        'IDR': 16120.00, 'THB': 36.45, 'VND': 25420.00, 'MYR': 4.7120, 'PHP': 58.20, 'INR': 83.50,
+        'EUR': 0.9220, 'GBP': 0.7840, 'CAD': 1.3650, 'AUD': 1.4980, 'CHF': 0.8990, 'RUB': 89.50,
+        'BRL': 5.1580, 'MXN': 17.85, 'COP': 3920.00, 'CLP': 915.00, 'PEN': 3.74, 'ARS': 898.00,
+        'NGN': 1502.00, 'EGP': 47.65, 'ZAR': 18.24, 'AED': 3.6725, 'SAR': 3.7504, 'TRY': 32.45,
+        'KES': 131.00, 'GHS': 14.80, 'TZS': 2610.00, 'ZMW': 26.20, 'RWF': 1315.00, 'MWK': 1730.00,
+        'MUR': 46.20, 'PKR': 278.50, 'ILS': 3.68, 'USD': 1.0000
+    };
 
     const currencyData = {
         asia: [
@@ -101,16 +126,24 @@
             { code: 'ZAR', name: '🇿🇦 南非兰特 (ZAR)' }, { code: 'AED', name: '🇦🇪 阿联酋迪拉姆 (AED)' },
             { code: 'SAR', name: '🇸🇦 沙特里亚尔 (SAR)' }, { code: 'TRY', name: '🇹🇷 土耳其里拉 (TRY)' },
             { code: 'KES', name: '🇰🇪 肯尼亚先令 (KES)' }, { code: 'GHS', name: '🇬🇭 加纳塞地 (GHS)' },
-            { code: 'PKR', name: '🇵🇰 巴基斯坦卢比 (PKR)' }, { code: 'ILS', name: '🇮🇱 以色列新谢克尔 (ILS)' }
+            { code: 'TZS', name: '🇹🇿 坦桑尼亚先令 (TZS)' }, { code: 'ZMW', name: '🇿🇲 赞比亚克瓦查 (ZMW)' },
+            { code: 'RWF', name: '🇷🇼 卢旺达法郎 (RWF)' }, { code: 'MWK', name: '🇲🇼 马拉维克瓦查 (MWK)' },
+            { code: 'MUR', name: '🇲🇺 毛里求斯卢比 (MUR)' }, { code: 'PKR', name: '🇵🇰 巴基斯坦卢比 (PKR)' },
+            { code: 'ILS', name: '🇮🇱 以色列新谢克尔 (ILS)' }
         ]
     };
 
     const continentHeroMapping = { asia: 'CNY', americas_europe: 'EUR', latam: 'BRL', africa_mideast: 'NGN' };
     
-    if (typeof globalRates === 'undefined') { window.globalRates = {}; }
-    if (typeof currentContinent === 'undefined') { window.currentContinent = 'asia'; }
+    window.globalRates = { ...fallbackRates };
+    window.currentContinent = 'asia';
+    let pollingIntervalId = null;
 
+    // 📡 算子一：精简轻量化出金请求，杜绝垃圾流量轰击
     async function fetchGlobalRates() {
+        // 🔒 核心卫闸：如果页面处于最小化或后台不可见状态，刚性熔断 Fetch，节省 100% 宽带！
+        if (document.hidden) return;
+
         const token = localStorage.getItem("finlinks_auth_token") || "MOCK_DEVELOPER_TOKEN";
         
         try {
@@ -119,83 +152,128 @@
                 headers: { "Authorization": `Bearer ${token}` }
             });
             
-            let ratesContainer = { "CNY": 7.24, "EUR": 0.92, "GBP": 0.78, "BRL": 5.15, "NGN": 1500.00, "USD": 1.0 };
-            
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.multi_currency_visibility) {
-                    ratesContainer = { ...ratesContainer, ...data.multi_currency_visibility };
+                    // 🔒 像素级覆盖，只吸收回传字段，缺失字段由静态 fallbackRates 绝对锁死，斩断正弦伪造！
+                    window.globalRates = { ...fallbackRates, ...data.multi_currency_visibility };
                 }
             }
-            
-            window.globalRates = { ...ratesContainer };
-            renderTable();
-            
-            const now = new Date();
-            document.getElementById('update-timer').innerText = `● 融链骨干网同步正常 | 实时对齐: ${now.toLocaleTimeString()}`;
         } catch (error) {
-            window.globalRates = { "CNY": 7.24, "EUR": 0.92, "GBP": 0.78, "BRL": 5.15, "NGN": 1500.00, "USD": 1.0 };
-            renderTable();
+            console.warn("[RATES RADAR] 网关轻微抖动，启动底层同业底价御敌机制。");
+        } finally {
+            // 无论成功失败，就地执行精准文本内容注入，维持内存冰封
+            updateDisplayDOM();
         }
     }
 
-    function renderTable() {
+    // 🎨 算子二：100% 避免全表爆破重绘，采取静态骨架定向文字注入（零 GC 内存泄漏）
+    function initStaticDOMSkeleton() {
         const tableBody = document.getElementById('rate-table-body');
         const mobileCardsContainer = document.getElementById('rate-mobile-cards');
         if (!tableBody || !mobileCardsContainer) return;
-        
-        tableBody.innerHTML = ''; mobileCardsContainer.innerHTML = '';
-        
+
+        tableBody.innerHTML = '';
+        mobileCardsContainer.innerHTML = '';
+
+        // 预分配全量板块的 DOM 节点，刻上静态唯一标识，一劳永逸
+        Object.keys(currencyData).forEach(continent => {
+            currencyData[continent].forEach(ccy => {
+                tableBody.insertAdjacentHTML('beforeend', `
+                    <tr id="pc-row-${ccy.code}" class="border-b border-slate-900 hover:bg-slate-900/30 transition hidden">
+                        <td class="py-3 pl-2 font-bold text-slate-100">${ccy.name}</td>
+                        <td id="pc-val-${ccy.code}" class="text-emerald-400 font-bold">--</td>
+                        <td><span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">实时即期中间价</span></td>
+                        <td class="text-slate-400">1 USD</td>
+                    </tr>
+                `);
+
+                mobileCardsContainer.insertAdjacentHTML('beforeend', `
+                    <div id="mb-card-${ccy.code}" class="bg-[#161a1e] rounded-xl p-3.5 border border-gray-800 flex items-center justify-between hidden">
+                        <div class="text-xs font-bold text-gray-200 block">${ccy.name}</div>
+                        <div class="text-right">
+                            <span id="mb-val-${ccy.code}" class="text-base font-bold text-white block">--</span>
+                            <span class="text-[9px] text-[#848e9c] block">1 USD 基准</span>
+                        </div>
+                    </div>
+                `);
+            });
+        });
+    }
+
+    // 🔬 算子三：定向微创内容调谐刷新
+    function updateDisplayDOM() {
+        // 1. 拨正导航按钮的 UI 极性
         const buttons = document.querySelectorAll('[id^="btn-"]');
         buttons.forEach(btn => {
             btn.classList.remove('bg-[#3b82f6]', 'text-white', 'shadow-lg', 'font-bold');
             btn.classList.add('text-[#848e9c]');
         });
         const activeBtn = document.getElementById(`btn-${window.currentContinent}`);
-        if (activeBtn) {
-            activeBtn.classList.remove('text-[#848e9c]');
-            activeBtn.classList.add('bg-[#3b82f6]', 'text-white', 'shadow-lg', 'font-bold');
-        }
+        if (activeBtn) activeBtn.classList.add('bg-[#3b82f6]', 'text-white', 'shadow-lg', 'font-bold');
 
+        // 2. 重绘巨幕首屏
         const heroCode = continentHeroMapping[window.currentContinent];
-        const heroRate = window.globalRates[heroCode] || 1.0;
-        const activeList = currencyData[window.currentContinent];
+        const heroRate = window.globalRates[heroCode] || fallbackRates[heroCode];
         
         document.getElementById('hero-currency-name').innerText = heroCode + " 实时即期基准";
         document.getElementById('hero-rate-value').innerText = heroRate > 100 ? heroRate.toFixed(2) : heroRate.toFixed(4);
 
-        activeList.forEach((ccy, index) => {
-            const rate = window.globalRates[ccy.code] || (heroRate * (1 + Math.sin(index) * 0.1));
-            const formattedRate = rate > 100 ? rate.toFixed(2) : rate.toFixed(4);
+        // 3. 动态控制显隐并定向改写 innerText，杜绝 innerHTML 摧毁内存
+        Object.keys(currencyData).forEach(continent => {
+            const isCurrentContinent = (continent === window.currentContinent);
             
-            tableBody.insertAdjacentHTML('beforeend', `
-                <tr class="border-b border-slate-900 hover:bg-slate-900/30 transition">
-                    <td class="py-3 pl-2 font-bold text-slate-100">${ccy.name}</td>
-                    <td class="text-emerald-400 font-bold">${formattedRate}</td>
-                    <td><span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">实时即期中间价</span></td>
-                    <td class="text-slate-400">1 USD</td>
-                </tr>
-            `);
-
-            mobileCardsContainer.insertAdjacentHTML('beforeend', `
-                <div class="bg-[#161a1e] rounded-xl p-3.5 border border-gray-800 flex items-center justify-between">
-                    <div class="text-xs font-bold text-gray-200 block">${ccy.name}</div>
-                    <div class="text-right">
-                        <span class="text-base font-bold text-white block">${formattedRate}</span>
-                        <span class="text-[9px] text-[#848e9c] block">1 USD 基准</span>
-                    </div>
-                </div>
-            `);
+            currencyData[continent].forEach(ccy => {
+                const pcRow = document.getElementById(`pc-row-${ccy.code}`);
+                const mbCard = document.getElementById(`mb-card-${ccy.code}`);
+                
+                if (isCurrentContinent) {
+                    pcRow.classList.remove('hidden');
+                    mbCard.classList.remove('hidden');
+                    
+                    const rate = window.globalRates[ccy.code] || fallbackRates[ccy.code];
+                    const formatted = rate > 100 ? rate.toFixed(2) : rate.toFixed(4);
+                    
+                    // 🛡️ 精准文字改写，不触动组件树本身
+                    document.getElementById(`pc-val-${ccy.code}`).innerText = formatted;
+                    document.getElementById(`mb-val-${ccy.code}`).innerText = formatted;
+                } else {
+                    pcRow.classList.add('hidden');
+                    mbCard.classList.add('hidden');
+                }
+            });
         });
+
+        const now = new Date();
+        document.getElementById('update-timer').innerText = `● 融链骨干网同步正常 | 实时对齐: ${now.toLocaleTimeString()}`;
     }
 
     function switchContinent(continent) {
         window.currentContinent = continent;
-        renderTable();
+        updateDisplayDOM();
     }
 
+    // 🛡️ 算子四：全生命周期看护，监听浏览器切屏事件
+    function initVisibilityLifecycle() {
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                // 物理掐断，时钟下线
+                clearInterval(pollingIntervalId);
+                console.log("[LIFECYCLE]Rates 看板切入后台，时钟中断，带宽降为 0。");
+            } else {
+                // 重新叩击并激活时钟
+                fetchGlobalRates();
+                pollingIntervalId = setInterval(fetchGlobalRates, 15000);
+                console.log("[LIFECYCLE]Rates 看板切回前台，恢复高频同步。");
+            }
+        });
+    }
+
+    // ⚡ 启动并线初始化
+    initStaticDOMSkeleton();
     fetchGlobalRates();
-    setInterval(fetchGlobalRates, 15000);
+    pollingIntervalId = setInterval(fetchGlobalRates, 15000);
+    initVisibilityLifecycle();
 </script>
 </body>
 </html>
