@@ -8,7 +8,7 @@ let payinTimerInterval = null; // 300秒代收确权时钟单例句柄
 let radarPollingInterval = null; // 👑 新增：红外主动核销雷达长轮询时钟句柄
 
 const RIGID_ACCOUNT_RULES = {
-    "NGN": { regex: /^\d{10}$/, error: "奈拉通道校验失败：必须为 10位 纯数字 NUBAN 标准银行账号！" },
+    "NGN": { regex: /^\d{10}$/, error: "尼日利亚通道校验失败：必须为 10位 纯数字 NUBAN 标准银行账号！" },
     "GHS": { regex: /^(233|0)?(2|5)\d{8}$/, error: "加纳通道校验失败：必须是标准的加纳移动钱包手机号格式！" },
     "KES": { regex: /^(254|0)?(7|1)\d{8}$/, error: "肯尼亚通道校验失败：必须为标准的东非 M-Pesa 钱包手机号！" },
     "TZS": { regex: /^(255|0)?(6|7)\d{8}$/, error: "坦桑尼亚通道校验失败：必须符合本地 Vodacom/Tigo 钱包号段！" },
@@ -403,19 +403,19 @@ function closePayinModal() {
 // 👑 📱 【前端自适应联动算子】：选择币种时，动态隐现清洗账号输入框格式
 // =====================================================================
 const DYNAMIC_PLACEHOLDER_MATRIX = {
-    "NGN": { tip: "🇳🇬 奈拉：请输入 10位 纯数字 NUBAN 标准银行账号", max: "10" },
+    "NGN": { tip: "尼日利亚：请输入 10位 纯数字 NUBAN 标准银行账号", max: "10" },
     "GHS": { tip: "加纳：请输入标准的加纳移动钱包手机号", max: "12" },
-    "KES": { tip: "🇰🇪 先令：请输入 M-Pesa 手机号 (如 07XXXXXXXX)", max: "12" },
+    "KES": { tip: "肯尼亚：请输入 M-Pesa 手机号 (如 07XXXXXXXX)", max: "12" },
     "TZS": { tip: "坦桑尼亚：请输入 Vodacom/Tigo 钱包手机号", max: "12" },
-    "UGX": { tip: "🇺🇬 乌干达：请输入 MTN/Airtel 钱包手机号", max: "12" },
+    "UGX": { tip: "乌干达：请输入 MTN/Airtel 钱包手机号", max: "12" },
     "ZAR": { tip: "南非：请输入 9 到 13 位纯数字本地银行账号", max: "13" },
     "MUR": { tip: "毛里求斯：请输入标准离岸结算结算账号", max: "12" },
-    "ZMW": { tip: "🇿🇲 赞比亚：请输入标准的赞比亚钱包账号/手机号", max: "12" }, // 🔒 补焊：ZMW 前端交互提示
-    "MWK": { tip: "🇲🇼 马拉维：请输入 Airtel/TNM 钱包钱包手机号", max: "12" },
-    "RWF": { tip: "🇷🇼 卢旺达：请输入标准的卢旺达钱包手机号 (如 078XXXXXXX)", max: "12" }, 
-    "PHP": { tip: "🇵🇭 菲律宾：请输入合规的 GCash 绑定手机号", max: "14" },
-    "IDR": { tip: "🇮🇩 印尼：DANA 直连代收请输入合规手机号", max: "14" },
-    "THB": { tip: "🇹🇭 泰国：请输入 PromptPay 清算参考标志", max: "20" }
+    "ZMW": { tip: "赞比亚：请输入标准的赞比亚钱包账号/手机号", max: "12" }, // 🔒 补焊：ZMW 前端交互提示
+    "MWK": { tip: "马拉维：请输入 Airtel/TNM 钱包钱包手机号", max: "12" },
+    "RWF": { tip: "卢旺达：请输入标准的卢旺达钱包手机号 (如 078XXXXXXX)", max: "12" }, 
+    "PHP": { tip: "菲律宾：请输入合规的 GCash 绑定手机号", max: "14" },
+    "IDR": { tip: "印尼: DANA 直连代收请输入合规手机号", max: "14" },
+    "THB": { tip: "泰国：请输入 PromptPay 清算参考标志", max: "20" }
 };
 
 export function initCurrencyAccountLinkage() {
