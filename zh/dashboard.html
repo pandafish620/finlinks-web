@@ -190,9 +190,12 @@
                                     <option value="KES">KES - 肯尼亚先令 (东非 M-Pesa 直连)</option>
                                     <option value="UGX">UGX - 乌干达先令 (东非 MTN 核心网)</option>
                                     <option value="NGN">NGN - 尼日利亚奈拉 (动态虚拟账号转账)</option>
+                                    <option value="GHS">GHS - 加纳塞地 (西非 MTN/Vodafone 移动钱包)</option>
                                     <option value="ZAR">ZAR - 南非兰特 (EFT 银行清算大闸通电)</option>
                                     <option value="MUR">MUR - 毛里求斯卢比 (MCB/SBM 离岸银行网络)</option>
                                     <option value="MWK">MWK - 马拉维克瓦查 (Airtel/TNM 移动钱包)</option>
+                                    <option value="RWF">RWF - 卢旺达法郎 (东非 MTN 核心网)</option>
+                                    <option value="ZMW">ZMW - 赞比亚克瓦查 (Airtel/MTN 移动钱包)</option>
                                     <option value="BRL">BRL - 巴西雷亚尔 (Pix 实时网关通电)</option>
                                     <option value="MXN">MXN - 墨西哥比索 (CLABE 核心网通电)</option>
                                     <option value="TRY">TRY - 土耳其里拉 (里拉自由大盘通电)</option>
@@ -239,7 +242,10 @@
                                 <option value="TRY">TRY (土耳其里拉 - 国际 IBAN 清算)</option>
                                 <option value="KES">KES (肯尼亚先令 - M-Pesa 移动放款)</option>
                                 <option value="UGX">UGX (乌加达先令 - MTN 移动打款)</option>
+                                <option value="TZS">TZS - 坦桑尼亚先令 (东非 Vodacom/Tigo 移动钱包)</option>
                                 <option value="GHS">GHS (加纳塞地 - Vodafone Mobile Money)</option>
+                                <option value="RWF">RWF (卢旺达法郎 - 东非 MTN 核心网)</option>
+                                <option value="ZMW">ZMW (赞比亚克瓦查 - Airtel/MTN 移动钱包)</option>
                                 <option value="ZAR">ZAR (南非兰特 - EFT 银行结算大闸)</option>
                                 <option value="MWK">MWK (马拉维克瓦查 - Airtel / TNM 移动钱包)</option>
                                 <option value="MUR">MUR (毛里求斯卢比 - MCB / SBM 离岸银行网络)</option>
@@ -489,13 +495,17 @@
                 "THB": "示例：10位 泰国本地手机号或 PromptPay 水单参考号",
                 "KES": "示例：东非 M-Pesa 手机号 (如 254712345678)",
                 "UGX": "示例：乌干达 MTN 手机号 (如 256771234567)",
+                "GHS": "示例：加纳本地标准移动货币手机号/账号 (如 23359XXXXXXX)", // 🔒 刚性回正：加纳前端占位符
+                "TZS": "示例：坦桑尼亚本地标准移动货币手机号/账号 (如 25571XXXXXXX)", // 🔒 刚性回正：坦桑尼亚前端占位符
                 "ZAR": "示例：9-13位 南非本地清算银行账号",
                 // 🎯 🌟 局部精准插入：拉美、中东及东非离岸多边资产灰度指印全量通电 🌟
                 "BRL": "示例：巴西 Pix 实时清算键值 (手机号/税号/随机密钥, 如 11999998888)",
                 "MXN": "示例：墨西哥 18位 标准 CLABE 核心清算银行账户代码",
                 "TRY": "示例：土耳其本地 26位 标准 IBAN 自由清算代码",
                 "MWK": "示例：马拉维本地 Airtel/TNM 移动钱包手机号 (如 265888123456)",
-                "MUR": "示例：7-12位 毛里求斯离岸银行标准清算物理账户"
+                "MUR": "示例：7-12位 毛里求斯离岸银行标准清算物理账户",
+                "ZMW": "示例：赞比亚本地标准移动货币手机号/账号 (如 26076XXXXXXX)", // 🔒 补齐钢印：解冻赞比亚前端占位
+                "RWF": "示例：卢旺达本地标准移动货币手机号/账号 (如 25078XXXXXXX)" // 🔒 补齐钢印：解冻卢旺达前端占位
             };
 
             phoneInput.placeholder = placeholderMatrix[curr] || "请输入对应地缘清算凭证号";
