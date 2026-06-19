@@ -329,7 +329,8 @@ window.adaptPayoutFormByGeopolitical = function() {
     
     if (!bankGroup || !mobileGroup) return;
 
-    if (currency === "KES" || currency === "UGX" || currency === "GHS") {
+    // 🌍 6国合拢修正：全量补齐 PawaPay 新通车的赞比亚 ZMW、马拉维 MWK、卢旺达 RWF，无损通过前台表单调谐大闸
+    if (["KES", "UGX", "GHS", "TZS", "ZMW", "MWK", "RWF"].includes(currency.toUpperCase().trim())) {
         mobileGroup.classList.remove("hidden"); 
         bankGroup.classList.add("hidden");    
         if (typeof window.pushAuditLog === "function") {
