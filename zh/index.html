@@ -37,7 +37,7 @@
                         <i class="fa-solid fa-network-wired text-sm"></i>
                     </div>
                     <span class="text-md font-extrabold tracking-tight text-slate-900 flex items-center gap-1.5 font-sans">
-                        FinLinks <span class="text-blue-600 font-bold text-xs bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">乾卉科技</span>
+                        FinLinks <span class="text-blue-600 font-bold text-xs bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100"></span>
                     </span>
                 </div>
 
@@ -49,11 +49,8 @@
                 </div>
 
                 <div class="flex items-center space-x-3 flex-shrink-0">
-                    <a href="dashboard.html" class="text-xs font-bold text-slate-500 hover:text-blue-600 transition-colors font-mono px-3 py-1.5 rounded-lg hover:bg-slate-100/60">
-                        <i class="fa-solid fa-user-shield mr-1"></i>商户控制台
-                    </a>
-                    <a href="#access" class="inline-flex items-center justify-center px-4 h-9 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all duration-200 font-mono shadow-lg shadow-blue-600/20">
-                        申请初始化接入
+                    <a href="#contact-us-panel" class="inline-flex items-center justify-center px-5 h-9 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all duration-200 font-mono shadow-lg shadow-blue-600/20">
+                        <i class="fa-solid fa-headset mr-1.5 text-[10px]"></i> Contact Us / 联系我们
                     </a>
                 </div>
             </div>
@@ -224,91 +221,63 @@
         </div>
     </section>
 
-    <section id="access" class="py-24 bg-slate-50 border-t border-slate-200">
+    <section id="contact-us-panel" class="py-24 bg-slate-50 border-t border-slate-200">
         <div class="max-w-3xl mx-auto px-4">
             <div class="text-center mb-12">
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-sans uppercase">
-                    激活商户沙箱与 API 准入配置
+                    商户意向登记与技术对接申请
                 </h2>
-                <p class="text-xs text-slate-400 mt-2 font-mono uppercase">
-                    Configure Gateway Handshake & Initialize Developer Client
-                </p>
             </div>
 
             <div class="bg-white rounded-2xl border border-slate-200 shadow-md p-8 sm:p-10 relative">
-                <div class="border-b border-slate-200 pb-5 mb-8 text-center sm:text-left">
-                    <h3 class="text-md font-bold text-slate-900 flex items-center justify-center sm:justify-start gap-2">
-                        <i class="fa-solid fa-code text-blue-600"></i> API 安全控制台令箭配置
-                    </h3>
-                    <p class="text-xs text-slate-400 mt-1">生成测试对接密钥，快速通电一站式同名资产实时监测</p>
-                </div>
-
-                <form id="sandboxAccessForm" class="space-y-5">
+                <form id="contactUsForm" class="space-y-5">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">企业注册中文全称 (company_name) <span class="text-red-500">*</span></label>
-                        <input type="text" id="company_name" name="company_name" placeholder="例如：北京乾卉科技有限公司" required class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-blue-600 transition text-slate-900">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">企业/商户登记全称 (company_name) *</label>
+                        <input type="text" id="company_name" placeholder="例如：跨境小商品出口贸易主体" required class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-blue-600 transition text-slate-900">
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">负责人正式授权姓名 (contact_name) <span class="text-red-500">*</span></label>
-                            <input type="text" id="contact_name" name="contact_name" placeholder="例如：张经理" required class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-blue-600 transition text-slate-900">
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">正式授权联络人法定姓名 *</label>
+                            <input type="text" id="contact_name" placeholder="例如：张经理" required class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-blue-600 transition text-slate-900">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">负责人微信凭证 / Email <span class="text-red-500">*</span></label>
-                            <input type="text" id="wx_email" name="wx_email" placeholder="例如：finlinks_support (微信或邮箱)" required class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-blue-600 transition text-slate-900">
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">联络凭证 (微信/Email/手机号) *</label>
+                            <input type="text" id="contact_info" placeholder="例如：finlinks_support (微信或邮箱)" required class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-blue-600 transition text-slate-900">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">目标开通资产清算回廊 (target_currency) <span class="text-red-500">*</span></label>
-                        <select id="target_currency" name="target_currency" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-blue-600 transition cursor-pointer">
-                            <option value="NGN">🇳🇬 尼日利亚离岸收单与同名结算 (NGN - 奈拉通电)</option>
-                            <option value="GHS">🇬🇭 加纳移动钱包清算通道 (GHS - 加纳塞地)</option>
-                            
-                            <option value="KES">🇰🇪 肯尼亚移动 M-Pesa 收单专区 (KES - 先令保活)</option>
-                            <option value="TZS">🇹🇿 坦桑尼亚电信直连矩阵 (TZS - 坦桑尼亚先令)</option>
-                            <option value="ZMW">🇿🇲 赞比亚清算总线大闸 (ZMW - 赞比亚克瓦查)</option>
-                            <option value="RWF">🇷🇼 卢旺达电信代收分流卡槽 (RWF - 卢旺达法郎)</option>
-                            <option value="MWK">🇲🇼 马拉维特许通道清算网关 (MWK - 马拉维克瓦查)</option>
-                            
-                            <option value="IDR">🇮🇩 印尼本币收单托管分流大闸 (IDR - 印尼盾)</option>
-                            <option value="PHP">🇵🇭 菲律宾 GCash 极速收银网关 (PHP - 菲比索)</option>
-                            <option value="THB">🇹🇭 泰国 PromptPay 国家扫码专流 (THB - 泰铢)</option>
-                            
-                            <option value="BRL">🇧🇷 巴西雷亚尔高频即期轧差 (BRL - 巴西Pix)</option>
-                            <option value="TRY">🇹🇷 土耳其里拉国际主流对账 (TRY - 里拉回廊)</option>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">拟开通新兴市场清算走廊 *</label>
+                        <select id="target_currency" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-blue-600 transition cursor-pointer">
+                            <option value="NGN">🇳🇬 尼日利亚离岸收单与同名结算 (NGN)</option>
+                            <option value="GHS">🇬🇭 加纳移动钱包清算通道 (GHS)</option>
+                            <option value="KES">🇰🇪 肯尼亚移动 M-Pesa 收单专区 (KES)</option>
+                            <option value="TZS">🇹🇿 坦桑尼亚电信直连矩阵 (TZS)</option>
+                            <option value="ZMW">🇿🇲 赞比亚清算总线大闸 (ZMW)</option>
+                            <option value="RWF">🇷🇼 卢旺达电信代收分流卡槽 (RWF)</option>
+                            <option value="MWK">🇲🇼 马拉维特许通道清算网关 (MWK)</option>
+                            <option value="IDR">🇮🇩 印尼本币收单托管分流大闸 (IDR)</option>
+                            <option value="PHP">🇵🇭 菲律宾 GCash 极速收银网关 (PHP)</option>
+                            <option value="THB">🇹🇭 泰国 PromptPay 国家扫码专流 (THB)</option>
+                            <option value="BRL">🇧🇷 巴西雷亚尔高频即期轧差 (BRL)</option>
+                            <option value="TRY">🇹🇷 土耳其里拉国际主流对账 (TRY)</option>
                         </select>
                     </div>
 
                     <button type="submit" class="w-full mt-4 py-3.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold uppercase tracking-wider rounded-xl text-xs font-mono transition duration-200 shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-terminal"></i> 立即激活 API 开发沙箱并获取密钥
+                        <i class="fa-solid fa-paper-plane"></i> 递交技术合作尽调申请
                     </button>
                     
-                    <div id="formSuccessStatus" class="hidden mt-6 bg-emerald-50 border border-emerald-100 rounded-xl p-5 space-y-4 font-mono text-xs">
-                        <div class="flex items-start gap-2 text-emerald-800">
-                            <span class="text-emerald-500 mt-0.5">🟢</span>
+                    <div id="formSuccessStatus" class="hidden mt-6 bg-blue-50 border border-blue-100 rounded-xl p-5 space-y-4 font-mono text-xs">
+                        <div class="flex items-start gap-2.5 text-blue-900">
+                            <span class="text-blue-500 mt-0.5"><i class="fa-solid fa-circle-check text-base"></i></span>
                             <div>
-                                <strong class="font-sans">沙箱测试白标账户激活大捷！</strong><br>
-                                已成功向中台分布式鉴权系统注册，您的专享密钥串及开发中核信息如下：
+                                <strong class="font-sans text-sm block mb-1">意向申请已无损安全接收！</strong>
+                                <span class="text-slate-600 leading-relaxed block">
+                                    离您最近的 Sales 销售经理会在第一时间与您建立私密联络，以更好地了解您的业务需求及多边代收结算合规场景。请保持通讯工具畅通。
+                                </span>
                             </div>
-                        </div>
-
-                        <div class="bg-slate-50 border border-slate-200 text-slate-900 p-4 rounded-lg space-y-2">
-                            <div>company_name : <span class="text-blue-600 font-bold" id="displayCName">--</span></div>
-                            <div>subaccount_id: <span class="text-slate-900 font-bold flex items-center justify-between mt-1">
-                                <span id="displaySubId">FINLINKS-044-0690000037</span> 
-                                <button type="button" onclick="navigator.clipboard.writeText(document.getElementById('displaySubId').innerText); alert('分账主键已安全复制至系统剪切板！');" class="text-[10px] bg-white border border-slate-200 hover:bg-slate-50 font-sans px-2 py-0.5 rounded text-slate-900 transition">复制</button>
-                            </span></div>
-                            <div class="border-t border-slate-200 pt-2 text-[10px] text-slate-400">
-                                Sandbox Session Security: <span class="text-emerald-600 font-bold">ACTIVE (STANDALONE)</span>
-                            </div>
-                        </div>
-
-                        <div class="pt-2 text-center">
-                            <a href="login.html" class="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-600/30 transition uppercase">
-                                <i class="fa-solid fa-right-to-bracket"></i> 前往登录激活生产控制台
-                            </a>
                         </div>
                     </div>
                 </form>
