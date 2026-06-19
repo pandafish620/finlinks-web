@@ -19,6 +19,8 @@
         "ZAR": { name: "南非兰特",     isCollectionEnabled: true, isFXEnabled: true, notice: "Fully Active" },
         "MUR": { name: "毛里求斯卢比", isCollectionEnabled: true, isFXEnabled: true, notice: "Fully Active" },
         "MWK": { name: "马拉维克瓦查", isCollectionEnabled: true, isFXEnabled: true, notice: "Fully Active" },
+        "RWF": { name: "卢旺达法郎",   isCollectionEnabled: true, isFXEnabled: true, notice: "Fully Active" }, // 🌍 6国合拢并线：补齐卢旺达硬币种配置
+        "ZMW": { name: "赞比亚克瓦查", isCollectionEnabled: true, isFXEnabled: true, notice: "Fully Active" }, // 🔒 拨乱反正：焊死 ZMW 现代代号
         // 未激活货币
         "ARS": { name: "阿根廷比索",   isCollectionEnabled: false, isFXEnabled: false, notice: "功能正在研发中 / To be enabled" },
         "COP": { name: "哥伦比亚比索", isCollectionEnabled: false, isFXEnabled: false, notice: "功能正在研发中 / To be enabled" }
@@ -34,7 +36,10 @@
         "TZS": { pattern: /^(255|0)?(6|7)\d{8}$/, notice: "坦桑尼亚移动货币规范，包含 Vodacom, Tigo, Airtel 钱包 (如 06XXXXXXXX)" },
         "UGX": { pattern: /^(256|0)?\d{9}$/, notice: "乌干达移动货币规范，必须是标准的乌干达钱包账号/手机号" },
         "ZAR": { pattern: /^\d{9,13}$/, notice: "南非清算网络规范，银行物理账户通常为 9 到 13 位纯数字或标准的结算标识" },
-        
+        "ZMW": { pattern: /^(260|0)?\d{9}$/, notice: "赞比亚移动货币规范，必须是标准的赞比亚钱包账号/手机号 (区号260)" },
+        "RWF": { pattern: /^(250|0)?7\d{8}$/, notice: "卢旺达移动货币规范，必须是标准的卢旺达钱包手机号格式 (区号250)" },
+
+
         // 🌟 核心补锚：东非马拉维与离岸毛里求斯双子引信
         "MWK": { pattern: /^(265|0)?(8|9)\d{8}$/, notice: "马拉维移动货币规范，支持 TNM Mpamba 与 Airtel Money，账号必须为合规钱包手机号 (如 08XXXXXXXX 或 09XXXXXXXX)" },
         "MUR": { pattern: /^\d{7,12}$/, notice: "毛里求斯银行清算规范，收款账户通常为 7 到 12 位纯数字的标准商业银行账号" },
