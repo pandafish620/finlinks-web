@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="../assets/js/new_auth_sentinel.js"></script>
+    <script src="../../assets/js/new_auth_sentinel.js"></script>
     <script>
         // 一开盘直接在内存最底层击发，确权不通过当场就地轰回 login.html，下方大厅像素点连加载的机会都没有！
         if (typeof window.authGuard === "function") {
@@ -12,7 +12,7 @@
     </script>
     <title>FinLinks 5.2.0 - 全球多通道聚合商户控制台</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="../assets/css/custom.css">
+    <link rel="stylesheet" href="../../assets/css/custom.css">
     <style>
         .modal { transition: opacity 0.25s ease; }
         body { background-color: #0f172a; color: #f8fafc; }
@@ -109,7 +109,7 @@
                 </div>
             </div>
             <div class="flex space-x-4 items-center">
-                <a href="rates.html" target="_blank" class="text-xs text-slate-400 hover:text-emerald-400 flex items-center transition">📡 实时汇率遥测</a>
+                <a href="../zh/rates_zh.html" target="_blank" class="text-xs text-slate-400 hover:text-emerald-400 flex items-center transition">📡 实时汇率遥测</a>
                 <button onclick="openFxModal()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 py-1.5 rounded-lg text-xs transition shadow-lg shadow-emerald-500/10">执行即期换汇 (FX Spot)</button>
             </div>
         </header>
@@ -289,7 +289,7 @@
                         </div>
                     </div>
 
-                    <a href="./kyb_portal.html" target="_blank" 
+                    <a href="../zh/kyb_portal.html" target="_blank" 
                        class="flex items-center justify-center space-x-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded text-[11px] tracking-widest transition-all duration-300 uppercase shadow-lg shadow-indigo-500/20 active:scale-[0.98]">
                         <span>📤 进入数字化高级 KYB 合规官审计问卷舱</span>
                     </a>
@@ -477,11 +477,11 @@
         </div>
     </div>
 
-    <script type="module" src="../assets/js/dashboard.js"></script>
+    <script type="module" src="../../assets/js/dashboard.js"></script>
 
     <script type="module">
-        import { handleLivePayinCallback } from '../assets/js/payin_handler.js';
-        import { client } from '../assets/js/finlinks_client.js';
+        import { handleLivePayinCallback } from '../../assets/js/payin_handler.js';
+        import { client } from '../../assets/js/finlinks_client.js';
 
         // 🎯 🌟 局部精准插入：多地缘本币收银台占位符灰度动态提示规则矩阵 🌟
         window.updatePayinPlaceholder = function() {

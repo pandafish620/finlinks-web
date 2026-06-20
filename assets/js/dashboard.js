@@ -130,7 +130,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typeof window.pushAuditLog === "function") window.pushAuditLog("[RECON TIER] ⚡ 正在扣动影子总账流水轧差审计大闸...");
         
         // 1. 动态抓取当前大厅选择的对账本币币种（例如 KES, NGN），保底使用 KES 执行清算
-        const currentCurrency = document.getElementById("payout-curr")?.value || "KES";
+        // 1. 🧬 动态级联打捞当前大厅处于活跃态的任何币种（优先使用入金/出金最新影子缓存，再抓 DOM 节点）
+        const currentCurrency = localStorage.getItem("FINLINKS_LAST_ACTIVE_CURRENCY") || 
+                                document.getElementById("collectionCurrency")?.value || 
+                                document.getElementById("payout-curr")?.value || 
+                                "NGN";
         const cleanCurrency = currentCurrency.toUpperCase().trim();
         
         try {

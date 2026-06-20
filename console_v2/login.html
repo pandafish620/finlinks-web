@@ -56,7 +56,7 @@
         </form>
 
         <div class="mt-4 pt-4 border-t border-slate-800/60 text-center">
-            <p class="text-xs text-slate-500 tracking-wide">新地缘跨境商户？<a href="./register.html" class="text-emerald-400 hover:text-emerald-300 font-bold underline underline-offset-4 ml-1 transition-all">自主入驻申请开户 →</a></p>
+            <p class="text-xs text-slate-500 tracking-wide">新跨境商户？<a href="register.html" class="text-emerald-400 hover:text-emerald-300 font-bold underline underline-offset-4 ml-1 transition-all">自主入驻申请开户 →</a></p>
         </div>
     </div>
 
@@ -141,8 +141,14 @@
                 msgBox.innerText = "🟢 [SUCCESS] 凭证核销大胜！商户身份及 JWT 黄金令牌已成功安全落盘。正在护送跨流进入持仓大厅...";
 
                 // 毫秒级安全延迟缓冲，体验完全丝滑拉满
+                // 🧬 动态自适应分流大闸：根据当前登录邮箱后缀或浏览器首选语言，精准投递至对应功能舱
                 setTimeout(() => {
-                    window.location.href = 'zh/dashboard.html';
+                    const userLang = navigator.language || navigator.userLanguage;
+                    if (userLang.includes('zh')) {
+                        window.location.href = 'dashboard_zh.html'; // 🇨🇳 义乌商户平滑弹入中文全量总账看板
+                    } else {
+                        window.location.href = 'dashboard_en.html'; // 🇬🇧 海外合规官平滑弹入英文圣洁ERP看板
+                    }
                 }, 800);
 
             } catch (err) {
