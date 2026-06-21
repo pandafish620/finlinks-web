@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>FinLinks - 邮箱确权与账户激活</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#0f172a] text-slate-200 flex items-center justify-center min-h-screen font-mono selection:bg-emerald-500/30">
+    
+    <div class="w-full max-w-md p-8 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl text-center space-y-6 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500"></div>
+
+        <div class="flex items-center justify-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <h1 class="text-xs font-bold tracking-widest uppercase text-slate-400">FinLinks Sovereign Anchor</h1>
+        </div>
+
+        <div id="status-box" class="space-y-4">
+            <div id="loader" class="w-10 h-10 border-4 border-slate-950 border-t-emerald-400 rounded-full animate-spin mx-auto"></div>
+            <h2 id="title" class="text-lg font-black text-white">正在确权中...</h2>
+            <p id="msg" class="text-xs text-slate-400 leading-relaxed">正在穿透公网，向核心账本锁死您的邮箱指纹...</p>
+            
+            <a id="btn" href="./login.html" class="hidden block w-full bg-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs hover:bg-emerald-400 transition-all tracking-widest uppercase shadow-lg shadow-emerald-500/10">前往登录控制塔 (Go to Login Tower)</a>
+        </div>
+    </div>
+
+    <script>
+        window.onload = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const email = urlParams.get('email');
+            
+            const loader = document.getElementById('loader');
+            const title = document.getElementById('title');
+            const msg = document.getElementById('msg');
+            const btn = document.getElementById('btn');
+
+            if (!email) {
+                loader.classList.add('hidden');
+                title.innerText = "⚠️ 确权引信残缺";
+                msg.innerText = "未在物理 URL 中检索到合规的 Email 身份指纹。";
+                return;
+            }
+
+            try {
+                // 1. ⚙️ 环境动态对账：自适应本地研发舱与 Render 公网生产舱
+                const BASE_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" 
+                    ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
+
+                // 2. 🚀 刚性补齐 /api/v1 血管，直击你昨晚部署的真实核销端点
+                const res = await fetch(`${BASE_URL}/api/v1/auth/onboarding/verify-email-link?email=${encodeURIComponent(email)}`);
+                const data = await res.json();
+                
+                loader.classList.add('hidden');
+                
+                if (res.ok || res.status === 200) {
+                    // 👑 【核心绝杀落盘】：将核销通过的邮箱，刚性物理锁入本地主权金库！
+                    // 这确保了下一步的 kyb_portal.html 进去后能 100% 自动打捞出这个邮箱
+                    localStorage.setItem("FINLINKS_ACTIVE_MID", email);
+                    
+                    title.className = "text-lg font-black text-emerald-400";
+                    title.innerText = "🎉 电子邮箱确权大胜！";
+                    msg.innerText = data.msg || "您的账号已成功激活";
+                } else {
+                    title.className = "text-lg font-black text-amber-400";
+                    title.innerText = "⚠️ 状态账本提示";
+                    msg.innerText = data.detail || data.msg || "此确权链接可能已过期或已被二次使用。";
+                }
+                
+                btn.classList.remove('hidden');
+            } catch (err) {
+                loader.classList.add('hidden');
+                title.className = "text-lg font-black text-rose-400";
+                title.innerText = "❌ 中台通信熔断";
+                msg.innerText = "无法连接至后端验证舱，请检查公网出网环境。内部排异: " + err.message;
+                btn.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
