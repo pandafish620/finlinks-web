@@ -29,16 +29,18 @@
         window.onload = async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const email = urlParams.get('email');
-            
+            const token = urlParams.get('token'); // 🎯 刚性捕获密码学令牌
+        
             const loader = document.getElementById('loader');
             const title = document.getElementById('title');
             const msg = document.getElementById('msg');
             const btn = document.getElementById('btn');
 
-            if (!email) {
+            // 双重零信任防御：缺一不可
+            if (!email || !token) {
                 loader.classList.add('hidden');
                 title.innerText = "⚠️ 确权引信残缺";
-                msg.innerText = "未在物理 URL 中检索到合规的 Email 身份指纹。";
+                msg.innerText = "未在物理 URL 中检索到合规的 Email 或 Token 身份指纹。";
                 return;
             }
 
@@ -47,32 +49,31 @@
                 const BASE_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" 
                     ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
 
-                // 2. 🚀 刚性补齐 /api/v1 血管，直击你昨晚部署的真实核销端点
-                const res = await fetch(`${BASE_URL}/api/v1/auth/onboarding/verify-email-link?email=${encodeURIComponent(email)}`);
+                // 2. 🚀 强行变轨：不再轰击假接口，直击后端真正的 /activate 核销大闸
+                const res = await fetch(`${BASE_URL}/api/v1/auth/activate?token=${encodeURIComponent(token)}`);
                 const data = await res.json();
-                
+            
                 loader.classList.add('hidden');
-                
+            
                 if (res.ok || res.status === 200) {
-                    // 👑 【核心绝杀落盘】：将核销通过的邮箱，刚性物理锁入本地主权金库！
-                    // 这确保了下一步的 kyb_portal.html 进去后能 100% 自动打捞出这个邮箱
+                    // 👑 【核心绝杀落盘】：核销成功，将确认无误的邮箱锁入本地主权金库，留给下一步的 kyb_portal.html 自动打捞
                     localStorage.setItem("FINLINKS_ACTIVE_MID", email);
-                    
+                
                     title.className = "text-lg font-black text-emerald-400";
                     title.innerText = "🎉 电子邮箱确权大胜！";
-                    msg.innerText = data.msg || "您的账号已成功激活";
+                    msg.innerText = data.msg || "您的商户主体已成功激活，正在护送进入控制塔...";
                 } else {
                     title.className = "text-lg font-black text-amber-400";
-                    title.innerText = "⚠️ 状态账本提示";
-                    msg.innerText = data.detail || data.msg || "此确权链接可能已过期或已被二次使用。";
+                    title.innerText = "⚠️ 凭证核销熔断";
+                    msg.innerText = data.detail || "该安全令牌已过期或已被重放刺穿。";
                 }
-                
+            
                 btn.classList.remove('hidden');
             } catch (err) {
                 loader.classList.add('hidden');
                 title.className = "text-lg font-black text-rose-400";
                 title.innerText = "❌ 中台通信熔断";
-                msg.innerText = "无法连接至后端验证舱，请检查公网出网环境。内部排异: " + err.message;
+                msg.innerText = "无法连接至后端验证舱。内部排异: " + err.message;
                 btn.classList.remove('hidden');
             }
         }
