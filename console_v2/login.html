@@ -98,7 +98,7 @@
                 formData.append('username', email);
                 formData.append('password', password);
 
-                let response = await fetch(`${BASE_URL}/auth/login`, {
+                let response = await fetch(`${BASE_URL}/api/v1/auth/login`, {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -112,7 +112,7 @@
                 // 🛡️ 防御性分流拦截自愈大闸：尝试轰击老线 /auth/login
                 if (response.status === 422) {
                     msgBox.innerText = "🔄 [RETRY] 接口格式排异，自动激活第二备用总线（纯 JSON 结构体回滚）...";
-                    const jsonResponse = await fetch(`${BASE_URL}/auth/login`, {
+                    const jsonResponse = await fetch(`${BASE_URL}/api/v1/auth/login`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
                         body: JSON.stringify({ username: email, password: password })
