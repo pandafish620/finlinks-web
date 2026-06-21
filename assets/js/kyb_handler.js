@@ -7,19 +7,22 @@ import { client } from './finlinks_client.js';
 export async function submitAdvancedKYB(pushAuditLog, showPremiumNotification) {
     pushAuditLog("[KYB ONBOARDING] 签署确权：正在提炼高级商户资质对账血缘...");
 
-    // 📄 历史话术完美继承：保留松河投资咨询与 Pine Bay Advisory (HK) 的核心顶层 Branding
+    // 🧠 动态血缘清洗：生擒当前浏览器缓存中由上游门禁落盘的活体商户大名与唯一指纹
+    const activeMid = localStorage.getItem("FINLINKS_ACTIVE_MID") || "unknown_merchant";
+    const activeCompanyName = localStorage.getItem("FINLINKS_COMPANY_NAME") || "Pine Bay Advisory (HK)";
+    
     const kybPayload = {
-        company_name: "Pine Bay Advisory (HK)",
+        company_name: activeCompanyName,
         articles_of_association: "SHA256-HASH-OF-ARTICLES-OF-ASSOCIATION-999",
-        ubo_name: "Jacky Xiaoyu Zhang",
-        passport_or_id: "P12345678",
-        company_website: "https://www.pinebayadvisory.com",
+        ubo_name: "Merchant Principal",
+        passport_or_id: "PENDING_PORTAL_INPUT",
+        company_website: "https://www.finlinks.io",
         estimated_monthly_vol: 500000.0,
         business_type_intent: "BOTH",
         fx_intent_type: "Buy FX",
         target_geopolitical_countries: ["NGN", "KES", "GB", "CN"],
-        company_description: "松河投资咨询（Pine Bay Advisory）是一家资深金融咨询与流动性管理机构。"
-    };
+        company_description: `FinLinks 多租户隔离舱下属商户主体: ${activeCompanyName}, 特征指纹: ${activeMid}`
+    }; // 🟢 钢印修复：原位补齐闭合大闸，彻底消灭静态排异反应！
 
     try {
         // 1. 🔍 动态打捞中央配置大脑里的公网铁轨
@@ -31,7 +34,7 @@ export async function submitAdvancedKYB(pushAuditLog, showPremiumNotification) {
         const queryParams = new URLSearchParams({
             bank_code: "044",
             account_number: "0690000037",
-            business_name: "Pine Bay Advisory (HK)" // 💡 完美注入包含 (HK) 的指定 English 话术名称
+            business_name: localStorage.getItem("FINLINKS_COMPANY_NAME") || "Pine Bay Advisory (HK)"
         });
 
         const completeUrl = `${baseUrl}${onboardingEndpoint}?${queryParams.toString()}`;
@@ -41,7 +44,8 @@ export async function submitAdvancedKYB(pushAuditLog, showPremiumNotification) {
         const response = await fetch(completeUrl, {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${localStorage.getItem("token") || ""}`, // 🔒 捎带主权身份令牌
+                // ⚙️ 刚性对齐：像素级同步 login.html 砸下的黄金令牌键名，确保顺利穿透 Render 全局门禁锁
+                "Authorization": `Bearer ${localStorage.getItem("finlinks_auth_token") || ""}`,
                 "Content-Type": "application/json",
                 "Accept": "application/json"
             }

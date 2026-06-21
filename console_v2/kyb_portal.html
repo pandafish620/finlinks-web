@@ -185,7 +185,10 @@
         let currentStep = 1;
 
         // 🧠 初始化：全自动生擒活体商户会话数据
+        // 🎯 刚性并线：不仅生擒邮箱，同时在最顶部打捞出登录大厅刚刚砸下的 JWT 黄金令牌
+        const token = localStorage.getItem("finlinks_auth_token") || "";
         const activeEmail = localStorage.getItem("FINLINKS_ACTIVE_MID") || "";
+
         document.getElementById("kyb-email").value = activeEmail;
         
         const elDisplayEmail = document.getElementById("displayEmail");
@@ -336,6 +339,10 @@
                 // URL 传递 email 作为 Query，实体打包原有命名，完美咬合后端血管
                 const response = await fetch(`${BASE_URL}/auth/onboarding/submit-detailed-kyb?email=${encodeURIComponent(liveEmail)}`, {
                     method: "POST",
+                    headers: {
+                        // 🎯 唯一微创注入：只加了这一行身份印章，用于穿透 Render 后端的全局合规锁，后面的 formData 载荷完全不动
+                        "Authorization": `Bearer ${token}`
+                    },
                     body: formData
                 });
 

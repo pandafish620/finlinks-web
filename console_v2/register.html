@@ -97,10 +97,26 @@
                         window.authSentinel.registerMerchant(payload, () => {}, () => {});
                     }
 
-                    // 自动引流至核销大厅
-                    setTimeout(() => {
-                        window.location.href = "login.html";
-                    }, 2000);
+                    // 🛡️ 刚性阻断自动回跳：大厂套路必须把用户死锁在当前页，强迫其转场去点开自己的企业邮箱
+                    // 1. 改变按钮长相，将其固化为不可点击的哨兵状态
+                    btn.setAttribute("disabled", "true");
+                    btn.className = "w-full bg-slate-800 text-slate-500 font-bold py-3.5 rounded-xl text-sm tracking-wide cursor-not-allowed border border-slate-700/50";
+                    btn.innerText = "WAITING FOR EMAIL VERIFICATION...";
+
+                    // 2. 升级提示框视觉，以极具权威感的闪烁动画提示非陆买家
+                    alertBox.innerHTML = `
+                        <div class="flex flex-col space-y-2">
+                            <div class="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                                <span>[ONBOARDING PENDING] 确权电报击发大胜</span>
+                            </div>
+                            <p class="text-slate-300 leading-relaxed text-[11px]">
+                                ${result.msg || "账户主权已雕刻落盘。"} 我们已向您的企业邮箱派发了安全激活令牌。<strong>请立刻登录您的邮箱并点击激活链接</strong>。完成数字确权后，系统将自动送您进入控制塔。
+                            </p>
+                        </div>
+                    `;
+                    // 强制清空表单，防止商户二次盲刷
+                    document.getElementById("register-form").reset();
 
                 } else {
                     // 后端抛出 400 或 422 风控熔断拒绝

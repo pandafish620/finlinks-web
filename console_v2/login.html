@@ -55,8 +55,11 @@
             </button>
         </form>
 
-        <div class="mt-4 pt-4 border-t border-slate-800/60 text-center">
+        <div class="mt-4 pt-4 border-t border-slate-800/60 flex flex-col space-y-3 text-center">
             <p class="text-xs text-slate-500 tracking-wide">新跨境商户？<a href="register.html" class="text-emerald-400 hover:text-emerald-300 font-bold underline underline-offset-4 ml-1 transition-all">自主入驻申请开户 →</a></p>
+            <div id="forgot-password-trigger" class="hidden animate-fade-in">
+                <a href="javascript:void(0);" onclick="triggerAccountRecovery()" class="text-[10px] font-mono text-slate-500 hover:text-teal-400 transition-colors uppercase tracking-wider">⚠️ [CREDENTIAL RECOVERY] 忘记密码或用户名找回?</a>
+            </div>
         </div>
     </div>
 
@@ -65,6 +68,13 @@
         // 自动分流探测网关端点
         const BASE_URL = IS_LOCAL ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
 
+        // 临时兜底：找回密码核销弹窗
+        window.triggerAccountRecovery = function() {
+            msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-amber-500/30 text-amber-400 leading-relaxed";
+            msgBox.innerText = "ℹ️ [SYSTEM INFRA] 自主身份重置网关并线中。请将您的注册企业法人主体证明发送至 compliance@finlinks.io 申请人工核销放行。";
+            msgBox.classList.remove('hidden');
+        };
+
         window.handleLiveLogin = async function(event) {
             event.preventDefault();
             
@@ -72,8 +82,10 @@
             const password = document.getElementById('loginPassword').value;
             const msgBox = document.getElementById('login-msg-box');
             const btn = document.getElementById('loginBtn');
+            const recoveryTrigger = document.getElementById('forgot-password-trigger');
 
             // 点火黑金提示流
+            recoveryTrigger.classList.add('hidden');
             msgBox.classList.remove('hidden', 'text-rose-400', 'text-emerald-400', 'border-rose-500/30', 'border-emerald-500/30');
             msgBox.classList.add('text-amber-400', 'border-amber-500/20');
             msgBox.innerText = "⚡ [AUTHENTICATING] 正在安全打包 OAuth2 标准密文表单载荷...";
@@ -108,8 +120,6 @@
                     data = await jsonResponse.json();
                     if (!jsonResponse.ok) throw new Error(data.detail || "JSON 隔离通道拒绝放行凭证");
                 } else if (response.status === 404 || response.status === 405) {
-                    // 🔌 降级熔断：老线完全不在岗，说明后端已全面升级为新版 `new_merchant_auth_router.py`！
-                    // 直接全量轰击现代出出网网关，实施真正的 Query 凭证核销！
                     msgBox.innerText = "🚀 [MODERN AUTH ACTIVATED] 正在并线至 5.2.0 现代商户清算凭证核销大闸...";
                     const modernResponse = await fetch(`${BASE_URL}/api/v1/modern-auth/login-gateway?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`, {
                         method: 'POST'
@@ -129,33 +139,72 @@
                 
                 if (!token) throw new Error("回执载荷异常：未包含有效签名的 JWT 黄金令牌");
                 
-                // A. 严格灌入老线小写命名空间，确保 client 总线及 fetchBalances 前线无损调用！
+                // A. 严格灌入老线小写命名空间，确保 client 总线无损调用！
                 localStorage.setItem('finlinks_auth_token', token);
                 
-                // B. 严格锁死新版外汇多币种冷钱包与商户企业名牌特征码！绝杀常驻侧边栏假死！
+                // B. 严格锁死新版外汇多币种冷钱包与商户企业名牌特征码！
                 localStorage.setItem('FINLINKS_ACTIVE_MID', merchantId.trim().toLowerCase());
                 if (data.company_name) localStorage.setItem('FINLINKS_COMPANY_NAME', data.company_name);
-                if (data.account_status) localStorage.setItem('FINLINKS_ACCOUNT_STATUS', data.account_status);
-                
-                msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-emerald-500/30 text-emerald-400 leading-relaxed shadow-lg";
-                msgBox.innerText = "🟢 [SUCCESS] 凭证核销大胜！商户身份及 JWT 黄金令牌已成功安全落盘。正在护送跨流进入持仓大厅...";
 
-                // 毫秒级安全延迟缓冲，体验完全丝滑拉满
-                // 🧬 动态自适应分流大闸：根据当前登录邮箱后缀或浏览器首选语言，精准投递至对应功能舱
-                setTimeout(() => {
-                    const userLang = navigator.language || navigator.userLanguage;
-                    if (userLang.includes('zh')) {
-                        window.location.href = 'dashboard_zh.html'; // 🇨🇳 义乌商户平滑弹入中文全量总账看板
-                    } else {
-                        window.location.href = 'dashboard_en.html'; // 🇬🇧 海外合规官平滑弹入英文圣洁ERP看板
+                // =============================================================
+                // 🧱 【新代码插入位置 2】：实弹高频叩击 /users/me 黄金门禁，拦截并实施三级风控分流
+                // =============================================================
+                msgBox.innerText = "🔍 [SHADOW LEDGER AUDIT] 令牌解密成功，正在下钻打捞商户行级合规状态状态机...";
+                
+                const profileResponse = await fetch(`${BASE_URL}/api/v1/auth/users/me`, {
+                    method: 'GET',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'accept': 'application/json'
                     }
-                }, 800);
+                });
+
+                if (!profileResponse.ok) {
+                    throw new Error("在中台提取多租户隔离边界失败，账户可能处于高危死锁状态。");
+                }
+
+                const profileData = await profileResponse.json();
+                const accountPayload = profileData.account_payload || {};
+                const currentStatus = (accountPayload.status || "PENDING_VERIFY").toUpperCase().strip();
+                
+                localStorage.setItem('FINLINKS_ACCOUNT_STATUS', currentStatus);
+                if (accountPayload.company_name) localStorage.setItem('FINLINKS_COMPANY_NAME', accountPayload.company_name);
+
+                // 🚦 三级渐进式合规分流拦截总闸
+                if (currentStatus === "APPROVED") {
+                    // ✅ 第 3 类用户：全量完全体主宰者，直接开放完整看板
+                    msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-emerald-500/30 text-emerald-400 leading-relaxed shadow-lg";
+                    msgBox.innerText = "🟢 [SUCCESS] 核心清算授权完毕！已获得 G10 通道完全控制权。正在弹射进入全量持仓大厅...";
+                    
+                    setTimeout(() => {
+                        const userLang = navigator.language || navigator.userLanguage;
+                        if (userLang.includes('zh')) {
+                            window.location.href = 'dashboard_zh.html'; 
+                        } else {
+                            window.location.href = 'dashboard_en.html'; 
+                        }
+                    }, 800);
+
+                } else {
+                    // 🟡 第 2 类用户：挂起观察者 (PENDING_VERIFY / EMAIL_VERIFIED / PENDING_APPROVAL)
+                    // 准许其进入 Dashboard 看汇率，但在主控制台内强制抹灰并引流至你的 KYB portal
+                    msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-amber-500/30 text-amber-400 leading-relaxed shadow-lg";
+                    msgBox.innerText = `⚠️ [LIMITED TERMINAL] 身份为 ${currentStatus}。根据巴塞尔反洗钱法案，核心清算功能已抹灰。系统正引导您进入高级 KYB 备案大厅...`;
+                    
+                    // 🎯 像素级咬合你写好的 KYB 模块！直接强制引流
+                    setTimeout(() => {
+                        window.location.href = 'kyb_portal.html';
+                    }, 1200);
+                }
 
             } catch (err) {
+                // ❌ 第 1 类用户：账密错、撞门失败或被拒绝放行
                 msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-rose-500/30 text-rose-400 leading-relaxed";
                 msgBox.innerText = `❌ [ERROR] 登录认证熔断: ${err.message}`;
                 btn.disabled = false;
                 btn.classList.remove("opacity-40", "cursor-not-allowed");
+                // 原位炸开忘记密码的特赦链接
+                recoveryTrigger.classList.remove('hidden');
             }
         }
     </script>
