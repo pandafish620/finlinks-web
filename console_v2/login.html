@@ -120,12 +120,8 @@
                     data = await jsonResponse.json();
                     if (!jsonResponse.ok) throw new Error(data.detail || "JSON 隔离通道拒绝放行凭证");
                 } else if (response.status === 404 || response.status === 405) {
-                    msgBox.innerText = "🚀 [MODERN AUTH ACTIVATED] 正在并线至 5.2.0 现代商户清算凭证核销大闸...";
-                    const modernResponse = await fetch(`${BASE_URL}/api/v1/modern-auth/login-gateway?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`, {
-                        method: 'POST'
-                    });
-                    data = await modernResponse.json();
-                    if (!modernResponse.ok) throw new Error(data.detail || "现代主权鉴权中心拒绝接受核销");
+                    // ⚙️ 彻底绝杀流氓前缀，不给 404 任何容错空间，直接阻断
+                    throw new Error("后端核心登录门牌号匹配失败 (404/405)，请确保后端 main.py 挂载了正确的 /api/v1/auth 前缀。");
                 } else {
                     data = await response.json();
                     if (!response.ok) throw new Error(data.detail || "中台风控大闸物理拒绝放行");
@@ -165,8 +161,9 @@
 
                 const profileData = await profileResponse.json();
                 const accountPayload = profileData.account_payload || {};
-                const currentStatus = (accountPayload.status || "PENDING_VERIFY").toUpperCase().strip();
-                
+                // 🎯 纠偏：将 Python 的 .strip() 刚性修正为 JavaScript 唯一的 .trim()！
+                const currentStatus = (accountPayload.status || "PENDING_VERIFY").toUpperCase().trim();
+
                 localStorage.setItem('FINLINKS_ACCOUNT_STATUS', currentStatus);
                 if (accountPayload.company_name) localStorage.setItem('FINLINKS_COMPANY_NAME', accountPayload.company_name);
 
