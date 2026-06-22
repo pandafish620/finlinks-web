@@ -29,18 +29,20 @@
         window.onload = async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const email = urlParams.get('email');
-            const token = urlParams.get('token'); // 🎯 刚性捕获密码学令牌
+            const token = urlParams.get('token'); // 🎯 密码学令牌（老通道必备，新通道选配）
         
             const loader = document.getElementById('loader');
             const title = document.getElementById('title');
             const msg = document.getElementById('msg');
             const btn = document.getElementById('btn');
 
-            // 双重零信任防御：缺一不可
-            if (!email || !token) {
+            // =================================================================
+            //🛡️ 门禁自愈对账：只要有核心邮箱指纹，准许通电，绝不卡死新注册用户！
+            //=================================================================
+            if (!email) {
                 loader.classList.add('hidden');
                 title.innerText = "⚠️ 确权引信残缺";
-                msg.innerText = "未在物理 URL 中检索到合规的 Email 或 Token 身份指纹。";
+                msg.innerText = "未在物理 URL 中检索到合规的 Email 身份指纹。";
                 return;
             }
 
@@ -49,14 +51,27 @@
                 const BASE_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" 
                     ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
 
-                // 2. 🚀 强行变轨：不再轰击假接口，直击后端真正的 /activate 核销大闸
-                const res = await fetch(`${BASE_URL}/api/v1/auth/activate?token=${encodeURIComponent(token)}`);
+                let fetchUrl = "";
+                
+                //=================================================================
+                //🧠 智能分流变轨：用参数像素级判定商户到底走的是哪一条血缘
+                //=================================================================
+
+                if (token) {
+                    // 👑 老商户/重新补发电报线：直击后端传统的 /activate 安全核销大闸
+                    fetchUrl = `${BASE_URL}/api/v1/auth/activate?token=${encodeURIComponent(token)}`;
+                } else {
+                    // 🚀 新商户初次入驻线（今晚的 Mailgun 冲锋线）：直击合规舱的直接抹绿接口
+                    fetchUrl = `${BASE_URL}/auth/onboarding/verify-email-link?email=${encodeURIComponent(email)}`;
+                }
+
+                const res = await fetch(fetchUrl);
                 const data = await res.json();
             
                 loader.classList.add('hidden');
             
                 if (res.ok || res.status === 200) {
-                    // 👑 【核心绝杀落盘】：核销成功，将确认无误的邮箱锁入本地主权金库，留给下一步的 kyb_portal.html 自动打捞
+                    // 👑 【核心绝杀落盘】：将确认无误的邮箱锁入本地主权金库，护送进入下一步
                     localStorage.setItem("FINLINKS_ACTIVE_MID", email);
                 
                     title.className = "text-lg font-black text-emerald-400";
@@ -65,7 +80,7 @@
                 } else {
                     title.className = "text-lg font-black text-amber-400";
                     title.innerText = "⚠️ 凭证核销熔断";
-                    msg.innerText = data.detail || "该安全令牌已过期或已被重放刺穿。";
+                    msg.innerText = data.detail || data.msg || "该安全令牌已过期或已被重放刺穿。";
                 }
             
                 btn.classList.remove('hidden');
