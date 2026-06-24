@@ -79,8 +79,8 @@
                     <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                 </a>
                 
-                <a href="login.html" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-600 bg-white border border-slate-200 shadow-sm hover:bg-slate-100 hover:text-slate-900 rounded-xl transition duration-200 font-mono group">
-                    <i class="fa-solid fa-chart-line mr-2 text-emerald-500 group-hover:animate-bounce"></i> Real-time FX Terminal (Login Required)
+                <a href="javascript:void(0);" onclick="openSovereignMarketView()" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-600 bg-white border border-slate-200 shadow-sm hover:bg-slate-100 hover:text-slate-900 rounded-xl transition duration-200 font-mono group cursor-pointer">
+                    <i class="fa-solid fa-chart-line mr-2 text-emerald-500 group-hover:animate-bounce"></i> Real-time FX Console (Auth Required)
                 </a>
             </div>
         </div>
@@ -375,6 +375,34 @@
                 formSuccessStatus.scrollIntoView({ behavior: 'smooth' });
             });
         }
+        // ==============================================================================
+        // 🎭 [TRADINGVIEW SHADOW MASK] ANONYMOUS PASSIVE MARKET TERMINAL (EN VERSION)
+        // ==============================================================================
+        window.openSovereignMarketView = function() {
+            console.log("📡 [DEFENSE GATEWAY] Guest hit intercepted. Deploying macro-level delayed market matrix...");
+            
+            // 1. Construct a sovereign dark ambient overlay fitting Basel compliance ergonomics
+            const mask = document.createElement('div');
+            mask.id = "finlinks-sovereign-mask";
+            mask.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2,6,23,0.98); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; box-sizing:border-box;";
+            
+            // 2. Inject high-risk-mitigated regulatory disclaimers and 100% white-labeled native TV chart
+            mask.innerHTML = `
+                <div style="width:100%; max-w:1200px; display:flex; justify-content:between; align-items:center; margin-bottom:20px; border-bottom:1px solid #1e293b; padding-bottom:16px;">
+                    <div>
+                        <h2 style="color:#10b981; margin:0; font-size:16px; font-family:monospace; font-weight:900; letter-spacing:0.1em; text-align:left;">⚡ FINLINKS GLOBAL FX TICKER (DELAYED)</h2>
+                        <p style="color:#64748b; margin:6px 0 0 0; font-size:11px; font-family:sans-serif; font-weight:500; text-align:left;">[PUBLIC SECURITY ROUTE] This terminal displays international regulatory market data with end-of-day latency. For live core treasury payouts and high-frequency FX clearing, please authenticate via your dedicated Merchant Console credentials.</p>
+                    </div>
+                    <button onclick="document.getElementById('finlinks-sovereign-mask').remove()" style="background:#0f172a; color:#f1f5f9; border:1px solid #334155; padding:10px 20px; border-radius:10px; cursor:pointer; font-size:11px; font-family:monospace; font-weight:900; transition:all 0.2s; letter-spacing:0.05em;" onmouseover="this.style.background='#1e293b'; this.style.borderColor='#10b981';" onmouseout="this.style.background='#0f172a'; this.style.borderColor='#334155';">❌ CLOSE TERMINAL</button>
+                </div>
+                
+                <div style="width:100%; max-width:1200px; height:78vh; border:1px solid #1e293b; border-radius:16px; overflow:hidden; background:#000; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+                    <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_fx_widget&symbol=FX_IDC%3AUSDCNY&interval=D&symboledit=0&saveimage=0&toolbarbg=111827&theme=dark&style=1&timezone=Asia%2FShanghai&studies=%5B%5D&locale=en" style="width:100%; height:100%; border:none;"></iframe>
+                </div>
+            `;
+            
+            document.body.appendChild(mask);
+        };
     </script>
 </body>
 </html>
