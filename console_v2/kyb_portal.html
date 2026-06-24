@@ -187,6 +187,14 @@
         // 🧠 初始化：全自动生擒活体商户会话数据
         // 🎯 刚性并线：不仅生擒邮箱，同时在最顶部打捞出登录大厅刚刚砸下的 JWT 黄金令牌
         const token = localStorage.getItem("finlinks_auth_token") || "";
+        if (localStatus.toUpperCase().trim() === "APPROVED" || localStatus.toUpperCase().trim() === "VERIFIED") {
+            // 延迟 50 毫秒确保 DOM 渲染就绪后，直接强行触发下方的中英双语拦截大闸
+            setTimeout(() => {
+                const dummyResponse = { status: 403, detail: { error_code: "ALREADY_VERIFIED" } };
+                handleKybForbiddenGate(dummyResponse);
+            }, 50);
+        }
+
         const activeEmail = localStorage.getItem("FINLINKS_ACTIVE_MID") || "";
 
         document.getElementById("kyb-email").value = activeEmail;
@@ -355,79 +363,89 @@
                     btn.innerText = "合规受审中 (UNDER_REVIEW)";  
                 } 
                 // ==============================================================================
-                // 👑 [SECURITY UX PATCH START] 拦截 403 信号弹，将其羽化为中英双语国际化合规尊荣弹窗
+                // ==============================================================================
+                // 👑 [SECURITY UX PATCH] 核心解法：无损拦截 403 信号弹，隔离分流至独立双语渲染舱
                 // ==============================================================================
                 else if (response.status === 403 && result.detail) {
-                    const errorCode = result.detail.error_code;
-                    
-                    // 🟢 勋章 A：已经成功通过验证的优质老商户
-                    if (errorCode === "ALREADY_VERIFIED") {
-                        if (typeof Swal !== "undefined") {
-                            Swal.fire({
-                                icon: 'success', iconColor: '#10b981', title: '👑 Corporate Profile Verified',
-                                html: `
-                                    <div style="text-align: left; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; color: #94a3b8; line-height: 1.6; margin-top: 15px;">
-                                        <div style="background: rgba(16, 185, 129, 0.05); border-left: 3px solid #10b981; padding: 10px 14px; margin-bottom: 14px; border-radius: 0 8px 8px 0;">
-                                            <p style="color: #34d399; font-weight: bold; margin: 0 0 4px 0; font-size: 14px;">您已成功通过 KYB 确权</p>
-                                            <p style="margin: 0; color: #cbd5e1;">尊敬的商户，贵司企业身份已通过反洗钱与跨境收单合规审计，多币种代发与清算舱位已全量就位，无须再次验证。</p>
-                                        </div>
-                                        <div style="background: rgba(99, 102, 241, 0.05); border-left: 3px solid #6366f1; padding: 10px 14px; border-radius: 0 8px 8px 0;">
-                                            <p style="color: #818cf8; font-weight: bold; margin: 0 0 4px 0; font-size: 13px; font-family: monospace;">KYB STATUS: VERIFIED</p>
-                                            <p style="margin: 0; color: #94a3b8; font-size: 12px;">Dear partner, your corporate profile has successfully cleared global AML/CTF legal compliance audits. All multi-currency settlement gates are fully operational.</p>
-                                        </div>
-                                    </div>
-                                `,
-                                confirmButtonText: '进入控制塔 / Return to Dashboard',
-                                allowOutsideClick: false, allowEscapeKey: false
-                            }).then((resClick) => { if (resClick.isConfirmed) window.location.href = 'dashboard.html'; });
-                        } else {
-                            alert("👑 [VERIFIED] 您已成功通过 KYB 确权，无须再次验证。\\nYour corporate profile has successfully cleared global AML/CTF legal compliance audits.");
-                            window.location.href = 'dashboard.html';
-                        }
-                        return;
-                    }
-                    
-                    // 🟡 勋章 B：资料已提交、正在合规官桌上审计的商户
-                    else if (errorCode === "ALREADY_UNDER_REVIEW") {
-                        if (typeof Swal !== "undefined") {
-                            Swal.fire({
-                                icon: 'info', iconColor: '#3b82f6', title: '⏳ Profile Under Compliance Review',
-                                html: `
-                                    <div style="text-align: left; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; color: #94a3b8; line-height: 1.6; margin-top: 15px;">
-                                        <div style="background: rgba(59, 130, 246, 0.05); border-left: 3px solid #3b82f6; padding: 10px 14px; margin-bottom: 14px; border-radius: 0 8px 8px 0;">
-                                            <p style="color: #60a5fa; font-weight: bold; margin: 0 0 4px 0; font-size: 14px;">合规官穿透审计中</p>
-                                            <p style="margin: 0; color: #cbd5e1;">您之前提交的企业法律资质正在进行巴塞尔协议级风险穿透。当前资产处于严格只读锁定状态，请勿重复提交。</p>
-                                        </div>
-                                        <div style="background: rgba(234, 179, 8, 0.05); border-left: 3px solid #eab308; padding: 10px 14px; border-radius: 0 8px 8px 0;">
-                                            <p style="color: #facc15; font-weight: bold; margin: 0 0 4px 0; font-size: 13px; font-family: monospace;">KYB STATUS: UNDER AUDIT</p>
-                                            <p style="margin: 0; color: #94a3b8; font-size: 12px;">Your corporate constitutional documents are currently undergoing mandatory risk screening. The ledger profile is temporarily frozen as read-only.</p>
-                                        </div>
-                                    </div>
-                                `,
-                                confirmButtonText: '确定 / Acknowledge',
-                                allowOutsideClick: false, allowEscapeKey: false
-                            }).then((resClick) => { if (resClick.isConfirmed) window.location.href = 'dashboard.html'; });
-                        } else {
-                            alert("⏳ [UNDER AUDIT] 合规官穿透审计中，资产处于严格只读锁定状态，请勿重复提交。\\nYour profile is currently undergoing risk screening. The ledger is read-only.");
-                            window.location.href = 'dashboard.html';
-                        }
-                        return;
-                    }
-                    
-                    // 如果是其他非 403 特权码，抛出原生错误
-                    throw new Error(result.detail.message || result.detail || "风控网关硬性熔断");
+                    handleKybForbiddenGate(result);
+                    return;
                 }
-                // ==============================================================================
-                // 👑 [SECURITY UX PATCH END]
-                // ==============================================================================
                 else {
-                    throw new Error(result.detail || "清算中台或风控网关硬性熔断");
+                    throw new Error(result.detail || "飞书清算中台或风控网关硬性熔断");
                 }
             } catch (err) {
                 btn.disabled = false;
                 btn.innerText = "签署确权并正式递交合规舱 (Submit KYB Dossier)";
                 revealError(`❌ [COMPLIANCE ERROR] 递交熔断: ${err.message}`);
             }
+        } // 🔒 executeFinalSubmit 主函数在此处完美干净闭合
+
+        // 🎭 [RECONCILED FUNCTION] 独立渲染舱：平铺到最外层，逻辑结构完全对齐
+        function handleKybForbiddenGate(resultObj) {
+            const errorCode = resultObj.detail ? resultObj.detail.error_code : resultObj.error_code;
+            
+            // 🟢 勋章 A：已经成功通过验证的优质老商户 (支持 APPROVED 门牌无损对齐)
+            if (errorCode === "ALREADY_VERIFIED") {
+                if (typeof Swal !== "undefined") {
+                    Swal.fire({
+                        icon: 'success', 
+                        iconColor: '#10b981', 
+                        title: '👑 Corporate Profile Verified',
+                        html: `
+                            <div style="text-align: left; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; color: #94a3b8; line-height: 1.6; margin-top: 15px;">
+                                <div style="background: rgba(16, 185, 129, 0.05); border-left: 3px solid #10b981; padding: 10px 14px; margin-bottom: 14px; border-radius: 0 8px 8px 0;">
+                                    <p style="color: #34d399; font-weight: bold; margin: 0 0 4px 0; font-size: 14px;">您已成功通过 KYB 确权</p>
+                                    <p style="margin: 0; color: #cbd5e1;">尊敬的商户，贵司企业身份已通过反洗钱与跨境收单合规审计，多币种代发与清算舱位已全量就位，无须再次验证。</p>
+                                </div>
+                                <div style="background: rgba(99, 102, 241, 0.05); border-left: 3px solid #6366f1; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                                    <p style="color: #818cf8; font-weight: bold; margin: 0 0 4px 0; font-size: 13px; font-family: monospace;">KYB STATUS: VERIFIED / APPROVED</p>
+                                    <p style="margin: 0; color: #94a3b8; font-size: 12px;">Dear partner, your corporate profile has successfully cleared global AML/CTF legal compliance audits. All multi-currency settlement gates are fully operational.</p>
+                                </div>
+                            </div>
+                        `,
+                        confirmButtonText: '进入控制塔 / Return to Dashboard',
+                        allowOutsideClick: false, 
+                        allowEscapeKey: false
+                    }).then((resClick) => { if (resClick.isConfirmed) window.location.href = 'dashboard.html'; });
+                } else {
+                    alert("👑 [VERIFIED] 您已成功通过 KYB 确权，无须再次验证。\nYour corporate profile has cleared global AML compliance.");
+                    window.location.href = 'dashboard.html';
+                }
+                return;
+            }
+            
+            // 🟡 勋章 B：资料已提交、正在合规官桌上审计的商户
+            else if (errorCode === "ALREADY_UNDER_REVIEW") {
+                if (typeof Swal !== "undefined") {
+                    Swal.fire({
+                        icon: 'info', 
+                        iconColor: '#3b82f6', 
+                        title: '⏳ Profile Under Compliance Review',
+                        html: `
+                            <div style="text-align: left; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; color: #94a3b8; line-height: 1.6; margin-top: 15px;">
+                                <div style="background: rgba(59, 130, 246, 0.05); border-left: 3px solid #3b82f6; padding: 10px 14px; margin-bottom: 14px; border-radius: 0 8px 8px 0;">
+                                    <p style="color: #60a5fa; font-weight: bold; margin: 0 0 4px 0; font-size: 14px;">合规官穿透审计中</p>
+                                    <p style="margin: 0; color: #cbd5e1;">您之前提交的企业法律资质正在进行巴塞尔协议级风险穿透。当前资产处于严格只读锁定状态，请勿重复提交。</p>
+                                </div>
+                                <div style="background: rgba(234, 179, 8, 0.05); border-left: 3px solid #eab308; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                                    <p style="color: #facc15; font-weight: bold; margin: 0 0 4px 0; font-size: 13px; font-family: monospace;">KYB STATUS: UNDER AUDIT</p>
+                                    <p style="margin: 0; color: #94a3b8; font-size: 12px;">Your corporate constitutional documents are currently undergoing mandatory risk screening. The ledger profile is temporarily frozen as read-only.</p>
+                                </div>
+                            </div>
+                        `,
+                        confirmButtonText: '确定 / Acknowledge',
+                        allowOutsideClick: false, 
+                        allowEscapeKey: false
+                    }).then((resClick) => { if (resClick.isConfirmed) window.location.href = 'dashboard.html'; });
+                } else {
+                    alert("⏳ [UNDER AUDIT] 合规官穿透审计中，资产处于严格只读锁定状态，请勿重复提交。\nYour profile is currently undergoing risk screening.");
+                    window.location.href = 'dashboard.html';
+                }
+                return;
+            }
+            
+            // 如果是其他非预期的 403 信号弹，顺向向外抛出原生错误
+            throw new Error(resultObj.detail?.message || resultObj.detail || "风控网关硬性熔断");
         }
     </script>
 </body>
