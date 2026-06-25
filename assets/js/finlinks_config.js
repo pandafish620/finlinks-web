@@ -55,7 +55,7 @@
     const FINLINKS_CONFIG = {
         API_BASE_URL: "https://finlinks-backend.onrender.com", // 🔒 刚性挂载你的 Render 后端生产公网骨干
         ENDPOINTS: {
-            ONBOARDING: "/api/v1/invoices/onboarding",      // 🏢 白标开户端点
+            ONBOARDING: "/api/v1/auth/onboarding",      // 🏢 白标开户端点
             CREATE_INVOICE: "/api/v1/invoices/create",      // 📤 长效专属卡槽拉起端点
             VERIFY_INVOICE: "/api/v1/invoices/verify"       // 🔭 红外雷达核销平账端点
         }
