@@ -81,7 +81,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs md:text-[13px] font-bold text-slate-300 tracking-wider mb-2">1.4 企业官方公开网站 (Company Website) <span class="text-rose-500">*</span></label>
+                        <label class="block text-xs md:text-[13px] font-bold text-slate-300 tracking-wider mb-2">1.4 企业官方公开网站 (Company Website) </label>
                         <input type="url" id="companyWebsite" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs md:text-sm text-white focus:outline-none focus:border-emerald-500 font-mono transition-all" placeholder="https://www.yourcompany.com">
                     </div>
                 </div>
@@ -184,30 +184,32 @@
     <script>
         let currentStep = 1;
 
-        // 🧠 初始化：全自动生擒活体商户会话数据
-        // 🎯 刚性并线：不仅生擒邮箱，同时在最顶部打捞出登录大厅刚刚砸下的 JWT 黄金令牌
+        // 🧠 1. [资产置顶] 全自动生擒活体商户会话数据，严格确立初始化血缘
         const token = localStorage.getItem("finlinks_auth_token") || "";
-        if (localStatus.toUpperCase().trim() === "APPROVED" || localStatus.toUpperCase().trim() === "VERIFIED") {
-            // 延迟 50 毫秒确保 DOM 渲染就绪后，直接强行触发下方的中英双语拦截大闸
+        const activeEmail = localStorage.getItem("FINLINKS_ACTIVE_MID") || "";
+        const localStatus = localStorage.getItem("FINLINKS_ACCOUNT_STATUS") || ""; // 🟢 刚性补回变量定义！
+
+        // 🛡️ 2. [门禁冷启动自愈] 解决老商户客态露脸漏洞
+        if (localStatus && (localStatus.toUpperCase().trim() === "APPROVED" || localStatus.toUpperCase().trim() === "VERIFIED")) {
             setTimeout(() => {
                 const dummyResponse = { status: 403, detail: { error_code: "ALREADY_VERIFIED" } };
                 handleKybForbiddenGate(dummyResponse);
             }, 50);
         }
 
-        const activeEmail = localStorage.getItem("FINLINKS_ACTIVE_MID") || "";
+        // ⚙️ 3. DOM 绑定赋能
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("kyb-email").value = activeEmail;
+            const elDisplayEmail = document.getElementById("displayEmail");
+            if (elDisplayEmail) elDisplayEmail.value = activeEmail || "未关联到确权身份";
 
-        document.getElementById("kyb-email").value = activeEmail;
-        
-        const elDisplayEmail = document.getElementById("displayEmail");
-        if (elDisplayEmail) elDisplayEmail.value = activeEmail || "未关联到确权身份";
+            const elCompanyName = document.getElementById("companyName");
+            if (elCompanyName) {
+                elCompanyName.value = localStorage.getItem("FINLINKS_COMPANY_NAME") || "FinLinks 研发期商户舱";
+            }
+        });
 
-        const elCompanyName = document.getElementById("companyName");
-        if (elCompanyName) {
-            elCompanyName.value = localStorage.getItem("FINLINKS_COMPANY_NAME") || "FinLinks 研发期商户舱";
-        }
-
-        // 🔬 漏斗舱核心：前置步骤的刚性正则拦截对账
+        // 🔬 [漏斗舱核心] 前置步骤的刚性正则拦截对账 (保持原状)
         function validateStepGuard() {
             const alertBox = document.getElementById("kyb-alert-box");
             alertBox.className = "hidden mb-6 p-4 rounded-xl text-xs font-mono border leading-relaxed";
@@ -215,17 +217,27 @@
             if (currentStep === 1) {
                 const phone = document.getElementById("phone").value.trim();
                 const website = document.getElementById("companyWebsite").value.trim();
-
                 if (!phone.startsWith("+") || phone.length < 7) {
-                    revealError("❌ [VALIDATION REJECTED] 运营负责人电话号码不能为空，且必须包含国际区号（以 + 开头，如 +86138...）");
+                    revealError("❌ [VALIDATION REJECTED] 运营负责人电话号码不能为空，且必须包含国际区号（以 + 开头）");
                     return false;
                 }
-                if (!/^https?:\/\/.+/.test(website)) {
-                    revealError("❌ [VALIDATION REJECTED] 企业官方公开网站格式不合规，必须以 http:// 或 https:// 开头");
-                    return false;
+                // 🟢 【完全体自愈微创手术】：Website 宽容兼容舱
+                if (website) {
+                    let cleanedWebsite = website.trim();
+                    
+                    // 🧠 自适应补枪：如果用户手滑只填了 www.xxx.com 或 finlinks.io，前端自动帮他灌入协议头
+                    if (!/^https?:\/\//i.test(cleanedWebsite)) {
+                        cleanedWebsite = "https://" + cleanedWebsite;
+                        document.getElementById("companyWebsite").value = cleanedWebsite; // 原位回写，确保发给后端的资产 1:1 规范化
+                    }
+                    
+                    // 🔒 最终收网校核：利用松散正则，只要符合最基础的域名骨架（包含点号且点后有后缀）就刚性放行
+                    if (!/^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(cleanedWebsite)) {
+                        revealError("❌ [VALIDATION REJECTED] 企业官方公开网站格式不正确，请输入合法的网址（如 www.finlinks.io 或 https://...）");
+                        return false;
+                    }
                 }
             }
-
             if (currentStep === 2) {
                 const uboName = document.getElementById("uboName").value.trim();
                 const passportId = document.getElementById("passportId").value.trim();
@@ -233,11 +245,11 @@
                 const companyDesc = document.getElementById("companyDesc").value.trim();
 
                 if (!uboName || uboName.length < 2) {
-                    revealError("❌ [VALIDATION REJECTED] 最终受益人/实控人姓名不能为空且不能少于 2 个字符");
+                    revealError("❌ [VALIDATION REJECTED] 最终受益人/实控人姓名不能少于 2 个字符");
                     return false;
                 }
                 if (!passportId) {
-                    revealError("❌ [VALIDATION REJECTED] 董事及UBO法定证件号属于风控要素，不能为空");
+                    revealError("❌ [VALIDATION REJECTED] 董事及UBO法定证件号不能为空");
                     return false;
                 }
                 if (!monthlyVol || parseFloat(monthlyVol) <= 0) {
@@ -245,7 +257,7 @@
                     return false;
                 }
                 if (companyDesc.length < 10) {
-                    revealError("❌ [VALIDATION REJECTED] 主营业务范围描述是审查核心，为了保证穿透通过，请至少填写 10 个字符");
+                    revealError("❌ [VALIDATION REJECTED] 请至少填写 10 个字符的主营业务范围描述");
                     return false;
                 }
             }
@@ -260,15 +272,12 @@
 
         // 🧭 状态机卡片平移切换引擎
         function navigateStep(direction) {
-            if (direction === 1 && !validateStepGuard()) return; // 拦截熔断
-
+            if (direction === 1 && !validateStepGuard()) return;
             currentStep += direction;
 
-            // 物理控制卡片的显隐
             for (let i = 1; i <= 3; i++) {
                 const panel = document.getElementById(`stepPanel${i}`);
                 const dot = document.getElementById(`dot${i}`);
-                
                 if (i === currentStep) {
                     panel.classList.add("active");
                     dot.className = "step-dot active px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500 text-emerald-400";
@@ -281,7 +290,6 @@
                 }
             }
 
-            // 动态修正三个操控按钮的状态
             const btnPrev = document.getElementById("btnPrev");
             const btnNext = document.getElementById("btnNext");
             const btnSubmit = document.getElementById("btnSubmit");
@@ -296,61 +304,55 @@
             }
         }
 
-        // 🚀 实弹击发：完全回滚并对齐你最原始的后端 API 命名契约，绝不产生代码冲突
+        // 🚀 实弹击发核心舱
         async function executeFinalSubmit() {
             const btn = document.getElementById("btnSubmit");
             const alertBox = document.getElementById("kyb-alert-box");
-            const liveEmail = document.getElementById("kyb-email").value;
+            // 🧠 顺向自愈：如果隐藏域漏了，强行从顶层全局常数拉取，双保险锁死邮箱不为空！
+            const liveEmail = document.getElementById("kyb-email").value || activeEmail;
+
+            if (!liveEmail) {
+                revealError("❌ [COMPLIANCE ERROR] 门禁身份指纹断流，请返回登录控制塔重新过闸。");
+                return;
+            }
 
             alertBox.className = "hidden mb-6 p-4 rounded-xl text-xs font-mono border leading-relaxed";
 
-            // 单元三刚性校核：3 枚大文件必须同时挂载到位
             const fileArticles = document.getElementById("fileArticles").files[0];
             const filePassport = document.getElementById("filePassport").files[0];
             const fileAddress = document.getElementById("fileAddress").files[0];
 
             if (!fileArticles || !filePassport || !fileAddress) {
-                revealError("❌ [VALIDATION REJECTED] 单元三中的 3 项核心物理合规材料（章程、护照、地址证明）全部为刚性必填，请完整挂载文件！");
+                revealError("❌ [VALIDATION REJECTED] 单元三中的 3 项核心物理合规材料全部为刚性必填，请完整挂载文件！");
                 return;
             }
 
             btn.disabled = true;
             btn.innerText = "正在打包合规资产并执行物理交割...";
 
-            // ⚙️ 编织完全体金融级 Multipart 报文 —— 🔒 精准复活回滚你原版的后端 Key 契约！
             const formData = new FormData();
-            formData.append("email", liveEmail); // 🟢 刚性补枪！彻底接通后端的第一个大门槛！
+            formData.append("email", liveEmail);
             formData.append("ubo_name", document.getElementById("uboName").value.trim());
-            formData.append("passport_or_id", document.getElementById("passportId").value.trim()); // 🟢 回滚原版 Key
+            formData.append("passport_or_id", document.getElementById("passportId").value.trim());
             formData.append("estimated_monthly_vol", document.getElementById("monthlyVol").value.trim());
-            formData.append("business_type_intent", document.getElementById("businessIntent").value);    // 🟢 回滚原版 Key
-            formData.append("business_description", document.getElementById("companyDesc").value.trim()); // 🟢 回滚原版 Key
-            
-            // 扩容并入的基础通讯信息
+            formData.append("business_type_intent", document.getElementById("businessIntent").value);
+            formData.append("business_description", document.getElementById("companyDesc").value.trim());
             formData.append("company_website", document.getElementById("companyWebsite").value.trim());
             formData.append("phone", document.getElementById("phone").value.trim());
-            
-            // 选填参考字段保持原状优雅出网
             formData.append("fx_intent_type", document.getElementById("fxIntent").value);
             formData.append("target_countries", document.getElementById("targetCountries").value.trim());
-
-            // 并线物理多媒体流
             formData.append("file_articles", fileArticles);
             formData.append("file_passport", filePassport);
             formData.append("file_address", fileAddress);
 
             try {
-                // 环境动态对账：自适应本地研发舱与 Render 公网生产舱
                 const BASE_URL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost" 
                     ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
 
-                // URL 传递 email 作为 Query，实体打包原有命名，完美咬合后端血管
-                const response = await fetch(`${BASE_URL}/auth/onboarding/submit-detailed-kyb?email=${encodeURIComponent(liveEmail)}`, {
+                // 精准补齐 /api/v1 刚性前缀，彻底打通 Render 后端血管！
+                const response = await fetch(`${BASE_URL}/api/v1/auth/onboarding/submit-detailed-kyb?email=${encodeURIComponent(liveEmail)}`, {
                     method: "POST",
-                    headers: {
-                        // 🎯 唯一微创注入：只加了这一行身份印章，用于穿透 Render 后端的全局合规锁，后面的 formData 载荷完全不动
-                        "Authorization": `Bearer ${token}`
-                    },
+                    headers: { "Authorization": `Bearer ${token}` },
                     body: formData
                 });
 
@@ -360,37 +362,30 @@
                     localStorage.setItem("FINLINKS_ACCOUNT_STATUS", "UNDER_REVIEW");
                     alertBox.className = "mb-6 p-4 rounded-xl text-xs font-mono border bg-emerald-950/40 border-emerald-500/30 text-emerald-400 leading-relaxed";
                     alertBox.innerText = `🏁 [KYB COMPLETED] 问卷要素与 3 大附件全量交割大胜！\n商户已转入受审待定状态。`;
-                    btn.innerText = "合规受审中 (UNDER_REVIEW)";  
+                    btn.innerText = "合规受审中 (UNDER_REVIEW)";
                 } 
-                // ==============================================================================
-                // ==============================================================================
-                // 👑 [SECURITY UX PATCH] 核心解法：无损拦截 403 信号弹，隔离分流至独立双语渲染舱
-                // ==============================================================================
                 else if (response.status === 403 && result.detail) {
                     handleKybForbiddenGate(result);
                     return;
                 }
                 else {
-                    throw new Error(result.detail || "飞书清算中台或风控网关硬性熔断");
+                    throw new Error(result.detail?.message || result.detail || "飞书清算中台或风控网关硬性熔断");
                 }
             } catch (err) {
                 btn.disabled = false;
                 btn.innerText = "签署确权并正式递交合规舱 (Submit KYB Dossier)";
                 revealError(`❌ [COMPLIANCE ERROR] 递交熔断: ${err.message}`);
             }
-        } // 🔒 executeFinalSubmit 主函数在此处完美干净闭合
+        }
 
-        // 🎭 [RECONCILED FUNCTION] 独立渲染舱：平铺到最外层，逻辑结构完全对齐
+        // 🎭 [RECONCILED FUNCTION] 独立双语渲染舱
         function handleKybForbiddenGate(resultObj) {
             const errorCode = resultObj.detail ? resultObj.detail.error_code : resultObj.error_code;
             
-            // 🟢 勋章 A：已经成功通过验证的优质老商户 (支持 APPROVED 门牌无损对齐)
             if (errorCode === "ALREADY_VERIFIED") {
                 if (typeof Swal !== "undefined") {
                     Swal.fire({
-                        icon: 'success', 
-                        iconColor: '#10b981', 
-                        title: '👑 Corporate Profile Verified',
+                        icon: 'success', iconColor: '#10b981', title: '👑 Corporate Profile Verified',
                         html: `
                             <div style="text-align: left; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; color: #94a3b8; line-height: 1.6; margin-top: 15px;">
                                 <div style="background: rgba(16, 185, 129, 0.05); border-left: 3px solid #10b981; padding: 10px 14px; margin-bottom: 14px; border-radius: 0 8px 8px 0;">
@@ -399,52 +394,40 @@
                                 </div>
                                 <div style="background: rgba(99, 102, 241, 0.05); border-left: 3px solid #6366f1; padding: 10px 14px; border-radius: 0 8px 8px 0;">
                                     <p style="color: #818cf8; font-weight: bold; margin: 0 0 4px 0; font-size: 13px; font-family: monospace;">KYB STATUS: VERIFIED / APPROVED</p>
-                                    <p style="margin: 0; color: #94a3b8; font-size: 12px;">Dear partner, your corporate profile has successfully cleared global AML/CTF legal compliance audits. All multi-currency settlement gates are fully operational.</p>
+                                    <p style="margin: 0; color: #94a3b8; font-size: 12px;">Dear partner, your corporate profile has successfully cleared global AML/CTF legal compliance audits.</p>
                                 </div>
                             </div>
                         `,
                         confirmButtonText: '进入控制塔 / Return to Dashboard',
-                        allowOutsideClick: false, 
-                        allowEscapeKey: false
-                    }).then((resClick) => { if (resClick.isConfirmed) window.location.href = 'dashboard.html'; });
+                        allowOutsideClick: false, allowEscapeKey: false
+                    }).then(() => { window.location.href = 'dashboard.html'; });
                 } else {
-                    alert("👑 [VERIFIED] 您已成功通过 KYB 确权，无须再次验证。\nYour corporate profile has cleared global AML compliance.");
+                    alert("👑 [VERIFIED] 您已成功通过 KYB 确权，无须再次验证。");
                     window.location.href = 'dashboard.html';
                 }
                 return;
             }
-            
-            // 🟡 勋章 B：资料已提交、正在合规官桌上审计的商户
             else if (errorCode === "ALREADY_UNDER_REVIEW") {
                 if (typeof Swal !== "undefined") {
                     Swal.fire({
-                        icon: 'info', 
-                        iconColor: '#3b82f6', 
-                        title: '⏳ Profile Under Compliance Review',
+                        icon: 'info', iconColor: '#3b82f6', title: '⏳ Profile Under Compliance Review',
                         html: `
                             <div style="text-align: left; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; color: #94a3b8; line-height: 1.6; margin-top: 15px;">
                                 <div style="background: rgba(59, 130, 246, 0.05); border-left: 3px solid #3b82f6; padding: 10px 14px; margin-bottom: 14px; border-radius: 0 8px 8px 0;">
                                     <p style="color: #60a5fa; font-weight: bold; margin: 0 0 4px 0; font-size: 14px;">合规官穿透审计中</p>
-                                    <p style="margin: 0; color: #cbd5e1;">您之前提交的企业法律资质正在进行巴塞尔协议级风险穿透。当前资产处于严格只读锁定状态，请勿重复提交。</p>
-                                </div>
-                                <div style="background: rgba(234, 179, 8, 0.05); border-left: 3px solid #eab308; padding: 10px 14px; border-radius: 0 8px 8px 0;">
-                                    <p style="color: #facc15; font-weight: bold; margin: 0 0 4px 0; font-size: 13px; font-family: monospace;">KYB STATUS: UNDER AUDIT</p>
-                                    <p style="margin: 0; color: #94a3b8; font-size: 12px;">Your corporate constitutional documents are currently undergoing mandatory risk screening. The ledger profile is temporarily frozen as read-only.</p>
+                                    <p style="margin: 0; color: #cbd5e1;">您之前提交的企业法律资质正在进行巴塞尔协议级风险穿透。当前资产处于严格只读锁定状态。</p>
                                 </div>
                             </div>
                         `,
                         confirmButtonText: '确定 / Acknowledge',
-                        allowOutsideClick: false, 
-                        allowEscapeKey: false
-                    }).then((resClick) => { if (resClick.isConfirmed) window.location.href = 'dashboard.html'; });
+                        allowOutsideClick: false, allowEscapeKey: false
+                    }).then(() => { window.location.href = 'dashboard.html'; });
                 } else {
-                    alert("⏳ [UNDER AUDIT] 合规官穿透审计中，资产处于严格只读锁定状态，请勿重复提交。\nYour profile is currently undergoing risk screening.");
+                    alert("⏳ [UNDER AUDIT] 合规官穿透审计中，资产处于严格只读锁定状态。");
                     window.location.href = 'dashboard.html';
                 }
                 return;
             }
-            
-            // 如果是其他非预期的 403 信号弹，顺向向外抛出原生错误
             throw new Error(resultObj.detail?.message || resultObj.detail || "风控网关硬性熔断");
         }
     </script>
