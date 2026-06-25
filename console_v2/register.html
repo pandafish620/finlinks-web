@@ -75,7 +75,7 @@
 
             try {
                 // 4. 🚀 刚性穿透！发起具有物理法律效力的真实异步网络请求，直击后端核心持久化端点
-                const response = await fetch(`${BASE_URL}/auth/onboarding/register-pending`, {
+                const response = await fetch(`${BASE_URL}/api/v1/auth/onboarding/register-pending`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json; charset=utf-8"

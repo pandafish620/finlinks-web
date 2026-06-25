@@ -62,7 +62,7 @@
                     fetchUrl = `${BASE_URL}/api/v1/auth/activate?token=${encodeURIComponent(token)}`;
                 } else {
                     // 🚀 新商户初次入驻线（今晚的 Mailgun 冲锋线）：直击合规舱的直接抹绿接口
-                    fetchUrl = `${BASE_URL}/auth/onboarding/verify-email-link?email=${encodeURIComponent(email)}`;
+                    fetchUrl = `${BASE_URL}/api/v1/auth/onboarding/verify-email-link?email=${encodeURIComponent(email)}`;
                 }
 
                 const res = await fetch(fetchUrl);

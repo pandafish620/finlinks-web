@@ -3,7 +3,7 @@
 // 🎯 FinLinks 5.2.0 前端主权鉴权安全哨兵总线（完全对齐老线缓存键名与 Bcrypt 脉络）
 
 const MODERN_AUTH_API = "https://finlinks-backend.onrender.com/api/v1/modern-auth";
-const ONBOARDING_API = "https://finlinks-backend.onrender.com/auth/onboarding";
+const ONBOARDING_API = "https://finlinks-backend.onrender.com/api/v1/auth/onboarding";
 
 class NewAuthSentinel {
     /**
@@ -31,7 +31,8 @@ class NewAuthSentinel {
      */
     static async registerMerchant(payload, successCb, errorCb) {
         try {
-            const response = await fetch(`${ONBOARDING_API}/register-pending`, {
+            // ======= 🟢 【前线实弹弹道：直接物理焊死完全体路径】 =======
+                const response = await fetch("https://finlinks-backend.onrender.com/api/v1/auth/onboarding/register-pending", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
