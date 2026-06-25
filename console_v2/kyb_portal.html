@@ -364,28 +364,49 @@
                     alertBox.innerText = `🏁 [KYB COMPLETED] 问卷要素与 3 大附件全量交割大胜！\n商户已转入受审待定状态。`;
                     btn.innerText = "合规受审中 (UNDER_REVIEW)";
                 } 
+                // ==============================================================================
+                // 👑 [SECURITY UX PATCH] 核心解法：无损拦截 403 信号弹，隔离分流至独立双语渲染舱
+                // ==============================================================================
                 else if (response.status === 403 && result.detail) {
                     handleKybForbiddenGate(result);
                     return;
                 }
                 else {
-                    throw new Error(result.detail?.message || result.detail || "飞书清算中台或风控网关硬性熔断");
+                    throw new Error(result.detail || "清算中台或风控网关硬性熔断");
                 }
             } catch (err) {
                 btn.disabled = false;
                 btn.innerText = "签署确权并正式递交合规舱 (Submit KYB Dossier)";
                 revealError(`❌ [COMPLIANCE ERROR] 递交熔断: ${err.message}`);
             }
+        } // 🔒 executeFinalSubmit 主函数在此处完美干净闭合
+
+        // 🛰️ [GEOPOLITICAL NAVIGATION DISPATCHER] 方案一：纯前端自适应浏览器母语分流引擎
+        function redirectToCorrectDashboard() {
+            // 🧠 全自动生擒商户浏览器的内核母语系统语言指纹
+            const userLang = (navigator.language || navigator.userLanguage || "en").toLowerCase();
+            
+            // 🎯 如果是中文系统环境 (zh-CN, zh-HK, zh-TW 等)，精准引流至中文控制塔
+            if (userLang.includes("zh")) {
+                window.location.href = "dashboard_zh.html";
+            } 
+            // 🌍 海外机构及其他所有多国法币代发商户，一律平滑分流至英文控制塔
+            else {
+                window.location.href = "dashboard_en.html";
+            }
         }
 
-        // 🎭 [RECONCILED FUNCTION] 独立双语渲染舱
+        // 🎭 [RECONCILED FUNCTION] 独立双语渲染舱：平铺到最外层空间
         function handleKybForbiddenGate(resultObj) {
             const errorCode = resultObj.detail ? resultObj.detail.error_code : resultObj.error_code;
             
+            // 🟢 勋章 A：已经成功通过验证的优质老商户 (支持 APPROVED 状态无损对齐)
             if (errorCode === "ALREADY_VERIFIED") {
                 if (typeof Swal !== "undefined") {
                     Swal.fire({
-                        icon: 'success', iconColor: '#10b981', title: '👑 Corporate Profile Verified',
+                        icon: 'success', 
+                        iconColor: '#10b981', 
+                        title: '👑 Corporate Profile Verified',
                         html: `
                             <div style="text-align: left; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; color: #94a3b8; line-height: 1.6; margin-top: 15px;">
                                 <div style="background: rgba(16, 185, 129, 0.05); border-left: 3px solid #10b981; padding: 10px 14px; margin-bottom: 14px; border-radius: 0 8px 8px 0;">
@@ -394,40 +415,56 @@
                                 </div>
                                 <div style="background: rgba(99, 102, 241, 0.05); border-left: 3px solid #6366f1; padding: 10px 14px; border-radius: 0 8px 8px 0;">
                                     <p style="color: #818cf8; font-weight: bold; margin: 0 0 4px 0; font-size: 13px; font-family: monospace;">KYB STATUS: VERIFIED / APPROVED</p>
-                                    <p style="margin: 0; color: #94a3b8; font-size: 12px;">Dear partner, your corporate profile has successfully cleared global AML/CTF legal compliance audits.</p>
+                                    <p style="margin: 0; color: #94a3b8; font-size: 12px;">Dear partner, your corporate profile has successfully cleared global AML/CTF legal compliance audits. All multi-currency settlement gates are fully operational.</p>
                                 </div>
                             </div>
                         `,
                         confirmButtonText: '进入控制塔 / Return to Dashboard',
-                        allowOutsideClick: false, allowEscapeKey: false
-                    }).then(() => { window.location.href = 'dashboard.html'; });
+                        allowOutsideClick: false, 
+                        allowEscapeKey: false
+                    }).then(() => { 
+                        redirectToCorrectDashboard(); // 👑 [方案一顺向引流]
+                    });
                 } else {
                     alert("👑 [VERIFIED] 您已成功通过 KYB 确权，无须再次验证。");
-                    window.location.href = 'dashboard.html';
+                    redirectToCorrectDashboard(); // 👑 [降级分流]
                 }
                 return;
             }
+            
+            // 🟡 勋章 B：资料已提交、正在合规官桌上审计的商户
             else if (errorCode === "ALREADY_UNDER_REVIEW") {
                 if (typeof Swal !== "undefined") {
                     Swal.fire({
-                        icon: 'info', iconColor: '#3b82f6', title: '⏳ Profile Under Compliance Review',
+                        icon: 'info', 
+                        iconColor: '#3b82f6', 
+                        title: '⏳ Profile Under Compliance Review',
                         html: `
                             <div style="text-align: left; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; color: #94a3b8; line-height: 1.6; margin-top: 15px;">
                                 <div style="background: rgba(59, 130, 246, 0.05); border-left: 3px solid #3b82f6; padding: 10px 14px; margin-bottom: 14px; border-radius: 0 8px 8px 0;">
                                     <p style="color: #60a5fa; font-weight: bold; margin: 0 0 4px 0; font-size: 14px;">合规官穿透审计中</p>
-                                    <p style="margin: 0; color: #cbd5e1;">您之前提交的企业法律资质正在进行巴塞尔协议级风险穿透。当前资产处于严格只读锁定状态。</p>
+                                    <p style="margin: 0; color: #cbd5e1;">您之前提交的企业法律资质正在进行巴塞尔协议级风险穿透。当前资产处于严格只读锁定状态，请勿重复提交。</p>
+                                </div>
+                                <div style="background: rgba(234, 179, 8, 0.05); border-left: 3px solid #eab308; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                                    <p style="color: #facc15; font-weight: bold; margin: 0 0 4px 0; font-size: 13px; font-family: monospace;">KYB STATUS: UNDER AUDIT</p>
+                                    <p style="margin: 0; color: #94a3b8; font-size: 12px;">Your corporate constitutional documents are currently undergoing mandatory risk screening. The ledger profile is temporarily frozen as read-only.</p>
                                 </div>
                             </div>
                         `,
                         confirmButtonText: '确定 / Acknowledge',
-                        allowOutsideClick: false, allowEscapeKey: false
-                    }).then(() => { window.location.href = 'dashboard.html'; });
+                        allowOutsideClick: false, 
+                        allowEscapeKey: false
+                    }).then(() => { 
+                        redirectToCorrectDashboard(); // 👑 [方案一顺向引流]
+                    });
                 } else {
-                    alert("⏳ [UNDER AUDIT] 合规官穿透审计中，资产处于严格只读锁定状态。");
-                    window.location.href = 'dashboard.html';
+                    alert("⏳ [UNDER AUDIT] 合规官穿透审计中，资产处于严格只读锁定状态，请勿重复提交。");
+                    redirectToCorrectDashboard(); // 👑 [降级分流]
                 }
                 return;
             }
+            
+            // 如果是其他非预期的 403 信号弹，顺向向外抛出原生错误
             throw new Error(resultObj.detail?.message || resultObj.detail || "风控网关硬性熔断");
         }
     </script>
