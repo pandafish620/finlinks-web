@@ -25,6 +25,18 @@
     </script>
     <style>
         body { background-color: #F8FAFC; color: #0F172A; }
+        
+        /* 🏎️ 全球 2400+ 承运商跑马灯无缝平滑滚动引擎 */
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        .marquee-track {
+            display: flex;
+            width: 200%;
+            animation: marquee 30s linear infinite;
+        }
+        .marquee-track:hover { animation-play-state: paused; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased selection:bg-blue-100 selection:text-blue-900">
@@ -45,7 +57,7 @@
                     <a href="#hero" class="hover:text-blue-600 transition duration-150">Home</a>
                     <a href="#advantages" class="hover:text-blue-600 transition duration-150">Compliance</a>
                     <a href="#interactive-simulator" class="hover:text-blue-600 transition duration-150">FX Telemetry</a>
-                    <a href="#access" class="hover:text-blue-600 transition duration-150">Integration</a>
+                    <a href="#contact-us-panel" class="hover:text-blue-600 transition duration-150">Integration</a>
                 </div>
 
                 <div class="flex items-center space-x-3 flex-shrink-0">
@@ -58,35 +70,93 @@
         </div>
     </nav>
 
-    <section id="hero" class="relative pt-32 pb-20 overflow-hidden bg-slate-50">
+    <section id="hero" class="relative pt-32 pb-16 overflow-hidden bg-slate-50">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30"></div>
         
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-            <span class="inline-flex items-center px-3.5 py-1 rounded-full text-[11px] font-mono tracking-widest uppercase bg-blue-50 text-blue-700 border border-blue-100 mb-6 font-bold">
-                <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mr-2 animate-pulse"></span> Aggregation Middleware for Cross-Border Merchants
-            </span>
-            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight font-sans max-w-5xl mx-auto leading-tight mb-6">
-                Payment Infrastructure for Emerging Markets,<br class="hidden sm:inline">
-                A Secure Harbor for Global SaaS and Cross-Border Digital Enterprises
-            </h1>
-            <p class="text-base sm:text-md text-slate-500 max-w-3xl mx-auto mb-10 leading-relaxed font-sans font-medium">
-                FinLinks delivers high-concurrency, low-latency collection aggregation and reporting middleware. We strictly enforce non-custodial, same-name routing core principles to protect your asset balance.
-            </p>
-            
-            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-                <a href="#access" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 text-xs font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition duration-200 shadow-lg shadow-blue-600/20 group font-mono">
-                    Configure Sandbox API
-                    <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-                </a>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center text-left">
                 
-                <a href="javascript:void(0);" onclick="openSovereignMarketView()" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-600 bg-white border border-slate-200 shadow-sm hover:bg-slate-100 hover:text-slate-900 rounded-xl transition duration-200 font-mono group cursor-pointer">
-                    <i class="fa-solid fa-chart-line mr-2 text-emerald-500 group-hover:animate-bounce"></i> Real-time FX Console (Auth Required)
-                </a>
+                <div class="lg:col-span-7 flex flex-col justify-center">
+                    <span class="inline-flex items-center px-3.5 py-1 rounded-full text-[11px] font-mono tracking-widest uppercase bg-blue-50 text-blue-700 border border-blue-100 mb-6 font-bold w-fit">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mr-2 animate-pulse"></span> Aggregation Middleware for Cross-Border Merchants
+                    </span>
+                    <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight font-sans leading-tight mb-6">
+                        Payment Infrastructure for Emerging Markets,<br class="hidden sm:inline">
+                        A Secure Harbor for Global SaaS and Cross-Border Digital Enterprises
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-500 mb-10 leading-relaxed font-sans font-medium max-w-2xl">
+                        FinLinks delivers high-concurrency, low-latency collection aggregation and reporting middleware. We strictly enforce non-custodial, same-name routing core principles to protect your asset balance.
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="#access" class="inline-flex items-center justify-center px-8 py-3.5 text-xs font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition duration-200 shadow-lg shadow-blue-600/20 group font-mono text-center">
+                            Configure Sandbox API
+                            <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                        
+                        <a href="javascript:void(0);" onclick="openSovereignMarketView()" class="inline-flex items-center justify-center px-8 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-600 bg-white border border-slate-200 shadow-sm hover:bg-slate-100 hover:text-slate-900 rounded-xl transition duration-200 font-mono group cursor-pointer text-center">
+                            <i class="fa-solid fa-chart-line mr-2 text-emerald-500 group-hover:animate-bounce"></i> Real-time FX Console (Auth Required)
+                        </a>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 w-full">
+                    <div class="bg-white border border-slate-200 p-6 md:p-8 rounded-2xl shadow-xl shadow-slate-200/50 relative">
+                        <div class="absolute top-0 right-0 border-t border-r border-blue-500/20 w-4 h-4 rounded-tr-2xl"></div>
+                        <div class="absolute bottom-0 left-0 border-b border-l border-blue-500/20 w-4 h-4 rounded-bl-2xl"></div>
+                        
+                        <div class="flex items-center space-x-2 text-blue-600 mb-2">
+                            <i class="fa-solid fa-shield-halved text-xs"></i>
+                            <h3 class="text-xs font-bold tracking-widest font-mono uppercase">Audit Detector // V2</h3>
+                        </div>
+                        <p class="text-[11px] text-slate-400 font-sans leading-relaxed mb-6">
+                            Enter the 16-character secure audit token issued by the merchant to unlock and decompress the verified logistics ledger stream.
+                        </p>
+                        
+                        <form id="audit-form" class="space-y-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">Security Access Token</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 font-mono text-xs">
+                                        <i class="fa-solid fa-key"></i>
+                                    </div>
+                                    <input type="text" id="token-input" placeholder="e.g., d9d2a0dba3100dd6" autocomplete="off" maxlength="16"
+                                        class="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-blue-600 placeholder-slate-300 focus:outline-none focus:border-blue-600 transition">
+                                </div>
+                            </div>
+                            <button type="submit" id="btn-submit"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3 rounded-xl tracking-widest transition duration-150 uppercase shadow-md shadow-blue-600/10 flex items-center justify-center gap-2 font-mono">
+                                <i class="fa-solid fa-bolt-lightning text-[10px]"></i> Decompress & Audit Ledger
+                            </button>
+                        </form>
+                        <div id="error-box" class="mt-3 text-[11px] text-rose-500 font-mono hidden text-center bg-rose-50 border border-rose-100 p-2 rounded-lg"></div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
 
-    <section id="advantages" class="py-20 bg-slate-50 border-t border-b border-slate-200">
+    <div class="w-full border-t border-b border-slate-200 bg-white py-4 overflow-hidden z-20 relative">
+        <div class="marquee-track flex space-x-12 items-center text-[11px] font-mono tracking-widest text-slate-400 font-bold">
+            <span>MAERSK LINE AGGREGATOR [ACTIVE]</span> <span class="text-slate-200">//</span>
+            <span>COSCO SHIPPING NODE [CONNECTED]</span> <span class="text-slate-200">//</span>
+            <span>MSC MEDITERRANEAN SATELLITE FEED</span> <span class="text-slate-200">//</span>
+            <span>ONE OCEAN NETWORK EXPRESS LINK</span> <span class="text-slate-200">//</span>
+            <span>CMA CGM COMPLIANCE SECURE</span> <span class="text-slate-200">//</span>
+            <span>EVERGREEN MARINE COORD [ONLINE]</span> <span class="text-slate-200">//</span>
+            <span>HAPAG-LLOYD CONTAINER MATRIX</span> <span class="text-slate-200">//</span>
+            <span>MAERSK LINE AGGREGATOR [ACTIVE]</span> <span class="text-slate-200">//</span>
+            <span>COSCO SHIPPING NODE [CONNECTED]</span> <span class="text-slate-200">//</span>
+            <span>MSC MEDITERRANEAN SATELLITE FEED</span> <span class="text-slate-200">//</span>
+            <span>ONE OCEAN NETWORK EXPRESS LINK</span> <span class="text-slate-200">//</span>
+            <span>CMA CGM COMPLIANCE SECURE</span> <span class="text-slate-200">//</span>
+            <span>EVERGREEN MARINE COORD [ONLINE]</span> <span class="text-slate-200">//</span>
+            <span>HAPAG-LLOYD CONTAINER MATRIX</span> <span class="text-slate-200">//</span>
+        </div>
+    </div>
+
+    <section id="advantages" class="py-20 bg-slate-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-16">
                 <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-sans uppercase">
@@ -147,7 +217,7 @@
         </div>
     </section>
 
-    <section id="interactive-simulator" class="py-20 bg-slate-50">
+    <section id="interactive-simulator" class="py-20 bg-slate-50 border-t border-slate-200">
         <div class="max-w-4xl mx-auto px-4 sm:px-6">
             <div class="text-center mb-12">
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-sans uppercase">
@@ -261,7 +331,7 @@
                             <option value="IDR">🇮🇩 Indonesia - Virtual Account Aggregation (IDR)</option>
                             <option value="PHP">🇵🇭 Philippines - GCash Instant Checkout Gateway (PHP)</option>
                             <option value="THB">🇹🇭 Thailand - PromptPay Unified QR Vector (THB)</option>
-                            <option value="BRL">🇧🇷 Brazil - Pix High-Frequency Settlement Corridor (BRL)</option>
+                            <option value="BRL">BR Brazil - Pix High-Frequency Settlement Corridor (BRL)</option>
                             <option value="TRY">🇹🇷 Turkey - Lira Global Ledger Reconciliation (TRY)</option>
                         </select>
                     </div>
@@ -312,7 +382,7 @@
     </footer>
 
     <script type="module">
-        // 🔒 1:1 对齐生产底价，全量扩容至 2026 年最新 6 国完全体，拒绝 Math.sin 伪造
+        // 🔒 1:1 对齐生产底价
         const FX_MATRICES = {
             "NGN": 1502.00, "GHS": 14.80, "TZS": 2610.00, "ZMW": 26.20, "RWF": 1315.00, "MWK": 1730.00,
             "KES": 131.00, "BRL": 5.15, "MXN": 17.85, "TRY": 32.45, "PHP": 58.20, "IDR": 16120.00, "THB": 36.45
@@ -339,15 +409,13 @@
             }
         }
 
-        // 🛡️ 绝杀 403 污染雷：首页计算卡退化为纯本地清算大盘，绝对不向后端发射网络请求，带宽归零！
         baseUsdAmountInput.addEventListener("input", recalculateSimulation);
         targetCurrencySelect.addEventListener("change", recalculateSimulation);
         
-        // 原地完成初始化点火
         recalculateSimulation();
 
-        // 📝 激活沙箱开通：隔离所有 Key 名，绝对不重写污染生产主键
-        const sandboxAccessForm = document.getElementById("contactUsForm"); // Alignment fix with form ID
+        // 📝 激活沙箱开通
+        const sandboxAccessForm = document.getElementById("contactUsForm");
         const formSuccessStatus = document.getElementById("formSuccessStatus");
         
         if (sandboxAccessForm) {
@@ -357,7 +425,6 @@
                 const uContact = document.getElementById("contact_info").value;
                 const uCurrency = document.getElementById("target_currency").value;
 
-                // 🔑 局部防震区：全部刻写在 SANDBOX 专属特许字段下，严防死守主控制台生产子账号被打碎！
                 const generatedMid = "FLK-SANDBOX-" + cName.toUpperCase().slice(0, 4).replace(/[^A-Z0-9]/g, 'X') + "-" + Math.floor(100+Math.random()*900);
                 const generatedSubId = "FINLINKS-SANDBOX-044-" + Math.floor(100000+Math.random()*900000);
                 
@@ -368,27 +435,43 @@
 
                 if (formSuccessStatus) formSuccessStatus.classList.remove("hidden");
                 
-                // 🔒 建立纯净沙箱安全秘密票据
                 const cleanToken = "sandbox_session_secret_token_" + btoa(encodeURIComponent(cName + ":" + uContact));
                 localStorage.setItem("finlinks_sandbox_token", cleanToken);
 
                 formSuccessStatus.scrollIntoView({ behavior: 'smooth' });
             });
         }
+
+        // 🚂 穿透审计级联跳转引擎 (绑定到大宗货单穿透审计框)
+        const auditForm = document.getElementById('audit-form');
+        if (auditForm) {
+            auditForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const token = document.getElementById('token-input').value.trim();
+                const errBox = document.getElementById('error-box');
+                
+                if (token.length !== 16) {
+                    errBox.innerText = "🛑 INVALID TOKEN: SECURITY LENGTH MUST BE EXACTLY 16 CHARS.";
+                    errBox.classList.remove('hidden');
+                    return;
+                }
+                
+                errBox.classList.add('hidden');
+                // 🚀 级联变轨：直接带上 token 参数平移跨入买家查单大厅！
+                window.location.href = `/tracker.html?token=${token}`;
+            });
+        }
+
         // ==============================================================================
         // 🎭 [TRADINGVIEW SHADOW MASK] ANONYMOUS PASSIVE MARKET TERMINAL (EN VERSION)
         // ==============================================================================
         window.openSovereignMarketView = function() {
-            console.log("📡 [DEFENSE GATEWAY] Guest hit intercepted. Deploying macro-level delayed market matrix...");
-            
-            // 1. Construct a sovereign dark ambient overlay fitting Basel compliance ergonomics
             const mask = document.createElement('div');
             mask.id = "finlinks-sovereign-mask";
             mask.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2,6,23,0.98); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; box-sizing:border-box;";
             
-            // 2. Inject high-risk-mitigated regulatory disclaimers and 100% white-labeled native TV chart
             mask.innerHTML = `
-                <div style="width:100%; max-w:1200px; display:flex; justify-content:between; align-items:center; margin-bottom:20px; border-bottom:1px solid #1e293b; padding-bottom:16px;">
+                <div style="width:100%; max-width:1200px; display:flex; justify-content:between; align-items:center; margin-bottom:20px; border-bottom:1px solid #1e293b; padding-bottom:16px;">
                     <div>
                         <h2 style="color:#10b981; margin:0; font-size:16px; font-family:monospace; font-weight:900; letter-spacing:0.1em; text-align:left;">⚡ FINLINKS GLOBAL FX TICKER (DELAYED)</h2>
                         <p style="color:#64748b; margin:6px 0 0 0; font-size:11px; font-family:sans-serif; font-weight:500; text-align:left;">[PUBLIC SECURITY ROUTE] This terminal displays international regulatory market data with end-of-day latency. For live core treasury payouts and high-frequency FX clearing, please authenticate via your dedicated Merchant Console credentials.</p>

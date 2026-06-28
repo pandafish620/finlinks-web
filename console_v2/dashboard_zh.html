@@ -39,6 +39,11 @@
                 <button onclick="switchTab('payout')" id="btn-payout" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
                     <span>💸 自主出金代付 (Payout)</span>
                 </button>
+                
+                <button onclick="switchTab('lead-radar')" id="btn-lead-radar" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
+                    <span>📡 海外买家线索雷达 (2.0)</span>
+                </button>
+
                 <button onclick="triggerMockReconciliation()" id="btn-reconcile" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
                     <span>⚖️ 自动化总账对账</span>
                 </button>
@@ -115,6 +120,7 @@
         </header>
 
         <div class="flex-1 overflow-y-auto p-8 space-y-8">
+            
             <section id="pane-overview" class="tab-pane space-y-6">
                 <div>
                     <h1 class="text-2xl font-extrabold tracking-tight">全球多边轧差资产头寸</h1>
@@ -166,7 +172,7 @@
                         </table>
                     </div>
                 </div>
-                </section>
+            </section>
 
             <section id="pane-payin" class="tab-pane hidden space-y-6">
                 <div>
@@ -271,6 +277,64 @@
                         </div>
 
                         <button onclick="executeLivePayoutDisbursal()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded text-xs tracking-wider transition shadow-lg shadow-rose-600/10">核销并下发代付信号</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="pane-lead-radar" class="tab-pane hidden space-y-6">
+                <div>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-amber-400">📡 海外大买家防爆线索雷达中心</h1>
+                    <p class="text-slate-400 text-xs mt-1">商户在此签发绑定国际货运影子大账本的 16 位安全令牌。境外进口商在查单大厅调阅数据时，其联系方式和法人身份将被雷达刚性捕获。</p>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    <div class="lg:col-span-5 bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4">
+                        <div class="border-b border-slate-800 pb-2">
+                            <span class="text-sm font-bold text-slate-200 block">⚡ Token 密码学铸造工厂</span>
+                        </div>
+                        <form id="mint-form" onsubmit="event.preventDefault();" class="space-y-4">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">国际海运提单号 / 货单标识号 (Manifest ID)</label>
+                                <input type="text" id="manifest-input" placeholder="例如：COSU62979161" required
+                                    class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs font-mono text-amber-400 placeholder-slate-700 focus:outline-none focus:border-amber-500/50">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">大宗清算货运轨模 (Transport Mode)</label>
+                                <select id="mode-input" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-400 focus:outline-none focus:border-amber-500/50">
+                                    <option value="OCEAN">OCEAN (大宗集装箱国际海运总线)</option>
+                                    <option value="AIR">AIR (经常项目高频航空快线货运)</option>
+                                </select>
+                            </div>
+                            <button onclick="executeMintSecureToken()" id="btn-mint" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded text-xs tracking-widest transition uppercase shadow-lg shadow-amber-500/10 font-mono">
+                                🔒 签发密码学防爆安全令牌
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="receipt-zone" class="lg:col-span-7 bg-emerald-950/10 border border-emerald-500/20 p-6 rounded-xl hidden flex flex-col justify-between min-h-[260px]">
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-2 text-xs text-emerald-400 font-bold tracking-wider">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                                <span>TOKEN MINT SUCCESS // 资产线索节点持久化落地</span>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block uppercase font-mono">Generated Token ID (16位防爆安全令牌)</span>
+                                    <span id="receipt-token" class="text-sm font-mono text-amber-400 font-bold bg-slate-950 px-3 py-1.5 rounded border border-slate-800 block w-fit mt-1">---</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block uppercase font-mono">Buyer Secure Tracking Hall URL (境外大买家查单大厅专用安全链接)</span>
+                                    <div class="flex items-center space-x-2 mt-1">
+                                        <input type="text" id="receipt-url" readonly class="bg-slate-950 border border-slate-800 rounded p-2 text-xs font-mono text-slate-300 w-full focus:outline-none">
+                                        <button id="btn-copy" onclick="executeClipboardCopy()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs px-3 py-2 rounded font-mono transition tracking-wider shrink-0">COPY</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-slate-500 mt-4 leading-relaxed font-sans">
+                            💡 提示：该密码学凭证已被强制沉降入库。请将上述查单专用链接安全抄送给你的境外进口商（大买家）。对方在打开该链接进行提单数据穿透审计前，系统会强行拉下“反洗钱留存大闸”，捕获其企业法人线索，从源头消灭技术呆账。
+                        </p>
                     </div>
                 </div>
             </section>
@@ -447,43 +511,105 @@
         </div>
     </div>
 
-    <div id="payout-payin-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 transition duration-200">
-        <div class="modal-overlay absolute w-full h-full bg-slate-950 opacity-80" onclick="closeOrderModal()"></div>
-        <div class="modal-container bg-slate-900 border border-slate-800 w-11/12 md:max-w-md mx-auto rounded-xl shadow-2xl z-50 overflow-y-auto">
-            <div class="modal-content py-6 text-left px-6 space-y-4">
-                <div class="flex justify-between items-center pb-3 border-b border-slate-800">
-                    <p class="text-md font-bold text-amber-400" id="order-modal-title">单据确权审查中心 (300s 时钟锁)</p>
-                    <div class="cursor-pointer z-50" onclick="closeOrderModal()">
-                        <svg class="fill-current text-slate-400 hover:text-white" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18">
-                            <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div id="order-modal-body" class="text-xs text-slate-300 bg-slate-950 p-4 rounded border border-slate-800 font-mono space-y-2"></div>
-                <div class="space-y-1">
-                    <div class="flex justify-between text-[10px] text-slate-500 uppercase font-mono">
-                        <span>中台控制流财务独占锁</span>
-                        <span class="text-amber-400 font-bold" id="order-countdown-text">300.0s</span>
-                    </div>
-                    <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
-                        <div id="order-progress-bar" class="bg-gradient-to-r from-amber-500 to-orange-400 h-full w-full transition-all duration-100"></div>
-                    </div>
-                </div>
-                <div class="flex justify-end pt-3 border-t border-slate-800 space-x-2">
-                    <button onclick="closeOrderModal()" class="px-4 py-1.5 bg-slate-800 text-slate-300 rounded text-xs hover:bg-slate-700 transition">取消 (Cancel)</button>
-                    <button id="order-confirm-btn" class="px-4 py-1.5 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-600 transition shadow-lg shadow-amber-500/10">确认放行 (Execute)</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script type="module" src="../../assets/js/dashboard.js"></script>
 
     <script type="module">
         import { handleLivePayinCallback } from '../../assets/js/payin_handler.js';
         import { client } from '../../assets/js/finlinks_client.js';
 
-        // 🎯 🌟 局部精准插入：多地缘本币收银台占位符灰度动态提示规则矩阵 🌟
+        // 👑 选项卡中央切流总线调度闸 (对齐侧边栏高亮并集成新雷达舱)
+        window.switchTab = function(tabId) {
+            // 1. 全量蒸发隐藏所有的主面板舱
+            document.querySelectorAll(".tab-pane").forEach(pane => pane.classList.add("hidden"));
+            // 2. 释放激活目标面板舱
+            document.getElementById(`pane-${tabId}`)?.classList.remove("hidden");
+            
+            // 3. 物理剥离拆卸所有的侧边栏按钮高亮手势
+            document.querySelectorAll("aside nav button").forEach(btn => {
+                btn.classList.remove("sidebar-active");
+            });
+            // 4. 为当前击发的按钮刚性砸上激活高亮磁道
+            document.getElementById(`btn-${tabId}`)?.classList.add("sidebar-active");
+            
+            window.pushAuditLog(`[ROUTING] 控制台视窗已成功切流至专属舱面: [${tabId.toUpperCase()}]`);
+        };
+
+        // 👑 🛰️ 【核心并线脚本：真刀真枪轰击后端接口一，铸造防爆安全令牌】 🛰️
+        window.executeMintSecureToken = async function() {
+            const btn = document.getElementById('btn-mint');
+            const manifestInput = document.getElementById('manifest-input');
+            const modeInput = document.getElementById('mode-input');
+            const receiptZone = document.getElementById('receipt-zone');
+
+            if (!manifestInput || !manifestInput.value.trim()) {
+                alert("🛑 提单标识号/货单号不能为空！");
+                return;
+            }
+
+            const manifestId = manifestInput.value.trim();
+            const transportMode = modeInput.value;
+
+            btn.innerText = "正在下沉金库磁道 正在签发密码学令牌...";
+            btn.disabled = true;
+            window.pushAuditLog(`[TOKEN MINT] 正在向后端发起密码学安全确权电报，拟绑定单号: [${manifestId}]`);
+
+            try {
+                // 🚀 铁血轰击后端的接口一 (对齐公网 Render 生产网关域名)
+                const response = await fetch('https://finlinks-backend.onrender.com/api/v2/logistics/token/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        manifest_id: manifestId,
+                        transport_mode: transportMode
+                    })
+                });
+
+                if (!response.ok) throw new Error(`云端网关拒绝签发合同，错误状态码: ${response.status}`);
+                const data = await response.json();
+
+                // 🔓 成功解包回执，灌入前端物理槽位
+                document.getElementById('receipt-token').innerText = data.token;
+                
+                // 🛰️ 像素级咬合：自动组装境外大买家专用的公网查单大厅链接
+                const targetUrl = `${window.location.origin}/tracker.html?token=${data.token}`;
+                document.getElementById('receipt-url').value = targetUrl;
+
+                receiptZone.classList.remove('hidden');
+                btn.innerText = "🔒 签发密码学防爆安全令牌";
+                btn.disabled = false;
+                window.pushAuditLog(`[MINT SUCCESS] 🟢 令牌 [${data.token}] 成功持久化沉降入库！买家数据隔离锁已通电。`);
+
+            } catch (err) {
+                alert(`🛑 令牌铸造崩盘: ${err.message}`);
+                btn.innerText = "重新铸造安全令牌";
+                btn.disabled = false;
+                window.pushAuditLog(`[MINT CRITICAL ERROR] 令牌工厂发生底层车祸: ${err.message}`);
+            }
+        };
+
+        // 一键剪切板复制大闸
+        window.executeClipboardCopy = function() {
+            const urlInput = document.getElementById('receipt-url');
+            const copyBtn = document.getElementById('btn-copy');
+            if (!urlInput) return;
+
+            urlInput.select();
+            document.execCommand('copy');
+            
+            const origText = copyBtn.innerText;
+            copyBtn.innerText = "COPIED!";
+            copyBtn.style.background = "#065f46";
+            copyBtn.style.color = "#34d399";
+            
+            setTimeout(() => {
+                copyBtn.innerText = origText;
+                copyBtn.style.background = "";
+                copyBtn.style.color = "";
+            }, 1500);
+            window.pushAuditLog("[CLIPBOARD] 查单链接已成功复制到系统剪切板，准备抄送境外进口商。");
+        };
+
+        // 🎯 🌟 多地缘本币收银台占位符灰度动态提示规则矩阵 🌟
         window.updatePayinPlaceholder = function() {
             const curr = document.getElementById("collectionCurrency")?.value || "NGN";
             const phoneInput = document.getElementById("collectionPhone");
@@ -496,17 +622,16 @@
                 "THB": "示例：10位 泰国本地手机号或 PromptPay 水单参考号",
                 "KES": "示例：东非 M-Pesa 手机号 (如 254712345678)",
                 "UGX": "示例：乌干达 MTN 手机号 (如 256771234567)",
-                "GHS": "示例：加纳本地标准移动货币手机号/账号 (如 23359XXXXXXX)", // 🔒 刚性回正：加纳前端占位符
-                "TZS": "示例：坦桑尼亚本地标准移动货币手机号/账号 (如 25571XXXXXXX)", // 🔒 刚性回正：坦桑尼亚前端占位符
+                "GHS": "示例：加纳本地标准移动货币手机号/账号 (如 23359XXXXXXX)",
+                "TZS": "示例：坦桑尼亚本地标准移动货币手机号/账号 (如 25571XXXXXXX)",
                 "ZAR": "示例：9-13位 南非本地清算银行账号",
-                // 🎯 🌟 局部精准插入：拉美、中东及东非离岸多边资产灰度指印全量通电 🌟
                 "BRL": "示例：巴西 Pix 实时清算键值 (手机号/税号/随机密钥, 如 11999998888)",
                 "MXN": "示例：墨西哥 18位 标准 CLABE 核心清算银行账户代码",
                 "TRY": "示例：土耳其本地 26位 标准 IBAN 自由清算代码",
                 "MWK": "示例：马拉维本地 Airtel/TNM 移动钱包手机号 (如 265888123456)",
                 "MUR": "示例：7-12位 毛里求斯离岸银行标准清算物理账户",
-                "ZMW": "示例：赞比亚本地标准移动货币手机号/账号 (如 26076XXXXXXX)", // 🔒 补齐钢印：解冻赞比亚前端占位
-                "RWF": "示例：卢旺达本地标准移动货币手机号/账号 (如 25078XXXXXXX)" // 🔒 补齐钢印：解冻卢旺达前端占位
+                "ZMW": "示例：赞比亚本地标准移动货币手机号/账号 (如 26076XXXXXXX)",
+                "RWF": "示例：卢旺达本地标准移动货币手机号/账号 (如 25078XXXXXXX)"
             };
 
             phoneInput.placeholder = placeholderMatrix[curr] || "请输入对应地缘清算凭证号";
@@ -539,7 +664,7 @@
             console.log(`[AUDIT LOG] ${message}`);
         };
 
-        // 📥 挂载积木 2：出海收单代收入口
+        // 📥 出海收单代收入口
         window.triggerMockPayinCallback = function() {
             const currEl = document.getElementById("collectionCurrency");
             if (currEl && currEl.value) {
@@ -579,9 +704,7 @@
             }
         };
 
-        // =================================================================
-        // 👑 🟢 【商户法人主体血缘流同步点火】
-        // =================================================================
+        // 并线点火初始化
         (async function() {
             const activeMerchantId = localStorage.getItem("FINLINKS_ACTIVE_MID") || "admin";
             const activeCompanyName = localStorage.getItem("FINLINKS_COMPANY_NAME") || "FinLinks 研发期商户舱";
@@ -598,6 +721,9 @@
                 elRoleLabel.classList.remove("text-amber-500", "animate-pulse");
                 elRoleLabel.classList.add("text-emerald-400");
             }
+
+            // 监听收单选择，动态调节占位符提示
+            document.getElementById("collectionCurrency")?.addEventListener("change", window.updatePayinPlaceholder);
 
             window.pushAuditLog(`[IDENTITY] ⚖️ 零信任确权成功！当前登录主体: [${activeMerchantId}] | 实体: [${activeCompanyName}]`);
         })();
