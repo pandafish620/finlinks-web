@@ -7,7 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&family=JetBrains+Mono:wght=400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -25,6 +25,18 @@
     </script>
     <style>
         body { background-color: #F8FAFC; color: #0F172A; }
+        
+        /* 🏎️ 全球 2400+ 承运商跑马灯无缝平滑滚动引擎 */
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+        .marquee-track {
+            display: flex;
+            width: 200%;
+            animation: marquee 30s linear infinite;
+        }
+        .marquee-track:hover { animation-play-state: paused; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 antialiased selection:bg-blue-100 selection:text-blue-900">
@@ -45,51 +57,110 @@
                     <a href="#hero" class="hover:text-blue-600 transition duration-150">首页</a>
                     <a href="#advantages" class="hover:text-blue-600 transition duration-150">合规优势</a>
                     <a href="#interactive-simulator" class="hover:text-blue-600 transition duration-150">对账汇率遥测</a>
-                    <a href="#access" class="hover:text-blue-600 transition duration-150">申请接入</a>
+                    <a href="#contact-us-panel" class="hover:text-blue-600 transition duration-150">申请接入</a>
                 </div>
 
                 <div class="flex items-center space-x-3 flex-shrink-0">
+                    <a href="../en/index.html" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 hover:text-emerald-400 transition font-mono mr-1">EN</a>
                     <a href="#contact-us-panel" class="inline-flex items-center justify-center px-5 h-9 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all duration-200 font-mono shadow-lg shadow-blue-600/20">
-                        <i class="fa-solid fa-headset mr-1.5 text-[10px]"></i> Contact Us / 联系我们
+                        <i class="fa-solid fa-headset mr-1.5 text-[10px]"></i> 联系我们
                     </a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <section id="hero" class="relative pt-32 pb-20 overflow-hidden bg-slate-50">
+    <section id="hero" class="relative pt-32 pb-16 overflow-hidden bg-slate-50">
         <div class="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30"></div>
         
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-            <span class="inline-flex items-center px-3.5 py-1 rounded-full text-[11px] font-mono tracking-widest uppercase bg-blue-50 text-blue-700 border border-blue-100 mb-6 font-bold">
-                <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mr-2 animate-pulse"></span> 中国出海商户首选的新兴市场聚合收单技术中台
-            </span>
-            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight font-sans max-w-5xl mx-auto leading-tight mb-6">
-                新兴市场支付服务技术服务商，<br class="hidden sm:inline">
-                以极客精神成为出海中小商家的避风港
-            </h1>
-            <p class="text-base sm:text-md text-slate-500 max-w-3xl mx-auto mb-10 leading-relaxed font-sans font-medium">
-                FinLinks为出海商家提供高并发、低时延的新兴市场收单聚合与财务对账中台。严格执行非托管、同名原路清算底层钢印, 捍卫商户资金安全红线。
-            </p>
-            
-            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-                <a href="#access" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 text-xs font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition duration-200 shadow-lg shadow-blue-600/20 group font-mono">
-                    配置沙箱技术对接
-                    <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
-                </a>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center text-left">
                 
-                <a href="javascript:void(0);" onclick="openSovereignMarketView()" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-600 bg-white border border-slate-200 shadow-sm hover:bg-slate-100 hover:text-slate-900 rounded-xl transition duration-200 font-mono group cursor-pointer">
-                    <i class="fa-solid fa-chart-line mr-2 text-emerald-500 group-hover:animate-bounce"></i> 实时外汇行情终端 (需登录)
-                </a>
+                <div class="lg:col-span-7 flex flex-col justify-center">
+                    <span class="inline-flex items-center px-3.5 py-1 rounded-full text-[11px] font-mono tracking-widest uppercase bg-blue-50 text-blue-700 border border-blue-100 mb-6 font-bold w-fit">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mr-2 animate-pulse"></span> 中国出海商户首选的新兴市场聚合收单技术中台
+                    </span>
+                    <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight font-sans leading-tight mb-6">
+                        新兴市场支付技术服务基础设施，<br class="hidden sm:inline">
+                        为全球数字企业与跨境 SaaS 打造的安全避风港
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-500 mb-10 leading-relaxed font-sans font-medium max-w-2xl">
+                        FinLinks 为出海商家提供高并发、低时延的新兴市场收单聚合与财务对账中台。我们严格执行非托管、同名原路清算的底层清算原则，刚性捍卫商户资金安全红线。
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="#contact-us-panel" class="inline-flex items-center justify-center px-8 py-3.5 text-xs font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition duration-200 shadow-lg shadow-blue-600/20 group font-mono text-center">
+                            配置沙箱技术对接
+                            <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                        
+                        <a href="javascript:void(0);" onclick="openSovereignMarketView()" class="inline-flex items-center justify-center px-8 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-600 bg-white border border-slate-200 shadow-sm hover:bg-slate-100 hover:text-slate-900 rounded-xl transition duration-200 font-mono group cursor-pointer text-center">
+                            <i class="fa-solid fa-chart-line mr-2 text-emerald-500 group-hover:animate-bounce"></i> 实时外汇行情终端 (需特许授权)
+                        </a>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 w-full">
+                    <div class="bg-white border border-slate-200 p-6 md:p-8 rounded-2xl shadow-xl shadow-slate-200/50 relative">
+                        <div class="absolute top-0 right-0 border-t border-r border-blue-500/20 w-4 h-4 rounded-tr-2xl"></div>
+                        <div class="absolute bottom-0 left-0 border-b border-l border-blue-500/20 w-4 h-4 rounded-bl-2xl"></div>
+                        
+                        <div class="flex items-center space-x-2 text-blue-600 mb-2">
+                            <i class="fa-solid fa-shield-halved text-xs"></i>
+                            <h3 class="text-xs font-bold tracking-widest font-mono uppercase">经常项目穿透审计大闸 // V2</h3>
+                        </div>
+                        <p class="text-[11px] text-slate-400 font-sans leading-relaxed mb-6">
+                            请输入由商户控制台签发的 16 位密码学安全审计令牌，以无锁解包并穿透核销链上大宗影子货流。
+                        </p>
+                        
+                        <form id="audit-form" class="space-y-4">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">安全审计令牌 (Security Access Token)</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 font-mono text-xs">
+                                        <i class="fa-solid fa-key"></i>
+                                    </div>
+                                    <input type="text" id="token-input" placeholder="例如：d9d2a0dba3100dd6" autocomplete="off" maxlength="16"
+                                        class="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-blue-600 placeholder-slate-300 focus:outline-none focus:border-blue-600 transition">
+                                </div>
+                            </div>
+                            <button type="submit" id="btn-submit"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3 rounded-xl tracking-widest transition duration-150 uppercase shadow-md shadow-blue-600/10 flex items-center justify-center gap-2 font-mono">
+                                <i class="fa-solid fa-bolt-lightning text-[10px]"></i> 穿透审计并解包货流
+                            </button>
+                        </form>
+                        <div id="error-box" class="mt-3 text-[11px] text-rose-500 font-mono hidden text-center bg-rose-50 border border-rose-100 p-2 rounded-lg"></div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
 
-    <section id="advantages" class="py-20 bg-slate-50 border-t border-b border-slate-200">
+    <div class="w-full border-t border-b border-slate-200 bg-white py-4 overflow-hidden z-20 relative">
+        <div class="marquee-track flex space-x-12 items-center text-[11px] font-mono tracking-widest text-slate-400 font-bold">
+            <span><i class="fa-solid fa-anchor mr-1.5 text-blue-500"></i>MAERSK LINE AGGREGATOR [ACTIVE]</span> <span class="text-slate-200">//</span>
+            <span><i class="fa-solid fa-ship mr-1.5 text-blue-500"></i>COSCO SHIPPING NODE [CONNECTED]</span> <span class="text-slate-200">//</span>
+            <span><i class="fa-solid fa-satellite-dish mr-1.5 text-blue-500"></i>MSC MEDITERRANEAN SATELLITE FEED</span> <span class="text-slate-200">//</span>
+            <span><i class="fa-solid fa-circle-nodes mr-1.5 text-blue-500"></i>ONE OCEAN NETWORK EXPRESS LINK</span> <span class="text-slate-200">//</span>
+            <span><i class="fa-solid fa-bezier-curve mr-1.5 text-blue-500"></i>CMA CGM COMPLIANCE SECURE</span> <span class="text-slate-200">//</span>
+            <span><i class="fa-solid fa-microchip mr-1.5 text-blue-500"></i>EVERGREEN MARINE COORD [ONLINE]</span> <span class="text-slate-200">//</span>
+            <span><i class="fa-solid fa-network-wired mr-1.5 text-blue-500"></i>HAPAG-LLOYD CONTAINER MATRIX</span> <span class="text-slate-200">//</span>
+            <span><i class="fa-solid fa-anchor mr-1.5 text-blue-500"></i>MAERSK LINE AGGREGATOR [ACTIVE]</span> <span class="text-slate-200">//</span>
+            <span><i class="fa-solid fa-ship mr-1.5 text-blue-500"></i>COSCO SHIPPING NODE [CONNECTED]</span> <span class="text-slate-200">//</span>
+            <span><i class="fa-solid fa-satellite-dish mr-1.5 text-blue-500"></i>MSC MEDITERRANEAN SATELLITE FEED</span> <span class="text-slate-200">//</span>
+            <span><i class="fa-solid fa-circle-nodes mr-1.5 text-blue-500"></i>ONE OCEAN NETWORK EXPRESS LINK</span> <span class="text-slate-200">//</span>
+            <span><i class="fa-solid fa-bezier-curve mr-1.5 text-blue-500"></i>CMA CGM COMPLIANCE SECURE</span> <span class="text-slate-200">//</span>
+            <span><i class="fa-solid fa-microchip mr-1.5 text-blue-500"></i>EVERGREEN MARINE COORD [ONLINE]</span> <span class="text-slate-200">//</span>
+            <span><i class="fa-solid fa-network-wired mr-1.5 text-blue-500"></i>HAPAG-LLOYD CONTAINER MATRIX</span> <span class="text-slate-200">//</span>
+        </div>
+    </div>
+
+    <section id="advantages" class="py-20 bg-slate-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-3xl mx-auto mb-16">
                 <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-sans uppercase">
-                    官方合规与多边清算保障
+                    官方合规与多边主权清算保障
                 </h2>
                 <div class="w-12 h-1 bg-blue-600 mx-auto mt-4 rounded-full"></div>
                 <p class="text-slate-400 text-xs mt-3 uppercase tracking-widest font-mono">
@@ -103,9 +174,9 @@
                         <div class="w-12 h-12 bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center rounded-2xl shadow-inner">
                             <i class="fa-solid fa-building-shield text-lg"></i>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 font-sans flex items-center gap-2.5 before:content-[''] before:w-1 before:h-[18px] before:bg-blue-600 before:rounded-sm">合规合流 · 官方并线</h3>
+                        <h3 class="text-lg font-bold text-slate-900 font-sans flex items-center gap-2.5 before:content-[''] before:w-1 before:h-[18px] before:bg-blue-600 before:rounded-sm">合规直连 · 官方网关</h3>
                         <p class="text-sm text-slate-500 leading-relaxed font-sans">
-                            我们只与正规持牌机构的官方核心网并线，从源头确保商户资金流向绝对安全
+                            我们仅与受监管金融机构的官方核心 API 接口并线，从源头确保跨境一般项目一般贸易的合法资金血缘。
                         </p>
                     </div>
                     <div class="mt-8 pt-4 border-t border-slate-200 text-[11px] text-slate-400 font-mono">
@@ -118,9 +189,9 @@
                         <div class="w-12 h-12 bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center rounded-2xl shadow-inner">
                             <i class="fa-solid fa-money-bill-transfer text-lg"></i>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-900 font-sans flex items-center gap-2.5 before:content-[''] before:w-1 before:h-[18px] before:bg-blue-600 before:rounded-sm">同名划转 · 资产安全</h3>
+                        <h3 class="text-lg font-bold text-slate-900 font-sans flex items-center gap-2.5 before:content-[''] before:w-1 before:h-[18px] before:bg-blue-600 before:rounded-sm">同名原路 · 拒绝沉淀</h3>
                         <p class="text-sm text-slate-500 leading-relaxed font-sans">
-                            同名划转。支持将收单在途资产一键清算至商户同名账户
+                            完全非托管架构。支持将新兴市场代收的在途结汇资金，直接原路下发至商户的同名企业银行账户。
                         </p>
                     </div>
                     <div class="mt-8 pt-4 border-t border-slate-200 text-[11px] text-slate-400 font-mono">
@@ -135,7 +206,7 @@
                         </div>
                         <h3 class="text-lg font-bold text-slate-900 font-sans flex items-center gap-2.5 before:content-[''] before:w-1 before:h-[18px] before:bg-blue-600 before:rounded-sm">分布式核销 · 影子总账</h3>
                         <p class="text-sm text-slate-500 leading-relaxed font-sans">
-                            动态参考汇率对账系统, 助您出海无忧
+                            解耦的多币种财务参考汇率核销引擎，专为全球大宗货流发票对账打造，全线消除数据呆账与时延。
                         </p>
                     </div>
                     <div class="mt-8 pt-4 border-t border-slate-200 text-[11px] text-slate-400 font-mono">
@@ -146,11 +217,11 @@
         </div>
     </section>
 
-    <section id="interactive-simulator" class="py-20 bg-slate-50">
+    <section id="interactive-simulator" class="py-20 bg-slate-50 border-t border-slate-200">
         <div class="max-w-4xl mx-auto px-4 sm:px-6">
             <div class="text-center mb-12">
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-sans uppercase">
-                    对账参考汇率(Reporting FX)
+                    财务对账参考汇率遥测 (Reporting FX)
                 </h2>
                 <p class="text-xs text-slate-400 mt-2 font-mono uppercase">
                     Real-time Reporting Exchange Rate Telemetry Indicator
@@ -162,12 +233,12 @@
                     <span class="text-[10px] font-mono tracking-widest bg-blue-50 border border-blue-100 px-3 py-1 rounded-full text-blue-600 font-bold uppercase block w-max mx-auto mb-2">
                         <i class="fa-solid fa-square-poll-vertical mr-1"></i> 动态即期参考汇率
                     </span>
-                    <p class="text-xs text-slate-400 mt-1">本地官方批发参考汇率</p>
+                    <p class="text-xs text-slate-400 mt-1">同业批发基准大盘</p>
                 </div>
 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">基准输入名义金额 (Base USD Amount)</label>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">基准输入名义金额 (USD)</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 font-mono text-sm font-bold">$</div>
                             <input type="number" id="baseUsdAmount" value="1000" class="w-full pl-8 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-lg font-mono font-bold text-slate-900 focus:outline-none focus:border-blue-600 transition" placeholder="0.00">
@@ -176,7 +247,7 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">对账目标货币 (Reporting Currency)</label>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">对账目标货币</label>
                             <select id="targetCurrency" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-blue-600 cursor-pointer">
                                 <option value="NGN">NGN - 尼日利亚奈拉 (Nigeria)</option>
                                 <option value="GHS">GHS - 加纳塞地 (Ghana)</option>
@@ -194,7 +265,7 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">实时参考汇率 (Reference Rate)</label>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">实时大盘基准汇率</label>
                             <div id="referenceRateDisplay" class="w-full p-3 bg-slate-50 font-mono font-bold text-blue-600 rounded-xl text-md flex items-center border border-slate-200">
                                 1 USD = 1,480.00 NGN
                             </div>
@@ -203,8 +274,8 @@
 
                     <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 mt-6 font-mono text-xs space-y-2">
                         <div class="flex justify-between items-center text-slate-400 border-b border-dashed border-slate-200 pb-2 mb-2">
-                            <span>计算维度</span>
-                            <span>估计名义对账数额</span>
+                            <span>账目换算维度</span>
+                            <span>估计名义清算价值</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-slate-500">本币折算额:</span>
@@ -214,8 +285,8 @@
                 </div>
 
                 <div class="mt-6 p-4 bg-blue-50 rounded-xl text-[11px] leading-relaxed text-blue-700 border border-blue-100 font-sans">
-                    <p class="font-bold mb-1"><i class="fa-solid fa-circle-info mr-1"></i> 【动态参考提示】</p>
-                    解锁动态更新同业即期汇率中间价，请前往商户后台。
+                    <p class="font-bold mb-1"><i class="fa-solid fa-circle-info mr-1"></i> [系统提示]</p>
+                    * 如需解锁实时动态数据流以及同业智能路由（SOR）算法执行协议，请使用官方特许链接登录您的商户主控制台。
                 </div>
             </div>
         </div>
@@ -232,36 +303,36 @@
             <div class="bg-white rounded-2xl border border-slate-200 shadow-md p-8 sm:p-10 relative">
                 <form id="contactUsForm" class="space-y-5">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">企业/商户登记全称 (company_name) *</label>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">商户/企业法定登记名称 (company_name) *</label>
                         <input type="text" id="company_name" placeholder="例如：跨境小商品出口贸易主体" required class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-blue-600 transition text-slate-900">
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">正式授权联络人法定姓名 *</label>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">正式授权联络人全称 *</label>
                             <input type="text" id="contact_name" placeholder="例如：张经理" required class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-blue-600 transition text-slate-900">
                         </div>
                         <div>
                             <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">联络凭证 (微信/Email/手机号) *</label>
-                            <input type="text" id="contact_info" placeholder="例如：finlinks_support (微信或邮箱)" required class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-blue-600 transition text-slate-900">
+                            <input type="text" id="contact_info" placeholder="例如：tech_integration@pinebay.com" required class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-blue-600 transition text-slate-900">
                         </div>
                     </div>
 
                     <div>
                         <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">拟开通新兴市场清算走廊 *</label>
                         <select id="target_currency" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-blue-600 transition cursor-pointer">
-                            <option value="NGN">🇳🇬 尼日利亚离岸收单与同名结算 (NGN)</option>
-                            <option value="GHS">🇬🇭 加纳移动钱包清算通道 (GHS)</option>
-                            <option value="KES">🇰🇪 肯尼亚移动 M-Pesa 收单专区 (KES)</option>
-                            <option value="TZS">🇹🇿 坦桑尼亚电信直连矩阵 (TZS)</option>
-                            <option value="ZMW">🇿🇲 赞比亚清算总线大闸 (ZMW)</option>
-                            <option value="RWF">🇷🇼 卢旺达电信代收分流卡槽 (RWF)</option>
-                            <option value="MWK">🇲🇼 马拉维特许通道清算网关 (MWK)</option>
-                            <option value="IDR">🇮🇩 印尼本币收单托管分流大闸 (IDR)</option>
-                            <option value="PHP">🇵🇭 菲律宾 GCash 极速收银网关 (PHP)</option>
-                            <option value="THB">🇹🇭 泰国 PromptPay 国家扫码专流 (THB)</option>
-                            <option value="BRL">🇧🇷 巴西雷亚尔高频即期轧差 (BRL)</option>
-                            <option value="TRY">🇹🇷 土耳其里拉国际主流对账 (TRY)</option>
+                            <option value="NGN">🇳🇬 尼日利亚 - 离岸代收与同名轧差清算走廊 (NGN)</option>
+                            <option value="GHS">🇬🇭 加纳 - 移动货币代收网关 (GHS)</option>
+                            <option value="KES">🇰🇪 肯尼亚 - M-Pesa 移动收银特许专区 (KES)</option>
+                            <option value="TZS">🇹🇿 坦桑尼亚 - 电信直连结算总线矩阵 (TZS)</option>
+                            <option value="ZMW">🇿🇲 赞比亚 - 主权清算大闸控制仓 (ZMW)</option>
+                            <option value="RWF">🇷🇼 卢旺达 - 移动收单分流沙箱槽位 (RWF)</option>
+                            <option value="MWK">🇲🇼 马拉维 - 官方特许清算管道网关 (MWK)</option>
+                            <option value="IDR">🇮🇩 印度尼西亚 - 虚拟账户聚合代收线 (IDR)</option>
+                            <option value="PHP">🇵🇭 菲律宾 - GCash 极速收银台托管节点 (PHP)</option>
+                            <option value="THB">🇹🇭 泰国 - PromptPay 国家级统一扫码网关 (THB)</option>
+                            <option value="BRL">🇧🇷 巴西 - Pix 高频实时对账出海长廊 (BRL)</option>
+                            <option value="TRY">🇹🇷 土耳其 - 里拉全球影子总账核销端 (TRY)</option>
                         </select>
                     </div>
 
@@ -275,7 +346,7 @@
                             <div>
                                 <strong class="font-sans text-sm block mb-1">意向申请已无损安全接收！</strong>
                                 <span class="text-slate-600 leading-relaxed block">
-                                    离您最近的 Sales 销售经理会在第一时间与您建立私密联络，以更好地了解您的业务需求及多边代收结算合规场景。请保持通讯工具畅通。
+                                    离您最近的区域客户经理会通过加密信道开启正式沟通，以更好地评估您的多币种处理架构与合规反洗钱风控模型。请保持联络方式畅通。
                                 </span>
                             </div>
                         </div>
@@ -296,21 +367,22 @@
                         <span class="text-xs font-bold font-sans">FinLinks 融链信息科技</span>
                     </div>
                     <p class="max-w-md leading-relaxed">
-                        &copy; 2026 FinLinks Tech 版权所有 <br>
-                        技术支持与跨境支付算法提供商 <br>
-                        专注于为全球高增长新兴市场跨国 B2B 贸易提供合规、高并发中台架构阻隔服务
+                        &copy; 2026 FinLinks Tech. 版权所有 <br>
+                        支付底层技术软硬件架构与多边轧差对账算法供应商。 <br>
+                        专注于为全球高增长出海中资主体及跨国数字软件生态提供金融级合规中台隔离防御服务。
                     </p>
                 </div>
                 
                 <div class="p-6 bg-slate-950 rounded-2xl border border-slate-800 leading-relaxed text-justify text-slate-400">
-                    <span class="font-bold text-white block mb-2 font-sans flex items-center gap-1.5"><i class="fa-solid fa-scale-balanced text-blue-500"></i> 技术合规与非托管法律声明：</span>
-                    FinLinks 严格作为金融科技软件技术中台服务商运行。本平台不属于持牌银行、第三方代付中心或金钱服务经营者(MSO)
+                    <span class="font-bold text-white block mb-2 font-sans flex items-center gap-1.5"><i class="fa-solid fa-scale-balanced text-blue-500"></i> 技术合规与非托管法律 Notice:</span>
+                    FinLinks 严格作为第三方独立跨境支付软件技术底座提供商运行。本平台明确不属于吸储商业银行、标准持牌第三方跨境持牌收单中心或金钱服务经营者（MSO）。
+                </div>
             </div>
         </div>
     </footer>
 
     <script type="module">
-        // 🔒 1:1 对齐生产底价，全量扩容至 2026 年最新 6 国完全体，拒绝 Math.sin 伪造
+        // 🔒 1:1 对齐生产底价，全量扩容至 2026 年最新大盘数据
         const FX_MATRICES = {
             "NGN": 1502.00, "GHS": 14.80, "TZS": 2610.00, "ZMW": 26.20, "RWF": 1315.00, "MWK": 1730.00,
             "KES": 131.00, "BRL": 5.15, "MXN": 17.85, "TRY": 32.45, "PHP": 58.20, "IDR": 16120.00, "THB": 36.45
@@ -337,27 +409,23 @@
             }
         }
 
-        // 🛡️ 绝杀 403 污染雷：首页计算卡退化为纯本地清算大盘，绝对不向后端发射网络请求，带宽归零！
+        // 🛡️ 绝杀 403 污染雷：首页计算卡退化为纯本地清算大盘，绝对不向后端发射网络请求
         baseUsdAmountInput.addEventListener("input", recalculateSimulation);
         targetCurrencySelect.addEventListener("change", recalculateSimulation);
         
-        // 原地完成初始化点火
         recalculateSimulation();
 
-        // 📝 激活沙箱开通：隔离所有 Key 名，绝对不重写污染生产主键
-        const sandboxAccessForm = document.getElementById("sandboxAccessForm");
+        // 📝 激活沙箱开通：数据隔离存储
+        const sandboxAccessForm = document.getElementById("contactUsForm");
         const formSuccessStatus = document.getElementById("formSuccessStatus");
-        const displayCName = document.getElementById("displayCName");
-        const displaySubId = document.getElementById("displaySubId");
         
         if (sandboxAccessForm) {
             sandboxAccessForm.addEventListener("submit", (e) => {
                 e.preventDefault();
                 const cName = document.getElementById("company_name").value;
-                const uContact = document.getElementById("wx_email").value;
+                const uContact = document.getElementById("contact_info").value;
                 const uCurrency = document.getElementById("target_currency").value;
 
-                // 🔑 局部防震区：全部刻写在 SANDBOX 专属特许字段下，严防死守主控制台生产子账号被打碎！
                 const generatedMid = "FLK-SANDBOX-" + cName.toUpperCase().slice(0, 4).replace(/[^A-Z0-9]/g, 'X') + "-" + Math.floor(100+Math.random()*900);
                 const generatedSubId = "FINLINKS-SANDBOX-044-" + Math.floor(100000+Math.random()*900000);
                 
@@ -366,31 +434,45 @@
                 localStorage.setItem("finlinks_sandbox_subaccount_id", generatedSubId);
                 localStorage.setItem("FINLINKS_SANDBOX_LAST_CURRENCY", uCurrency);
 
-                if (displayCName) displayCName.innerText = cName;
-                if (displaySubId) displaySubId.innerText = generatedSubId;
                 if (formSuccessStatus) formSuccessStatus.classList.remove("hidden");
                 
-                // 🔒 建立纯净沙箱安全秘密票据
                 const cleanToken = "sandbox_session_secret_token_" + btoa(encodeURIComponent(cName + ":" + uContact));
                 localStorage.setItem("finlinks_sandbox_token", cleanToken);
 
                 formSuccessStatus.scrollIntoView({ behavior: 'smooth' });
             });
         }
+
+        // 🚂 穿透审计级联跳转引擎 (绑定到大宗货单穿透审计框)
+        const auditForm = document.getElementById('audit-form');
+        if (auditForm) {
+            auditForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const token = document.getElementById('token-input').value.trim();
+                const errBox = document.getElementById('error-box');
+                
+                if (token.length !== 16) {
+                    errBox.innerText = "🛑 错误：安全审计令牌长度必须精确为 16 位字符。";
+                    errBox.classList.remove('hidden');
+                    return;
+                }
+                
+                errBox.classList.add('hidden');
+                // 🚀 级联变轨：跳转大厅时带上单号和 Token 参数，确保沙箱应用平滑识别
+                window.location.href = `/tracker.html?token=${token}`;
+            });
+        }
+
         // ==============================================================================
-        // 🎭 [TRADINGVIEW SHADOW MASK] 陌生人免登录外汇大盘伪装垫片
+        // 🎭 [TRADINGVIEW SHADOW MASK] 陌生人免登录外汇行情大盘伪装垫片
         // ==============================================================================
         window.openSovereignMarketView = function() {
-            console.log("📡 [DEFENSE GATEWAY] 拦截到陌生人撞门，正在下发日级延迟伪装大盘...");
-            
-            // 1. 动态编织一层符合巴塞尔合规调性的极奢黑金漫反射暗黑遮罩
             const mask = document.createElement('div');
             mask.id = "finlinks-sovereign-mask";
             mask.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2,6,23,0.98); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; box-sizing:border-box;";
             
-            // 2. 注入高冷的反洗钱（AML）延迟免责声明与 100% 咬合的 TradingView 官方外汇行情内核
             mask.innerHTML = `
-                <div style="width:100%; max-w:1200px; display:flex; justify-content:between; align-items:center; margin-bottom:20px; border-bottom:1px solid #1e293b; padding-bottom:16px;">
+                <div style="width:100%; max-width:1200px; display:flex; justify-content:between; align-items:center; margin-bottom:20px; border-bottom:1px solid #1e293b; padding-bottom:16px;">
                     <div>
                         <h2 style="color:#10b981; margin:0; font-size:16px; font-family:monospace; font-weight:900; letter-spacing:0.1em; text-align:left;">⚡ FINLINKS GLOBAL FX TICKER (DELAYED)</h2>
                         <p style="color:#64748b; margin:6px 0 0 0; font-size:11px; font-family:sans-serif; font-weight:500; text-align:left;">[PUBLIC SECURITY ROUTE] 当前终端展示为国际合规延迟大盘（日级刷新）。核心代发与大额跨境清算请使用商户专属控制塔凭证登录。</p>
