@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Merchant Sidecar Component</title>
+    <title>Merchant Sidecar Component - FinLinks 2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 p-4 font-mono text-xs">
 
     <div class="max-w-md mx-auto bg-gray-950 border border-gray-800 p-5 rounded text-gray-300 space-y-4">
         <div class="border-b border-gray-800 pb-2 flex justify-between items-center">
-            <span class="text-gold font-bold tracking-wider uppercase text-[11px]">融链中台 // 经常项目提单裂变发布器</span>
+            <span class="text-amber-400 font-bold tracking-wider uppercase text-[11px]">融链中台 // 经常项目提单裂变发布器 2.0</span>
             <span class="text-[10px] text-gray-600">B2B2B EMPOWER</span>
         </div>
 
@@ -21,14 +21,13 @@
 
             <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1">
-                    <label class="text-gray-500 font-bold block uppercase">大宗国际货单号 / Container No.</label>
-                    <input type="text" id="tracking-no" required placeholder="e.g., COSU62979161" class="w-full bg-gray-900 border border-gray-800 rounded px-3 py-2 text-gray-200 focus:outline-none focus:border-amber-500 font-mono">
+                    <label class="text-gray-500 font-bold block uppercase">大宗国际货单号 / Manifest ID</label>
+                    <input type="text" id="panel-manifest-id" required placeholder="e.g., COSU62979161" class="w-full bg-gray-900 border border-gray-800 rounded px-3 py-2 text-gray-200 focus:outline-none focus:border-amber-500 font-mono">
                 </div>
                 <div class="space-y-1">
                     <label class="text-gray-500 font-bold block uppercase">多模态运输流向</label>
-                    <select id="cargo-type" class="w-full bg-gray-900 border border-gray-800 rounded px-3 py-2 text-gray-200 focus:outline-none focus:border-amber-500 font-mono">
+                    <select id="panel-transport-mode" class="w-full bg-gray-900 border border-gray-800 rounded px-3 py-2 text-gray-200 focus:outline-none focus:border-amber-500 font-mono">
                         <option value="OCEAN">OCEAN (大宗海运集装箱)</option>
-                        <option value="LAND">LAND (中亚国际陆运大卡)</option>
                         <option value="AIR">AIR (跨境一般贸易空运)</option>
                         <option value="EXPRESS">EXPRESS (标准小包物流)</option>
                     </select>
@@ -45,6 +44,11 @@
             </button>
         </form>
 
+        <div id="quota-zone" class="hidden border border-gray-800 bg-[#0F1115] p-3 rounded flex justify-between items-center text-[11px]">
+            <div><span class="text-gray-500">商户身份:</span> <span id="quota-tier" class="text-amber-400 font-bold"></span></div>
+            <div><span class="text-gray-500">账期剩余查询配额:</span> <span id="quota-remaining" class="text-white font-bold"></span></div>
+        </div>
+
         <div id="output-zone" class="hidden border border-amber-500/20 bg-amber-500/5 p-3.5 rounded space-y-2">
             <div class="text-gray-400 font-bold uppercase text-[10px] tracking-wider">Generated Tokenized URL (Send to Importer):</div>
             <div class="flex items-center space-x-2">
@@ -56,36 +60,54 @@
     </div>
 
     <script>
-        // 🔌 强行并线指向你的真后端 Render 域名（注意去掉末尾的斜杠）
-        const API_BASE = "https://finlinks-backend.onrender.com"
+        // 🔌 强行并线指向你的真后端 Render 域名
+        const API_BASE = "https://finlinks-backend.onrender.com";
+
         async function generateViralLink(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-generate');
+            const outputZone = document.getElementById('output-zone');
+            const quotaZone = document.getElementById('quota-zone');
+            
             btn.innerText = "COMPUTING HMAC-SHA256 SIGNATURE...";
             btn.disabled = true;
 
             try {
+                // 🚀 精准对齐后端 2.0 Schema 字段名
                 const response = await fetch(`${API_BASE}/api/v2/logistics/manifest/generate`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         merchant_id: document.getElementById('merchant-id').value,
-                        tracking_number: document.getElementById('tracking-no').value,
-                        cargo_type: document.getElementById('cargo-type').value,
+                        manifest_id: document.getElementById('panel-manifest-id').value,
+                        transport_mode: document.getElementById('panel-transport-mode').value,
                         expiry_days: parseInt(document.getElementById('expiry-days').value)
                     })
                 });
 
+                // 🚨 铁血配额断路器拦截
+                if (response.status === 402) {
+                    const errData = await response.json();
+                    throw new Error(`计费熔断: ${errData.detail || '当前账期查询额度已爆表，请前往主系统续费'}`);
+                }
+
                 if (!response.ok) throw new Error("Database ledger storage failed.");
                 const data = await response.json();
 
-                // 变轨：为了让它在单页面测试中能顺畅点开，我们将返回的公网链接，人肉纠正动态平移为指向我们刚刚建好的同根目录下的 tracker.html
+                // 📊 清洗并平铺 2.0 配额回执
+                if (data.quota_audit) {
+                    document.getElementById('quota-tier').innerText = `[${data.quota_audit.tier}]`;
+                    document.getElementById('quota-remaining').innerText = `${data.quota_audit.remaining} 次`;
+                    quotaZone.classList.remove('hidden');
+                }
+
+                // 🔗 清洗并平铺 2.0 federated_tracking_url 血管
                 const currentOrigin = window.location.origin;
-                const localToken = data.tracking_url.split('token=')[1];
-                const cleanTrackingUrl = `${currentOrigin}/tracker.html?token=${localToken}`;
+                const cleanTrackingUrl = `${currentOrigin}${data.federated_tracking_url}`;
 
                 document.getElementById('generated-url').value = cleanTrackingUrl;
-                document.getElementById('output-zone').classList.remove('hidden');
+                outputZone.classList.remove('hidden');
+                
                 btn.innerText = "SUCCESSFULLY SIGNED";
                 btn.classList.replace('bg-amber-500', 'bg-emerald-600');
                 
