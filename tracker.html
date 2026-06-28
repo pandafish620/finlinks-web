@@ -112,7 +112,7 @@
 
     <script>
         // 🧩 自动绑定后端的 Render 物理网关血管 (请确保与你的线上 FastAPI 暴露域对齐)
-        const API_BASE = window.location.origin; 
+        const API_BASE = "https://finlinks-backend.onrender.com"
         const urlParams = new URLSearchParams(window.location.search);
         const currentToken = urlParams.get('token');
 

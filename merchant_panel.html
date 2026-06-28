@@ -56,8 +56,8 @@
     </div>
 
     <script>
-        const API_BASE = window.location.origin;
-
+        // 🔌 强行并线指向你的真后端 Render 域名（注意去掉末尾的斜杠）
+        const API_BASE = "https://finlinks-backend.onrender.com"
         async function generateViralLink(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-generate');
