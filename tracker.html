@@ -135,55 +135,64 @@
 
         async function fetchTrackingPayload() {
             try {
-                // 🚀 精准轰击后端 2.0 级联接口
                 const response = await fetch(`${API_BASE}/api/v2/logistics/track?token=${currentToken}`);
                 
                 if (response.status === 410) throw new Error("The logistics credit audit window has closed (30-day link expired).");
                 if (!response.ok) throw new Error("Signature verification failed. Access denied.");
                 
                 const data = await response.json();
-                
-                // 🧼 强行透视级联 payload
                 const payload = data.payload;
 
-                // 像素级数据清洗注入
-                document.getElementById('meta-tracking-no').innerText = payload.tracking_number || payload.manifest_id;
-                document.getElementById('meta-cargo-type').innerText = payload.cargo_type || payload.transport_mode;
-                document.getElementById('meta-clicks').innerText = data.audit_clicks || 1;
-                document.getElementById('meta-eta').innerText = payload.eta || "CALCULATING...";
-                document.getElementById('meta-carrier').innerText = payload.carrier_details || "GLOBAL LINE AGGREGATOR";
-                document.getElementById('meta-vessel').innerText = `${payload.vessel_or_flight || 'ACTIVE CONTAINER'} // ${payload.voyage_number || 'N/A'}`;
-                document.getElementById('meta-status').innerText = payload.current_state;
+                // 👑 铁血刚性防御适配：使用 Optional Blocker (检测到节点不存在则静默跳过，绝不熔断)
+                const setSafeText = (id, value) => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerText = value;
+                };
+
+                // 像素级安全注入
+                setSafeText('meta-tracking-no', payload.tracking_number || payload.manifest_id);
+                setSafeText('meta-cargo-type', payload.cargo_type || payload.transport_mode);
+                setSafeText('meta-clicks', data.audit_clicks || 1);
+                setSafeText('meta-eta', payload.eta || "CALCULATING...");
+                setSafeText('meta-status', payload.current_state || "IN_TRANSIT");
+                
+                // 即使你的 HTML 里缺了下面这两行 ID，系统也会优雅略过，绝不弹窗报错！
+                setSafeText('meta-carrier', payload.carrier_details || payload.carrier_name || "GLOBAL LINE AGGREGATOR");
+                setSafeText('meta-vessel', `${payload.vessel_or_flight || payload.vessel_identifier || 'CONTAINER'} // ${payload.voyage_number || 'N/A'}`);
 
                 // 循环拉出链上历史核销事件轨迹
                 const timelineBox = document.getElementById('timeline-box');
-                timelineBox.innerHTML = '';
-                
-                if (payload.historical_events && payload.historical_events.length > 0) {
-                    payload.historical_events.forEach((ev, idx) => {
-                        const isLatest = idx === 0;
-                        timelineBox.innerHTML += `
-                            <div class="relative">
-                                <span class="absolute -left-[31px] top-1.5 w-2.5 h-2.5 rounded-full ${isLatest ? 'bg-amber-500 border-4 border-amber-500/30' : 'bg-gray-800'}"></span>
-                                <div class="text-[11px] text-gray-600">${ev.time}</div>
-                                <div class="text-xs ${isLatest ? 'text-gold font-bold' : 'text-gray-400'} mt-0.5 leading-relaxed">${ev.desc || ev.description}</div>
-                            </div>
-                        `;
-                    });
-                } else {
-                    timelineBox.innerHTML = `<div class="text-xs text-gray-600">📡 Waiting for carrier network response stream...</div>`;
+                if (timelineBox) {
+                    timelineBox.innerHTML = '';
+                    const events = payload.historical_events || [];
+                    if (events.length > 0) {
+                        events.forEach((ev, idx) => {
+                            const isLatest = idx === 0;
+                            timelineBox.innerHTML += `
+                                <div class="relative">
+                                    <span class="absolute -left-[31px] top-1.5 w-2.5 h-2.5 rounded-full ${isLatest ? 'bg-amber-500 border-4 border-amber-500/30' : 'bg-gray-800'}"></span>
+                                    <div class="text-[11px] text-gray-600">${ev.time}</div>
+                                    <div class="text-xs ${isLatest ? 'text-gold font-bold' : 'text-gray-400'} mt-0.5 leading-relaxed">${ev.desc || ev.description}</div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        timelineBox.innerHTML = `<div class="text-xs text-gray-600">📡 Waiting for carrier network response stream...</div>`;
+                    }
                 }
 
                 // 物理开关，隐藏骨架展现真身
-                document.getElementById('loading-skeleton').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
+                if (document.getElementById('loading-skeleton')) document.getElementById('loading-skeleton').classList.add('hidden');
+                if (document.getElementById('main-content')) document.getElementById('main-content').classList.remove('hidden');
 
             } catch (err) {
-                document.getElementById('loading-skeleton').innerHTML = `
-                    <div class="border border-rose-500/20 bg-rose-500/5 p-6 rounded text-xs text-rose-400 font-mono text-center">
-                        🛑 AUDIT熔断: ${err.message || "Isolated pipeline connection break."}
-                    </div>
-                `;
+                if (document.getElementById('loading-skeleton')) {
+                    document.getElementById('loading-skeleton').innerHTML = `
+                        <div class="border border-rose-500/20 bg-rose-500/5 p-6 rounded text-xs text-rose-400 font-mono text-center">
+                            🛑 AUDIT熔断: ${err.message || "Isolated pipeline connection break."}
+                        </div>
+                    `;
+                }
             }
         }
 
