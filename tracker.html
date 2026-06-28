@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-950 text-gray-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinLinks // Global Clearance Logic & Transit Radar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .bloomberg-gradient { background: linear-gradient(180deg, #090d16 0%, #020408 100%); }
+        .border-glow { border-color: rgba(212, 163, 89, 0.15); }
+        .text-gold { color: #d4a359; }
+        .bg-gold { background-color: #d4a359; }
+    </style>
+</head>
+<body class="bloomberg-gradient min-h-screen font-mono antialiased selection:bg-amber-500 selection:text-black">
+
+    <header class="border-b border-gray-800 bg-gray-900/60 backdrop-blur-md px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <span class="bg-gold text-black text-xs font-bold px-2 py-0.5 rounded-sm tracking-wider">FINLINKS 2.0</span>
+            <h1 class="text-sm font-bold tracking-widest text-gray-300 uppercase">经常项目供应链大宗控制台</h1>
+        </div>
+        <div class="flex items-center space-x-2 text-xs text-gray-500">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="node-status">SECURE NODE CONNECTED</span>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        <div id="loading-skeleton" class="space-y-6">
+            <div class="h-24 bg-gray-900/40 animate-pulse rounded border border-gray-800/80 p-6"></div>
+            <div class="h-64 bg-gray-900/20 animate-pulse rounded border border-gray-800/50"></div>
+        </div>
+
+        <div id="main-content" class="hidden space-y-6">
+            <div class="bg-gray-900/40 border border-glow p-6 rounded shadow-2xl flex flex-col md:flex-row justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="text-xs text-gray-500 tracking-wider uppercase">国际经常项目货单 / 提单号</div>
+                    <div class="text-xl font-bold text-gray-200 tracking-tight" id="meta-tracking-no">---</div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
+                    <div>
+                        <div class="text-xs text-gray-500 uppercase">运输模态</div>
+                        <div class="font-semibold text-gray-300 mt-0.5" id="meta-cargo-type">---</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-500 uppercase">系统状态</div>
+                        <span class="inline-block px-2 py-0.5 rounded-sm text-xs font-bold bg-amber-500/10 text-gold mt-1 border border-amber-500/20" id="meta-status">---</span>
+                    </div>
+                    <div class="col-span-2 md:col-span-1">
+                        <div class="text-xs text-gray-500 uppercase">预计到港/港预测 (ETA)</div>
+                        <div class="font-semibold text-emerald-400 mt-0.5" id="meta-eta">---</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-gray-900/20 border border-gray-800 p-6 rounded">
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-6 border-b border-gray-800 pb-3 flex items-center justify-between">
+                        <span>链上历史核销事件轨迹</span>
+                        <span class="text-[10px] text-gray-600">VERIFIED LOGISTICS LEDGER</span>
+                    </h3>
+                    <div class="relative pl-6 border-l border-gray-800 space-y-8" id="timeline-box">
+                        </div>
+                </div>
+
+                <div class="bg-gray-900/40 border border-glow p-6 rounded relative overflow-hidden flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="w-10 h-10 rounded bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-gold">
+                            📡
+                        </div>
+                        <h4 class="text-sm font-bold tracking-wider text-gray-200">全球 AIS 海运卫星高频雷达</h4>
+                        <p class="text-xs text-gray-500 leading-relaxed">
+                            基础视图当前仅渲染静态报文。升级法人特权可无锁透视货船实时**实时吃水深度、AIS 航向卫星高频追踪以及目的国海关扣留红警拦截自动核销推送**。
+                        </p>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-gray-800/80" id="premium-gate-zone">
+                        <button onclick="openCaptureModal()" class="w-full py-2.5 bg-gold hover:bg-amber-600 transition text-black font-bold text-xs rounded-sm uppercase tracking-widest shadow-lg">
+                            申请激活全球雷达绿卡
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="capture-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-gray-950 border border-amber-500/30 max-w-md w-full p-6 rounded-sm shadow-2xl space-y-6 relative">
+            <button onclick="closeCaptureModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-300 text-sm font-mono">✕</button>
+            
+            <div class="text-center space-y-2">
+                <div class="text-xs font-bold text-gold uppercase tracking-widest">🔒 B2B CORPORATE AUDIT VERIFICATION</div>
+                <h3 class="text-base font-bold text-gray-100">经常项目合规雷达放行登记</h3>
+                <p class="text-xs text-gray-500">为了对齐国际反洗钱交易真实性核销，高级高频卫星监控仅对通过基础确权的境外本地进口商法人实体开放。</p>
+            </div>
+
+            <form id="capture-form" onsubmit="submitBuyerLead(event)" class="space-y-4 text-xs">
+                <div class="space-y-1.5">
+                    <label class="text-gray-400 font-bold uppercase tracking-wider block">海外进口商公司全称 (Corporate Name)</label>
+                    <input type="text" id="form-company" required placeholder="e.g., Africa Distributors Ltd" class="w-full bg-gray-900 border border-gray-800 rounded-sm px-3 py-2.5 text-gray-200 focus:outline-none focus:border-amber-500 transition font-mono">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-gray-400 font-bold uppercase tracking-wider block">官方负责人联系通道 (WhatsApp / Email)</label>
+                    <input type="text" id="form-contact" required placeholder="e.g., +234 803 123 4567" class="w-full bg-gray-900 border border-gray-800 rounded-sm px-3 py-2.5 text-gray-200 focus:outline-none focus:border-amber-500 transition font-mono">
+                </div>
+                <button type="submit" id="btn-submit-lead" class="w-full py-3 bg-gold hover:bg-amber-600 transition text-black font-bold uppercase tracking-widest mt-2 rounded-sm">
+                    验证主体并解锁 24H 雷达权限
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 🧩 自动绑定后端的 Render 物理网关血管 (请确保与你的线上 FastAPI 暴露域对齐)
+        const API_BASE = window.location.origin; 
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentToken = urlParams.get('token');
+
+        // 页面初始化：铁血核销 Token 会话
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (!currentToken) {
+                document.getElementById('node-status').innerText = "ERROR: SECURE TOKEN MISSING";
+                document.getElementById('node-status').classList.replace('bg-emerald-500', 'bg-rose-500');
+                alert("🔒 Error: Security tracking credential identifier is missing.");
+                return;
+            }
+            await fetchTrackingPayload();
+        });
+
+        // 向后端异步轰击对账
+        async function fetchTrackingPayload() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v2/logistics/track?token=${currentToken}`);
+                if (!response.ok) throw new Error("Credential unauthorized or expired.");
+                const data = await response.json();
+
+                // 像素级数据清洗注入
+                document.getElementById('meta-tracking-no').innerText = data.tracking_number;
+                document.getElementById('meta-cargo-type').innerText = data.cargo_type;
+                document.getElementById('meta-status').innerText = data.current_state;
+                document.getElementById('meta-eta').innerText = data.eta;
+
+                // 循环拉出链上历史核销事件轨迹
+                const timelineBox = document.getElementById('timeline-box');
+                timelineBox.innerHTML = '';
+                data.historical_events.forEach((ev, idx) => {
+                    const isLatest = idx === 0;
+                    timelineBox.innerHTML += `
+                        <div class="relative">
+                            <span class="absolute -left-[31px] top-1.5 w-2.5 h-2.5 rounded-full ${isLatest ? 'bg-amber-500 border-4 border-amber-500/30' : 'bg-gray-800'}"></span>
+                            <div class="text-[11px] text-gray-600">${ev.time}</div>
+                            <div class="text-xs ${isLatest ? 'text-gold font-bold' : 'text-gray-400'} mt-0.5 leading-relaxed">${ev.desc}</div>
+                        </div>
+                    `;
+                });
+
+                // 物理开关，隐藏骨架展现真身
+                document.getElementById('loading-skeleton').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+
+            } catch (err) {
+                document.getElementById('loading-skeleton').innerHTML = `
+                    <div class="border border-rose-500/20 bg-rose-500/5 p-6 rounded text-xs text-rose-400 font-mono text-center">
+                        🛑 SECURITY ALARM: ${err.message || "Isolated pipeline connection break."}
+                    </div>
+                `;
+            }
+        }
+
+        // 营销卡口控制
+        function openCaptureModal() { document.getElementById('capture-modal').classList.remove('hidden'); }
+        function closeCaptureModal() { document.getElementById('capture-modal').classList.add('hidden'); }
+
+        // 主动留存收网：向后端倾倒非洲大进口商高净值企业线索
+        async function submitBuyerLead(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-lead');
+            btn.innerText = "VERIFYING LAUNCH CODE...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/v2/logistics/track/gate-capture?token=${currentToken}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        buyer_company_name: document.getElementById('form-company').value,
+                        buyer_contact: document.getElementById('form-contact').value
+                    })
+                });
+
+                if (!response.ok) throw new Error("Lead storage validation mismatch.");
+                
+                btn.innerText = "📡 RADAR ACCESS GRANTED";
+                btn.classList.replace('bg-gold', 'bg-emerald-600');
+                setTimeout(() => {
+                    closeCaptureModal();
+                    document.getElementById('premium-gate-zone').innerHTML = `
+                        <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-sm text-[11px] text-emerald-400 font-mono text-center">
+                            ✅ Global AIS Satellite Radar Active (24h Pass)
+                        </div>
+                    `;
+                    alert("🏆 System Verification Passed. High-frequency AIS data overlayed.");
+                }, 1000);
+
+            } catch (err) {
+                alert(`Error: ${err.message}`);
+                btn.innerText = "RE-TRIGGER VERIFICATION";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

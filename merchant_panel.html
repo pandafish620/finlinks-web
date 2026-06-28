@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Merchant Sidecar Component</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 p-4 font-mono text-xs">
+
+    <div class="max-w-md mx-auto bg-gray-950 border border-gray-800 p-5 rounded text-gray-300 space-y-4">
+        <div class="border-b border-gray-800 pb-2 flex justify-between items-center">
+            <span class="text-gold font-bold tracking-wider uppercase text-[11px]">融链中台 // 经常项目提单裂变发布器</span>
+            <span class="text-[10px] text-gray-600">B2B2B EMPOWER</span>
+        </div>
+
+        <form id="manifest-form" onsubmit="generateViralLink(event)" class="space-y-3.5">
+            <div class="space-y-1">
+                <label class="text-gray-500 font-bold block uppercase">商户主账户身份 (Merchant Identity)</label>
+                <input type="text" id="merchant-id" required value="admin@finlinks.io" class="w-full bg-gray-900 border border-gray-800 rounded px-3 py-2 text-gray-400 focus:outline-none focus:border-amber-500 font-mono">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="text-gray-500 font-bold block uppercase">大宗国际货单号 / Container No.</label>
+                    <input type="text" id="tracking-no" required placeholder="e.g., COSU62979161" class="w-full bg-gray-900 border border-gray-800 rounded px-3 py-2 text-gray-200 focus:outline-none focus:border-amber-500 font-mono">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-gray-500 font-bold block uppercase">多模态运输流向</label>
+                    <select id="cargo-type" class="w-full bg-gray-900 border border-gray-800 rounded px-3 py-2 text-gray-200 focus:outline-none focus:border-amber-500 font-mono">
+                        <option value="OCEAN">OCEAN (大宗海运集装箱)</option>
+                        <option value="LAND">LAND (中亚国际陆运大卡)</option>
+                        <option value="AIR">AIR (跨境一般贸易空运)</option>
+                        <option value="EXPRESS">EXPRESS (标准小包物流)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-gray-500 font-bold block uppercase">买家账期凭证链接有效死线 (Link Expiry Days)</label>
+                <input type="number" id="expiry-days" required value="30" class="w-full bg-gray-900 border border-gray-800 rounded px-3 py-2 text-gray-200 focus:outline-none focus:border-amber-500 font-mono">
+            </div>
+
+            <button type="submit" id="btn-generate" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-bold uppercase tracking-widest transition rounded-sm">
+                一键签发密文加密查单短链
+            </button>
+        </form>
+
+        <div id="output-zone" class="hidden border border-amber-500/20 bg-amber-500/5 p-3.5 rounded space-y-2">
+            <div class="text-gray-400 font-bold uppercase text-[10px] tracking-wider">Generated Tokenized URL (Send to Importer):</div>
+            <div class="flex items-center space-x-2">
+                <input type="text" id="generated-url" readonly class="w-full bg-gray-950 border border-gray-800 rounded p-2 text-amber-400 text-xs focus:outline-none font-mono">
+                <button onclick="copyToClipboard()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-3 py-2 rounded font-bold transition">Copy</button>
+            </div>
+            <div class="text-[10px] text-gray-600">非洲/中亚买家点击此安全链接即可免注册查单，系统将在他们首次点击时静默提取其物理网络特征。</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        async function generateViralLink(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-generate');
+            btn.innerText = "COMPUTING HMAC-SHA256 SIGNATURE...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/v2/logistics/manifest/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        merchant_id: document.getElementById('merchant-id').value,
+                        tracking_number: document.getElementById('tracking-no').value,
+                        cargo_type: document.getElementById('cargo-type').value,
+                        expiry_days: parseInt(document.getElementById('expiry-days').value)
+                    })
+                });
+
+                if (!response.ok) throw new Error("Database ledger storage failed.");
+                const data = await response.json();
+
+                // 变轨：为了让它在单页面测试中能顺畅点开，我们将返回的公网链接，人肉纠正动态平移为指向我们刚刚建好的同根目录下的 tracker.html
+                const currentOrigin = window.location.origin;
+                const localToken = data.tracking_url.split('token=')[1];
+                const cleanTrackingUrl = `${currentOrigin}/tracker.html?token=${localToken}`;
+
+                document.getElementById('generated-url').value = cleanTrackingUrl;
+                document.getElementById('output-zone').classList.remove('hidden');
+                btn.innerText = "SUCCESSFULLY SIGNED";
+                btn.classList.replace('bg-amber-500', 'bg-emerald-600');
+                
+                setTimeout(() => {
+                    btn.innerText = "一键签发密文加密查单短链";
+                    btn.classList.replace('bg-emerald-600', 'bg-amber-500');
+                    btn.disabled = false;
+                }, 1500);
+
+            } catch (err) {
+                alert(`Error: ${err.message}`);
+                btn.innerText = "RE-TRIGGER TRANSMISSION";
+                btn.disabled = false;
+            }
+        }
+
+        function copyToClipboard() {
+            const copyText = document.getElementById("generated-url");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(copyText.value);
+            alert("📋 Link tokenized & copied to clipboard!");
+        }
+    </script>
+</body>
+</html>
