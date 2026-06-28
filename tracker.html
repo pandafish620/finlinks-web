@@ -199,28 +199,54 @@
         function openCaptureModal() { document.getElementById('capture-modal').classList.remove('hidden'); }
         function closeCaptureModal() { document.getElementById('capture-modal').classList.add('hidden'); }
 
-        // B端线索捕获持久化映射 (留存捕获平移对齐)
+        // B端高净值线索持久化存盘引擎 (彻底告别 Mock，真刀真枪砸进数据库)
         async function submitBuyerLead(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-submit-lead');
-            btn.innerText = "SAVING SECURITY CREDENTIALS...";
+            
+            btn.innerText = "VERIFYING LAUNCH CODE & SAVING TO LEDGER...";
             btn.disabled = true;
 
-            // 💡 针对 MVP 极简链路，由于我们在后端接口二中已经支持了通过 click_count 和网络静默捕获线索，
-            // 此处主动弹窗登记直接由前端完成像素级视觉解锁，保证不增加冗余路由的前提下完美收尾。
-            setTimeout(() => {
+            const companyName = document.getElementById('form-company').value.trim();
+            const contactChannel = document.getElementById('form-contact').value.trim();
+
+            try {
+                // 🚀 铁血重击：真刀真枪向后端的接口三开火！
+                const response = await fetch(`${API_BASE}/api/v2/logistics/track/gate-capture?token=${currentToken}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        buyer_company_name: companyName,
+                        buyer_contact: contactChannel
+                    })
+                });
+
+                if (!response.ok) throw new Error("Backend infrastructure refused lead storage.");
+                const resData = await response.json();
+
+                // 🎉 物理存盘成功！优雅释放视觉绿卡
                 btn.innerText = "📡 RADAR ACCESS GRANTED";
                 btn.classList.replace('bg-gold', 'bg-emerald-600');
+                
                 setTimeout(() => {
-                    closeCaptureModal();
-                    document.getElementById('premium-gate-zone').innerHTML = `
-                        <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-sm text-[11px] text-emerald-400 font-mono text-center">
-                            ✅ Global AIS Satellite Radar Active (24h Pass)
-                        </div>
-                    `;
-                    alert("🏆 System Verification Passed. High-frequency AIS data overlayed.");
+                    closeCaptureModal(); // 关闭弹窗
+                    // 将右侧控制区无损替换为绿色通电横幅
+                    const gateZone = document.getElementById('premium-gate-zone');
+                    if (gateZone) {
+                        gateZone.innerHTML = `
+                            <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-sm text-[11px] text-emerald-400 font-mono text-center">
+                                ✅ Global AIS Satellite Radar Active (24h Pass)
+                            </div>
+                        `;
+                    }
+                    alert("🏆 System Verification Passed. High-frequency AIS data overlayed into database.");
                 }, 1000);
-            }, 1200);
+
+            } catch (err) {
+                alert(`🛑 Core Ledger Melt: ${err.message}`);
+                btn.innerText = "RE-TRIGGER VERIFICATION";
+                btn.disabled = false;
+            }
         }
     </script>
 </body>
