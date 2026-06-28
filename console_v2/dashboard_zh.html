@@ -41,19 +41,19 @@
                 </button>
                 
                 <button onclick="switchTab('lead-radar')" id="btn-lead-radar" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
-                    <span>📡 海外买家线索雷达 (2.0)</span>
+                    <span>📡 实时货运单号跟踪 (2.0)</span>
                 </button>
 
                 <button onclick="triggerMockReconciliation()" id="btn-reconcile" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
                     <span>⚖️ 自动化总账对账</span>
                 </button>
                 <button onclick="switchTab('kyb')" id="btn-kyb" class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
-                    <span>🛡️ 数字化高级 KYB 归档</span>
+                    <span>🛡️ 数字化KYB审核</span>
                 </button>
             </nav>
 
             <div class="mt-6 px-6 border-t border-slate-800/60 pt-4 space-y-3 shrink-0">
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">常驻可用头寸 (Live Balance)</span>
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">资金汇总余额 (Live Balance)</span>
                 <div class="space-y-2">
                     <div class="flex justify-between items-center bg-slate-950/40 border border-slate-800/40 p-2 rounded font-mono text-[11px]">
                         <span class="text-slate-400 font-bold">USD</span>
@@ -123,7 +123,7 @@
             
             <section id="pane-overview" class="tab-pane space-y-6">
                 <div>
-                    <h1 class="text-2xl font-extrabold tracking-tight">全球多边轧差资产头寸</h1>
+                    <h1 class="text-2xl font-extrabold tracking-tight">全球多边资产头寸</h1>
                     <p class="text-slate-400 text-xs mt-1">基于复式影子记账核销引擎的多币种头寸透视窗口。</p>
                 </div>
                 <div id="balances-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -137,9 +137,9 @@
                     <div class="px-6 py-5 border-b border-slate-800 bg-slate-900/50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
                             <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mr-2"></span>全球多币种入金清算对账流水 (实时审计)
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mr-2"></span>全球多币种清算对账流水 (实时审计)
                             </h3>
-                            <p class="text-[11px] text-slate-500 mt-1">基于方案 B 多租户隔离域（Tenant Domain）密码嗅探技术数字确权</p>
+                            <p class="text-[11px] text-slate-500 mt-1">基于多租户隔离（Tenant Domain）与密码嗅探技术数字确权</p>
                         </div>
                         <div class="flex items-center space-x-3 shrink-0">
                             <button onclick="if(typeof window.executeFinancialStatementExport === 'function') window.executeFinancialStatementExport();" 
@@ -154,9 +154,9 @@
                             <thead>
                                 <tr class="bg-slate-950/40 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
                                     <th class="py-3 px-5">System ID / Reference</th>
-                                    <th class="py-3 px-5">租户隔离域 (Domain)</th>
+                                    <th class="py-3 px-5">账户隔离 (Domain)</th>
                                     <th class="py-3 px-5">清算方向</th>
-                                    <th class="py-3 px-4 text-right">拟动火金额</th>
+                                    <th class="py-3 px-4 text-right">拟激活金额</th>
                                     <th class="py-3 px-4">资产币种</th>
                                     <th class="py-3 px-5">清算大闸状态</th>
                                     <th class="py-3 px-5 text-right">微秒级记账时钟</th>
@@ -165,7 +165,7 @@
                             <tbody id="global-transactions-tbody" class="divide-y divide-slate-800/60 text-xs font-mono text-slate-300">
                                 <tr>
                                     <td colspan="7" class="py-8 text-center text-slate-600 italic tracking-wide font-sans">
-                                        正在叩击中台中央审计引擎，安全加载全球资产历史血缘...
+                                        正在处理中，安全加载全球资产记录...
                                     </td>
                                 </tr>
                             </tbody>
@@ -177,16 +177,16 @@
             <section id="pane-payin" class="tab-pane hidden space-y-6">
                 <div>
                     <h1 class="text-2xl font-extrabold tracking-tight text-emerald-400">出海离岸收单账目 (Pay-in Collections)</h1>
-                    <p class="text-slate-400 text-xs mt-1">处理短剧/游戏出海高频收单流量。全面拦截并承接来自非洲 Mobile Money 与拉美国家级实时支付网络的跨国清算流水。</p>
+                    <p class="text-slate-400 text-xs mt-1">处理出海高频收单，全面承接来自非洲 Mobile Money 与拉美国家级实时支付网络的跨国清算流水。</p>
                 </div>
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-2xl space-y-4">
                     <div class="border-b border-slate-800 pb-2">
-                        <span class="text-sm font-bold text-slate-200 block">全球新兴 market 多币种泛化收单大闸</span>
+                        <span class="text-sm font-bold text-slate-200 block">全球新兴市场多币种泛化收单</span>
                     </div>
                     <form id="collectionDepositForm" onsubmit="event.preventDefault();" class="space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">拟入金名义金额 (Amount)</label>
+                                <label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">拟收单名义金额 (Amount)</label>
                                 <input type="number" id="collectionAmount" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono" placeholder="5000.00" required step="0.01">
                             </div>
                             <div>
@@ -229,7 +229,7 @@
 
             <section id="pane-payout" class="tab-pane hidden space-y-6">
                 <div>
-                    <h1 class="text-2xl font-extrabold tracking-tight text-rose-400">自主出金代付工作台 (Payout Control)</h1>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-rose-400">代付工作台 (Payout Control)</h1>
                     <p class="text-slate-400 text-xs mt-1">向离岸本地银行或电子钱包下发跨境代付清算指令。</p>
                 </div>
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-xl">
@@ -294,8 +294,8 @@
 
             <section id="pane-kyb" class="tab-pane hidden space-y-6">
                 <div>
-                    <h1 class="text-2xl font-extrabold tracking-tight text-indigo-400">数字化高级 KYB 资质归档中心</h1>
-                    <p class="text-[11px] text-slate-500 mt-1 uppercase tracking-widest">请进入安全加密的白标确权舱递交您的金融级资质证明材料</p>
+                    <h1 class="text-2xl font-extrabold tracking-tight text-indigo-400">数字化KYB审核归档中心</h1>
+                    <p class="text-[11px] text-slate-500 mt-1 uppercase tracking-widest">请进入递交您的企业资质相关证明材料</p>
                 </div>
 
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-xl space-y-5 shadow-sm">
@@ -308,12 +308,12 @@
 
                     <a href="kyb_portal.html" 
                         class="flex items-center justify-center space-x-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded text-[11px] tracking-widest transition-all duration-300 uppercase shadow-lg shadow-indigo-500/20 active:scale-[0.98] cursor-pointer">
-                        <span>📤 进入数字化高级 KYB 合规官审计问卷舱</span>
+                        <span>📤 进入数字化KYB合规官审计问卷舱</span>
                     </a>
 
                     <div class="flex items-start space-x-2 p-3 bg-indigo-950/20 border border-indigo-900/50 rounded text-[10px] text-indigo-400">
                         <span class="mt-0.5">ℹ️</span>
-                        <p>基于全球合规反洗钱（AML）指引，所有证明文件需在新的确权舱内经过加密传输。此操作不会在当前 Dashboard 留下任何中间态缓存，确保您的企业法律指纹安全。</p>
+                        <p>基于全球合规反洗钱（AML）指引，所有证明文件需在新的确权舱内经过加密传输。此操作不会在当前页面留下任何中间态缓存，确保您的企业法律指纹安全。</p>
                     </div>
                 </div>
             </section>
