@@ -73,31 +73,22 @@
                 <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-white/85">
                     <a href="#hero" class="hover:text-white transition">首页</a>
                     <a href="#advantages" class="hover:text-white transition">合规优势</a>
-                    <a href="#interactive-simulator" class="hover:text-white transition">对账汇率</a>
+                    <a href="#interactive-simulator" class="hover:text-white transition">对账汇率监控</a>
                     <a href="#contact-us-panel" class="hover:text-white transition">申请接入</a>
-                    <a href="../console_v2/login.html" class="hover:text-white transition">登录</a>
                 </div>
 
                 <div class="flex items-center gap-3 flex-shrink-0">
                     <a href="../en/index.html" class="text-[10px] px-2.5 py-1 rounded-full bg-white/10 text-white/70 hover:text-wise-lime hover:bg-white/15 transition font-mono border border-white/15">EN</a>
                     <a href="#contact-us-panel" class="wise-cta hidden sm:inline-flex items-center justify-center px-6 h-10 text-sm font-bold text-wise-forest bg-wise-lime hover:bg-[#b8f48a] rounded-full">
-                        立即接入
+                        <i class="fa-solid fa-headset mr-1.5 text-xs"></i> 联系我们
                     </a>
                 </div>
             </div>
         </nav>
-        <div class="border-t border-white/10 bg-wise-forest/95">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex gap-6 text-xs text-white/60 overflow-x-auto">
-                <a href="../console_v2/login.html" class="hover:text-wise-lime whitespace-nowrap transition">控制塔</a>
-                <a href="rates_zh.html" class="hover:text-wise-lime whitespace-nowrap transition">实时汇率</a>
-                <a href="../console_v2/register.html" class="hover:text-wise-lime whitespace-nowrap transition">商户入驻</a>
-                <a href="../merchant_panel.html" class="hover:text-wise-lime whitespace-nowrap transition">商户面板</a>
-            </div>
-        </div>
     </header>
 
     <!-- 双列 Hero -->
-    <section id="hero" class="relative pt-36 pb-20 overflow-hidden">
+    <section id="hero" class="relative pt-32 pb-20 overflow-hidden">
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(159,232,112,0.12),transparent_70%)]"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -311,12 +302,9 @@
                     </div>
                 </div>
 
-                <div class="mt-6 p-4 bg-wise-forest/5 rounded-2xl text-xs leading-relaxed text-wise-forest border border-wise-forest/10">
-                    <p class="font-bold mb-1"><i class="fa-solid fa-circle-info mr-1"></i> 系统提示</p>
-                    实时动态对账数据流需登录
-                    <a href="../console_v2/login.html" class="underline underline-offset-2 font-bold hover:text-wise-lime">智能对账控制台</a>
-                    或访问
-                    <a href="rates_zh.html" class="underline underline-offset-2 font-bold hover:text-wise-lime">特许汇率遥测页</a>。
+                <div class="mt-6 p-4 bg-wise-forest/5 rounded-2xl text-xs leading-relaxed text-wise-forest border border-wise-forest/10 font-sans">
+                    <p class="font-bold mb-1"><i class="fa-solid fa-circle-info mr-1"></i> [系统提示]</p>
+                    *如需同步实时动态对账数据流以及启用云端财务安全验证协议，请使用企业专属数字证书登录您的智能对账控制台
                 </div>
             </div>
         </div>
@@ -382,11 +370,9 @@
                         <div class="flex items-start gap-2.5 text-wise-forest">
                             <span class="text-wise-forest mt-0.5"><i class="fa-solid fa-circle-check text-base"></i></span>
                             <div>
-                                <strong class="font-sans text-sm block mb-1">意向已安全接收</strong>
+                                <strong class="font-sans text-sm block mb-1">意向申请已无损安全接收！</strong>
                                 <span class="text-slate-600 leading-relaxed block">
-                                    区域客户经理将通过加密信道跟进。沙箱凭证已写入本地存储，可前往
-                                    <a href="../console_v2/login.html" class="font-bold underline">控制塔登录</a>
-                                    继续对接。
+                                    离您最近的区域客户经理会通过加密信道开启正式沟通，以更好地评估您的多币种处理架构与合规反洗钱风控模型。请保持联络方式畅通。
                                 </span>
                             </div>
                         </div>
@@ -397,58 +383,31 @@
     </section>
 
     <!-- 非托管法律免责声明页脚 -->
-    <footer class="bg-slate-100 text-slate-600 text-xs py-16 border-t border-slate-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+    <footer class="bg-wise-forest text-white/60 text-[11px] py-16 border-t border-wise-forest font-mono relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                 <div>
-                    <h4 class="font-black text-wise-forest mb-4 text-sm">公司与团队</h4>
-                    <ul class="space-y-2 text-slate-500">
-                        <li><a href="#hero" class="hover:text-wise-forest transition">关于 FinLinks</a></li>
-                        <li><a href="../console_v2/register.html" class="hover:text-wise-forest transition">商户入驻</a></li>
-                    </ul>
+                    <div class="flex items-center space-x-2 text-white mb-4">
+                        <div class="w-9 h-9 bg-wise-lime rounded-full flex items-center justify-center text-wise-forest text-sm">
+                            <i class="fa-solid fa-network-wired"></i>
+                        </div>
+                        <span class="text-sm font-black font-sans">FinLinks 融链信息科技</span>
+                    </div>
+                    <p class="max-w-md leading-relaxed">
+                        &copy; 2026 FinLinks Tech. 版权所有 <br>
+                        支付底层技术软硬件架构与多边轧差对账算法供应商。 <br>
+                        专注于为全球高增长出海中资主体及跨国数字软件生态提供金融级合规中台隔离防御服务。
+                    </p>
                 </div>
-                <div>
-                    <h4 class="font-black text-wise-forest mb-4 text-sm">帮助与支持</h4>
-                    <ul class="space-y-2 text-slate-500">
-                        <li><a href="#contact-us-panel" class="hover:text-wise-forest transition">申请接入</a></li>
-                        <li><a href="../console_v2/login.html" class="hover:text-wise-forest transition">登录控制塔</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-black text-wise-forest mb-4 text-sm">了解更多</h4>
-                    <ul class="space-y-2 text-slate-500">
-                        <li><a href="rates_zh.html" class="hover:text-wise-forest transition">实时汇率</a></li>
-                        <li><a href="../tracker.html" class="hover:text-wise-forest transition">货流查单大厅</a></li>
-                        <li><a href="../en/index.html" class="hover:text-wise-forest transition">English</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-black text-wise-forest mb-4 text-sm">快捷入口</h4>
-                    <ul class="space-y-2 text-slate-500">
-                        <li><a href="../merchant_panel.html" class="hover:text-wise-forest transition">商户面板</a></li>
-                        <li><a href="../console_v2/kyb_portal.html" class="hover:text-wise-forest transition">KYB 合规门户</a></li>
-                    </ul>
+
+                <div class="p-6 bg-black/20 rounded-3xl border border-white/10 leading-relaxed text-justify text-white/55">
+                    <span class="font-black text-white block mb-2 font-sans flex items-center gap-2">
+                        <i class="fa-solid fa-scale-balanced text-wise-lime"></i>
+                        技术合规与非托管法律 Notice:
+                    </span>
+                    FinLinks 严格作为第三方独立跨境支付软件技术底座提供商运行。本平台明确不属于吸储商业银行、标准持牌第三方跨境持牌收单中心或金钱服务经营者（MSO）。
                 </div>
             </div>
-
-            <div class="flex items-center gap-3 mb-8">
-                <div class="w-9 h-9 bg-wise-forest rounded-full flex items-center justify-center text-wise-lime text-sm">
-                    <i class="fa-solid fa-network-wired"></i>
-                </div>
-                <span class="font-black text-wise-forest">FinLinks 融链信息科技</span>
-            </div>
-
-            <div class="p-6 bg-white rounded-2xl border border-slate-200 leading-relaxed text-slate-500 mb-8">
-                <span class="font-black text-wise-forest block mb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-scale-balanced"></i>
-                    技术合规与非托管法律 Notice
-                </span>
-                FinLinks 严格作为第三方独立跨境支付软件技术底座提供商运行。本平台明确不属于吸储商业银行、标准持牌第三方跨境持牌收单中心或金钱服务经营者（MSO）。本平台不托管、不沉淀客户资金，所有清算指令经由商户自有账户原路执行。
-            </div>
-
-            <p class="text-[11px] text-slate-400 font-mono leading-relaxed">
-                &copy; 2026 FinLinks Tech. 版权所有 · 支付底层技术架构与多边轧差对账算法供应商 · 专注于为全球出海中资主体及跨国数字生态提供金融级合规中台隔离防御服务。
-            </p>
         </div>
     </footer>
 
@@ -524,7 +483,7 @@
                 }
 
                 errBox.classList.add('hidden');
-                window.location.href = `../tracker.html?token=${encodeURIComponent(token)}`;
+                window.location.href = `/tracker.html?token=${token}`;
             });
         }
 
@@ -537,7 +496,7 @@
                 <div style="width:100%;max-width:1200px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:16px;">
                     <div>
                         <h2 style="color:#9FE870;margin:0;font-size:16px;font-family:monospace;font-weight:900;letter-spacing:0.1em;">FINLINKS GLOBAL FX TICKER</h2>
-                        <p style="color:rgba(255,255,255,0.5);margin:6px 0 0 0;font-size:11px;">延迟大盘 · 登录控制塔获取实时遥测</p>
+                        <p style="color:rgba(255,255,255,0.5);margin:6px 0 0 0;font-size:11px;">[PUBLIC SECURITY ROUTE] 当前终端展示为国际合规延迟大盘（日级刷新），如需更多动态信息，请使用商户专属控制塔凭证登录。</p>
                     </div>
                     <button onclick="document.getElementById('finlinks-sovereign-mask').remove()" style="background:#163300;color:#9FE870;border:1px solid #9FE870;padding:10px 24px;border-radius:999px;cursor:pointer;font-size:11px;font-weight:900;">关闭</button>
                 </div>
