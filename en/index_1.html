@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="scroll-smooth">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinLinks — 新兴市场清算中台</title>
+    <title>FinLinks — Emerging Markets Liquidity Middleware</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,7 +59,6 @@
 </head>
 <body class="bg-wise-warm text-slate-900 antialiased selection:bg-wise-lime/40 selection:text-wise-forest">
 
-    <!-- Wise 风格深绿顶栏 -->
     <header class="fixed top-0 left-0 right-0 z-50 bg-wise-forest text-white">
         <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
@@ -70,69 +69,66 @@
                     <span class="text-lg font-black tracking-tight">FinLinks</span>
                 </a>
 
-                <div class="hidden md:flex items-center gap-8 text-base font-semibold text-white/85">
-                    <a href="#hero" class="hover:text-white transition">首页</a>
-                    <a href="#advantages" class="hover:text-white transition">合规优势</a>
-                    <a href="#interactive-simulator" class="hover:text-white transition">对账汇率</a>
-                    <a href="#contact-us-panel" class="hover:text-white transition">申请接入</a>
+                <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-white/85">
+                    <a href="#hero" class="hover:text-white transition">Home</a>
+                    <a href="#advantages" class="hover:text-white transition">Compliance</a>
+                    <a href="#interactive-simulator" class="hover:text-white transition">Rates</a>
+                    <a href="#contact-us-panel" class="hover:text-white transition">API Access</a>
                 </div>
 
                 <div class="flex items-center gap-3 flex-shrink-0">
-                    <a href="../en/index.html" class="text-base px-3 py-1.5 rounded-full bg-white/10 text-white/70 hover:text-wise-lime hover:bg-white/15 transition font-mono font-semibold border border-white/15">EN</a>
+                    <a href="../zh/index.html" class="text-sm px-3 py-1.5 rounded-full bg-white/10 text-white/70 hover:text-wise-lime hover:bg-white/15 transition font-mono font-semibold border border-white/15">ZH</a>
                     <a href="#contact-us-panel" class="wise-cta hidden sm:inline-flex items-center justify-center px-6 h-10 text-sm font-bold text-wise-forest bg-wise-lime hover:bg-[#b8f48a] rounded-full">
-                        <i class="fa-solid fa-headset mr-1.5 text-xs"></i> 联系我们
+                        <i class="fa-solid fa-headset mr-1.5 text-xs"></i> Contact Us
                     </a>
                 </div>
             </div>
         </nav>
     </header>
 
-    <!-- 双列 Hero -->
     <section id="hero" class="relative pt-32 pb-20 overflow-hidden">
         <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(159,232,112,0.12),transparent_70%)]"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-14 items-start">
 
-                <!-- 左侧：极简 B 端文宣 -->
                 <div class="lg:col-span-7 flex flex-col justify-center">
                     <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[11px] font-bold tracking-widest uppercase bg-wise-forest/5 text-wise-forest border border-wise-forest/10 mb-8 w-fit">
                         <span class="w-2 h-2 rounded-full bg-wise-lime mr-2 animate-pulse"></span>
-                        新兴市场聚合清算中台
+                        Emerging Markets Liquidity Middleware
                     </span>
 
                     <h1 class="text-4xl sm:text-6xl font-black text-wise-forest tracking-tight leading-[1.05] mb-6">
-                        跨境清算<br class="hidden sm:block">
-                        一条 API 通全球
+                        Cross-Border Settlement.<br class="hidden sm:block">
+                        One API, Global Reach.
                     </h1>
 
                     <p class="text-base sm:text-lg text-slate-600 mb-10 max-w-xl leading-relaxed font-medium">
-                        非托管 · 同名原路 · 合规直连。货流穿透审计，汇率本地即算。
+                        Non-Custodial · Same-Name Routing · Compliant Connectivity. Live cargo auditing, localized real-time fx telemetry.
                     </p>
 
                     <div class="flex flex-col sm:flex-row gap-4">
                         <a href="#contact-us-panel" class="wise-cta inline-flex items-center justify-center px-10 py-4 text-sm font-black text-wise-forest bg-wise-lime hover:bg-[#b8f48a] rounded-full shadow-lg shadow-wise-lime/25 group">
-                            开通沙箱对接
+                            Open Sandbox
                             <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                         </a>
                         <a href="javascript:void(0);" onclick="openSovereignMarketView()" class="wise-cta inline-flex items-center justify-center px-10 py-4 text-sm font-bold text-wise-forest bg-white border-2 border-wise-forest/15 hover:border-wise-forest/30 rounded-full cursor-pointer">
                             <i class="fa-solid fa-chart-line mr-2 text-amber-500"></i>
-                            外汇行情终端
+                            FX Terminal
                         </a>
                     </div>
                 </div>
 
-                <!-- 右侧：穿透审计大闸 V2 -->
                 <div class="lg:col-span-5 w-full">
                     <div class="bg-white rounded-3xl border border-slate-200/80 p-7 md:p-9 shadow-xl shadow-wise-forest/5 relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-wise-lime/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
 
                         <div class="flex items-center gap-2.5 text-wise-forest mb-3 relative">
                             <i class="fa-solid fa-location-dot text-lg text-wise-forest/70"></i>
-                            <h3 class="text-xl sm:text-2xl font-black tracking-tight">物流运单实时跟踪</h3>
+                            <h3 class="text-xl sm:text-2xl font-black tracking-tight">Live Cargo Tracking</h3>
                         </div>
                         <p class="text-xs text-slate-500 leading-relaxed mb-6 relative">
-                            输入 16 位安全令牌，实时追踪全球货运集装箱位置与状态。
+                            Enter 16-character secure token to trace global container status in real-time.
                         </p>
 
                         <form id="audit-form" class="space-y-4 relative">
@@ -149,7 +145,7 @@
                             <button type="submit" id="btn-submit"
                                 class="wise-cta w-full bg-wise-forest hover:bg-[#1f4a00] text-wise-lime font-black text-sm py-4 rounded-full tracking-wide flex items-center justify-center gap-2 font-mono">
                                 <i class="fa-solid fa-bolt-lightning text-xs"></i>
-                                穿透审计 · 解包货流
+                                Audit Track · Unpack Cargo Stream
                             </button>
                         </form>
                         <div id="error-box" class="mt-3 text-xs text-rose-600 font-mono hidden text-center bg-rose-50 border border-rose-100 p-2.5 rounded-xl"></div>
@@ -160,7 +156,6 @@
         </div>
     </section>
 
-    <!-- 承运商跑马灯 -->
     <div class="w-full border-y border-slate-200 bg-white py-4 overflow-hidden z-20 relative">
         <div class="marquee-track flex space-x-12 items-center text-[11px] font-mono tracking-widest text-slate-500 font-bold">
             <span><i class="fa-solid fa-anchor mr-1.5 text-blue-500"></i>MAERSK LINE AGGREGATOR [ACTIVE]</span> <span class="text-slate-200">//</span>
@@ -182,12 +177,11 @@
         </div>
     </div>
 
-    <!-- 三大合规优势 -->
     <section id="advantages" class="py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center max-w-2xl mx-auto mb-16">
                 <h2 class="text-3xl sm:text-4xl font-black tracking-tight text-wise-forest">
-                    三条红线，一条通路
+                    Three Directives, One Pipeline.
                 </h2>
                 <p class="text-slate-500 text-sm mt-4 font-mono uppercase tracking-widest">
                     Zero-Pool · Non-Custodial · Compliance-First
@@ -199,9 +193,9 @@
                     <div class="w-14 h-14 bg-wise-forest/5 text-wise-forest flex items-center justify-center rounded-2xl mb-6">
                         <i class="fa-solid fa-building-shield text-xl"></i>
                     </div>
-                    <h3 class="text-xl font-black text-wise-forest mb-3">合规直连</h3>
+                    <h3 class="text-xl font-black text-wise-forest mb-3">Direct Gateway</h3>
                     <p class="text-sm text-slate-600 leading-relaxed">
-                        仅对接受监管金融机构官方 API，跨境贸易从源头透明可控。
+                        Interfacing strictly via regulated financial institutions' official APIs, providing end-to-end transparency for cross-border trade.
                     </p>
                     <p class="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-400 font-mono">V4 Clean API Rails</p>
                 </article>
@@ -210,9 +204,9 @@
                     <div class="w-14 h-14 bg-wise-lime/20 text-wise-forest flex items-center justify-center rounded-2xl mb-6">
                         <i class="fa-solid fa-money-bill-transfer text-xl"></i>
                     </div>
-                    <h3 class="text-xl font-black text-wise-forest mb-3">同名原路</h3>
+                    <h3 class="text-xl font-black text-wise-forest mb-3">Same-Name Routing</h3>
                     <p class="text-sm text-slate-600 leading-relaxed">
-                        资金不沉淀、不池化。采购订单与货流单据实时核对，账目自洽。
+                        Zero liquidity pooling or asset stagnation. Purchase orders match seamlessly with real-time freight tokens for pristine reconciliation.
                     </p>
                     <p class="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-400 font-mono">Own-Account Settlement</p>
                 </article>
@@ -221,9 +215,9 @@
                     <div class="w-14 h-14 bg-amber-100 text-amber-700 flex items-center justify-center rounded-2xl mb-6">
                         <i class="fa-solid fa-scale-balanced text-xl"></i>
                     </div>
-                    <h3 class="text-xl font-black text-wise-forest mb-3">影子总账</h3>
+                    <h3 class="text-xl font-black text-wise-forest mb-3">Shadow Ledger</h3>
                     <p class="text-sm text-slate-600 leading-relaxed">
-                        分布式核销，锁汇时机精准捕捉，规避新兴市场宏观波动。
+                        Distributed cryptographic verification. Capture optimized FX lock windows precisely to mitigate macroeconomic volatility in emerging markets.
                     </p>
                     <p class="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-400 font-mono">Real-time Reconciled Ledger</p>
                 </article>
@@ -231,12 +225,11 @@
         </div>
     </section>
 
-    <!-- 本地纯净汇率计算卡 -->
     <section id="interactive-simulator" class="py-24 bg-white border-y border-slate-200/80">
         <div class="max-w-4xl mx-auto px-4 sm:px-6">
             <div class="text-center mb-12">
                 <h2 class="text-3xl sm:text-4xl font-black text-wise-forest tracking-tight">
-                    对账参考汇率
+                    Reference Exchange Rates
                 </h2>
                 <p class="text-xs text-slate-500 mt-3 font-mono uppercase tracking-widest">
                     Local-Only · Zero Network Overhead
@@ -246,14 +239,14 @@
             <div class="bg-wise-warm rounded-3xl border border-slate-200 p-8 sm:p-10 max-w-2xl mx-auto shadow-sm">
                 <div class="text-center pb-6 border-b border-slate-200 mb-6">
                     <span class="text-[10px] font-mono tracking-widest bg-wise-forest text-wise-lime px-4 py-1.5 rounded-full font-bold uppercase inline-block">
-                        动态即期参考汇率
+                        Dynamic Spot Reference FX
                     </span>
-                    <p class="text-xs text-slate-500 mt-3">同业批发基准 · 纯本地演算</p>
+                    <p class="text-xs text-slate-500 mt-3">Interbank Wholesale Benchmarks · Client-Side Execution</p>
                 </div>
 
                 <div class="space-y-5">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">基准金额 (USD)</label>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Base Amount (USD)</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 font-mono font-bold">$</div>
                             <input type="number" id="baseUsdAmount" value="1000"
@@ -263,26 +256,26 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">目标货币</label>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Target Currency</label>
                             <select id="targetCurrency"
                                 class="w-full p-3.5 bg-white border-2 border-slate-200 rounded-2xl text-xs font-mono font-bold text-wise-forest focus:outline-none focus:border-wise-forest cursor-pointer">
-                                <option value="NGN">NGN — 尼日利亚奈拉</option>
-                                <option value="GHS">GHS — 加纳塞地</option>
-                                <option value="TZS">TZS — 坦桑尼亚先令</option>
-                                <option value="ZMW">ZMW — 赞比亚克瓦查</option>
-                                <option value="RWF">RWF — 卢旺达法郎</option>
-                                <option value="MWK">MWK — 马拉维克瓦查</option>
-                                <option value="KES">KES — 肯尼亚先令</option>
-                                <option value="BRL">BRL — 巴西雷亚尔</option>
-                                <option value="MXN">MXN — 墨西哥比索</option>
-                                <option value="TRY">TRY — 土耳其里拉</option>
-                                <option value="PHP">PHP — 菲律宾比索</option>
-                                <option value="IDR">IDR — 印度尼西亚盾</option>
-                                <option value="THB">THB — 泰国泰铢</option>
+                                <option value="NGN">NGN — Nigerian Naira</option>
+                                <option value="GHS">GHS — Ghanaian Cedi</option>
+                                <option value="TZS">TZS — Tanzanian Shilling</option>
+                                <option value="ZMW">ZMW — Zambian Kwacha</option>
+                                <option value="RWF">RWF — Rwandan Franc</option>
+                                <option value="MWK">MWK — Malawian Kwacha</option>
+                                <option value="KES">KES — Kenyan Shilling</option>
+                                <option value="BRL">BRL — Brazilian Real</option>
+                                <option value="MXN">MXN — Mexican Peso</option>
+                                <option value="TRY">TRY — Turkish Lira</option>
+                                <option value="PHP">PHP — Philippine Peso</option>
+                                <option value="IDR">IDR — Indonesian Rupiah</option>
+                                <option value="THB">THB — Thai Baht</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">基准汇率</label>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Benchmark Rate</label>
                             <div id="referenceRateDisplay"
                                 class="w-full p-3.5 bg-white font-mono font-black text-wise-forest rounded-2xl text-sm flex items-center border-2 border-slate-200 min-h-[52px]">
                                 1 USD = 1,502.00 NGN
@@ -292,87 +285,86 @@
 
                     <div class="bg-white rounded-2xl p-5 border border-slate-200 font-mono text-xs space-y-2">
                         <div class="flex justify-between items-center text-slate-400 border-b border-dashed border-slate-200 pb-2 mb-2">
-                            <span>账目换算</span>
-                            <span>估计清算价值</span>
+                            <span>Balance Conversion</span>
+                            <span>Estimated Liquidation Value</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-slate-500">本币折算额</span>
+                            <span class="text-slate-500">Converted Amount</span>
                             <span id="convertedAmountDisplay" class="font-black text-wise-forest text-base">-- NGN</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-6 p-4 bg-wise-forest/5 rounded-2xl text-xs leading-relaxed text-wise-forest border border-wise-forest/10 font-sans">
-                    <p class="font-bold mb-1"><i class="fa-solid fa-circle-info mr-1"></i> [系统提示]</p>
-                    *如需同步实时动态对账数据流以及启用云端财务安全验证协议，请使用企业专属数字证书登录您的智能对账控制台
+                    <p class="font-bold mb-1"><i class="fa-solid fa-circle-info mr-1"></i> [SYSTEM NOTICE]</p>
+                    *To synchronize real-time active reconciliation telemetry and enforce cloud financial security verification protocols, please utilize your corporate digital certificates to sign into your strategic dashboard tower.
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 商户意向登记 -->
     <section id="contact-us-panel" class="py-24">
         <div class="max-w-3xl mx-auto px-4">
             <div class="text-center mb-12">
                 <h2 class="text-3xl sm:text-4xl font-black text-wise-forest tracking-tight">
-                    商户意向登记
+                    Merchant Intake Registration
                 </h2>
-                <p class="text-slate-500 text-sm mt-3">递交即生成沙箱凭证，零后端依赖</p>
+                <p class="text-slate-500 text-sm mt-3">Submit to instantiate sandbox credentialing. Zero server overhead.</p>
             </div>
 
             <div class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-10 shadow-sm">
                 <form id="contactUsForm" class="space-y-5">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">企业法定名称 *</label>
-                        <input type="text" id="company_name" placeholder="跨境出口贸易主体" required
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">Legal Corporate Entity Name *</label>
+                        <input type="text" id="company_name" placeholder="Cross-border export trading entity" required
                             class="w-full p-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-mono focus:outline-none focus:border-wise-forest transition text-slate-900">
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">授权联络人 *</label>
-                            <input type="text" id="contact_name" placeholder="张经理" required
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">Authorized Liaison Name *</label>
+                            <input type="text" id="contact_name" placeholder="John Doe" required
                                 class="w-full p-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-mono focus:outline-none focus:border-wise-forest transition text-slate-900">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">联络凭证 *</label>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">Liaison Contact Info *</label>
                             <input type="text" id="contact_info" placeholder="tech@company.com" required
                                 class="w-full p-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-mono focus:outline-none focus:border-wise-forest transition text-slate-900">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">清算走廊 *</label>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">Clearing Corridor *</label>
                         <select id="target_currency"
                             class="w-full p-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-xs font-mono font-bold text-wise-forest focus:outline-none focus:border-wise-forest cursor-pointer">
-                            <option value="NGN">🇳🇬 尼日利亚 NGN</option>
-                            <option value="GHS">🇬🇭 加纳 GHS</option>
-                            <option value="KES">🇰🇪 肯尼亚 KES</option>
-                            <option value="TZS">🇹🇿 坦桑尼亚 TZS</option>
-                            <option value="ZMW">🇿🇲 赞比亚 ZMW</option>
-                            <option value="RWF">🇷🇼 卢旺达 RWF</option>
-                            <option value="MWK">🇲🇼 马拉维 MWK</option>
-                            <option value="IDR">🇮🇩 印度尼西亚 IDR</option>
-                            <option value="PHP">🇵🇭 菲律宾 PHP</option>
-                            <option value="THB">🇹🇭 泰国 THB</option>
-                            <option value="BRL">🇧🇷 巴西 BRL</option>
-                            <option value="TRY">🇹🇷 土耳其 TRY</option>
+                            <option value="NGN">🇳🇬 Nigeria NGN</option>
+                            <option value="GHS">🇬🇭 Ghana GHS</option>
+                            <option value="KES">🇰🇪 Kenya KES</option>
+                            <option value="TZS">🇹🇿 Tanzania TZS</option>
+                            <option value="ZMW">🇿🇲 Zambia ZMW</option>
+                            <option value="RWF">🇷🇼 Rwanda RWF</option>
+                            <option value="MWK">🇲🇼 Malawi MWK</option>
+                            <option value="IDR">🇮🇩 Indonesia IDR</option>
+                            <option value="PHP">🇵🇭 Philippines PHP</option>
+                            <option value="THB">🇹🇭 Thailand THB</option>
+                            <option value="BRL">🇧🇷 Brazil BRL</option>
+                            <option value="TRY">🇹🇷 Turkey TRY</option>
                         </select>
                     </div>
 
                     <button type="submit"
                         class="wise-cta w-full mt-2 py-4 px-4 bg-wise-lime hover:bg-[#b8f48a] text-wise-forest font-black uppercase tracking-wider rounded-full text-sm font-mono flex items-center justify-center gap-2">
                         <i class="fa-solid fa-paper-plane"></i>
-                        递交尽调申请
+                        Submit Due Diligence Intake
                     </button>
 
                     <div id="formSuccessStatus" class="hidden mt-6 bg-wise-lime/15 border border-wise-lime/30 rounded-2xl p-5 space-y-3 font-mono text-xs">
                         <div class="flex items-start gap-2.5 text-wise-forest">
                             <span class="text-wise-forest mt-0.5"><i class="fa-solid fa-circle-check text-base"></i></span>
                             <div>
-                                <strong class="font-sans text-sm block mb-1">意向申请已无损安全接收！</strong>
+                                <strong class="font-sans text-sm block mb-1">Intake Application Securely Generated!</strong>
                                 <span class="text-slate-600 leading-relaxed block">
-                                    离您最近的区域客户经理会通过加密信道开启正式沟通，以更好地评估您的多币种处理架构与合规反洗钱风控模型。请保持联络方式畅通。
+                                    Your designated regional relationship manager will open formal communications via encrypted channels to evaluate your multi-currency processing infrastructure and AML risk matrix. Please keep your contact channels clear.
                                 </span>
                             </div>
                         </div>
@@ -383,7 +375,7 @@
     </section>
 
     <footer class="py-10 border-t border-slate-200/80 bg-wise-warm text-center text-[11px] text-slate-400 font-mono leading-relaxed">
-        <p>&copy; 2026 FinLinks Tech. 版权所有</p>
+        <p>&copy; 2026 FinLinks Tech. All rights reserved.</p>
     </footer>
 
     <script type="module">
@@ -452,7 +444,7 @@
                 const errBox = document.getElementById('error-box');
 
                 if (token.length !== 16) {
-                    errBox.innerText = "错误：安全审计令牌长度必须精确为 16 位字符。";
+                    errBox.innerText = "Error: Security access token length must be exactly 16 characters.";
                     errBox.classList.remove('hidden');
                     return;
                 }
@@ -464,6 +456,7 @@
 
         window.openSovereignMarketView = function () {
             const mask = document.createElement('div');
+            const userLocale = "en";
             mask.id = "finlinks-sovereign-mask";
             mask.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(22,51,0,0.97);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;";
 
@@ -471,12 +464,12 @@
                 <div style="width:100%;max-width:1200px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:16px;">
                     <div>
                         <h2 style="color:#9FE870;margin:0;font-size:16px;font-family:monospace;font-weight:900;letter-spacing:0.1em;">FINLINKS GLOBAL FX TICKER</h2>
-                        <p style="color:rgba(255,255,255,0.5);margin:6px 0 0 0;font-size:11px;">[PUBLIC SECURITY ROUTE] 当前终端展示为国际合规延迟大盘（日级刷新），如需更多动态信息，请使用商户专属控制塔凭证登录。</p>
+                        <p style="color:rgba(255,255,255,0.5);margin:6px 0 0 0;font-size:11px;">[PUBLIC SECURITY ROUTE] Current feed reflects standard global compliance latency (updated daily). For dynamic tier-1 pricing stream, authenticate using corporate credentials.</p>
                     </div>
-                    <button onclick="document.getElementById('finlinks-sovereign-mask').remove()" style="background:#163300;color:#9FE870;border:1px solid #9FE870;padding:10px 24px;border-radius:999px;cursor:pointer;font-size:11px;font-weight:900;">关闭</button>
+                    <button onclick="document.getElementById('finlinks-sovereign-mask').remove()" style="background:#163300;color:#9FE870;border:1px solid #9FE870;padding:10px 24px;border-radius:999px;cursor:pointer;font-size:11px;font-weight:900;">CLOSE</button>
                 </div>
                 <div style="width:100%;max-width:1200px;height:78vh;border:1px solid rgba(159,232,112,0.2);border-radius:24px;overflow:hidden;background:#000;">
-                    <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_fx_widget&symbol=FX_IDC%3AUSDCNY&interval=D&symboledit=0&saveimage=0&toolbarbg=163300&theme=dark&style=1&timezone=Asia%2FShanghai&studies=%5B%5D&locale=zh_CN" style="width:100%;height:100%;border:none;"></iframe>
+                    <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_fx_widget&symbol=FX_IDC%3AUSDCNY&interval=D&symboledit=0&saveimage=0&toolbarbg=163300&theme=dark&style=1&timezone=Asia%2FShanghai&studies=%5B%5D&locale=${userLocale}" style="width:100%;height:100%;border:none;"></iframe>
                 </div>
             `;
 

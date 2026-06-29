@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinLinks - 出海企业的一站式技术服务商</title>
-    
+    <title>FinLinks — 新兴市场清算中台</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&family=JetBrains+Mono:wght=400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -18,15 +18,22 @@
                     fontFamily: {
                         sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
                         mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+                    },
+                    colors: {
+                        wise: {
+                            forest: '#163300',
+                            lime: '#9FE870',
+                            gold: '#FFC091',
+                            warm: '#F5F7F2',
+                        }
                     }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #F8FAFC; color: #0F172A; }
-        
-        /* 🏎️ 全球 2400+ 承运商跑马灯无缝平滑滚动引擎 */
+        body { background-color: #F5F7F2; color: #0F172A; }
+
         @keyframes marquee {
             0% { transform: translateX(0%); }
             100% { transform: translateX(-50%); }
@@ -34,102 +41,118 @@
         .marquee-track {
             display: flex;
             width: 200%;
-            animation: marquee 30s linear infinite;
+            animation: marquee 32s linear infinite;
         }
         .marquee-track:hover { animation-play-state: paused; }
+
+        .wise-cta {
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+        }
+        .wise-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 28px -8px rgba(159, 232, 112, 0.45);
+        }
+        .wise-cta:active {
+            transform: translateY(0) scale(0.98);
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 antialiased selection:bg-blue-100 selection:text-blue-900">
+<body class="bg-wise-warm text-slate-900 antialiased selection:bg-wise-lime/40 selection:text-wise-forest">
 
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Wise 风格深绿顶栏 -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-wise-forest text-white">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center space-x-3 flex-shrink-0">
-                    <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
-                        <i class="fa-solid fa-network-wired text-sm"></i>
+                <a href="#hero" class="flex items-center gap-2.5 flex-shrink-0 group">
+                    <div class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center border border-white/20 group-hover:bg-white/15 transition">
+                        <i class="fa-solid fa-network-wired text-wise-lime text-sm"></i>
                     </div>
-                    <span class="text-md font-extrabold tracking-tight text-slate-900 flex items-center gap-1.5 font-sans">
-                        FinLinks <span class="text-blue-600 font-bold text-xs bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100"></span>
-                    </span>
+                    <span class="text-lg font-black tracking-tight">FinLinks</span>
+                </a>
+
+                <div class="hidden md:flex items-center gap-8 text-base font-semibold text-white/85">
+                    <a href="#hero" class="hover:text-white transition">首页</a>
+                    <a href="#advantages" class="hover:text-white transition">合规优势</a>
+                    <a href="#interactive-simulator" class="hover:text-white transition">对账汇率</a>
+                    <a href="#contact-us-panel" class="hover:text-white transition">申请接入</a>
                 </div>
 
-                <div class="hidden md:flex space-x-8 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    <a href="#hero" class="hover:text-blue-600 transition duration-150">首页</a>
-                    <a href="#advantages" class="hover:text-blue-600 transition duration-150">合规优势</a>
-                    <a href="#interactive-simulator" class="hover:text-blue-600 transition duration-150">对账汇率监控</a>
-                    <a href="#contact-us-panel" class="hover:text-blue-600 transition duration-150">申请接入</a>
-                </div>
-
-                <div class="flex items-center space-x-3 flex-shrink-0">
-                    <a href="../en/index.html" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 hover:text-emerald-400 transition font-mono mr-1">EN</a>
-                    <a href="#contact-us-panel" class="inline-flex items-center justify-center px-5 h-9 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all duration-200 font-mono shadow-lg shadow-blue-600/20">
-                        <i class="fa-solid fa-headset mr-1.5 text-[10px]"></i> 联系我们
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    <a href="../en/index.html" class="text-base px-3 py-1.5 rounded-full bg-white/10 text-white/70 hover:text-wise-lime hover:bg-white/15 transition font-mono font-semibold border border-white/15">EN</a>
+                    <a href="#contact-us-panel" class="wise-cta hidden sm:inline-flex items-center justify-center px-6 h-10 text-sm font-bold text-wise-forest bg-wise-lime hover:bg-[#b8f48a] rounded-full">
+                        <i class="fa-solid fa-headset mr-1.5 text-xs"></i> 联系我们
                     </a>
                 </div>
             </div>
-        </div>
-    </nav>
+        </nav>
+    </header>
 
-    <section id="hero" class="relative pt-32 pb-16 overflow-hidden bg-slate-50">
-        <div class="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30"></div>
-        
+    <!-- 双列 Hero -->
+    <section id="hero" class="relative pt-32 pb-20 overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(159,232,112,0.12),transparent_70%)]"></div>
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center text-left">
-                
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-14 items-start">
+
+                <!-- 左侧：极简 B 端文宣 -->
                 <div class="lg:col-span-7 flex flex-col justify-center">
-                    <span class="inline-flex items-center px-3.5 py-1 rounded-full text-[11px] font-mono tracking-widest uppercase bg-blue-50 text-blue-700 border border-blue-100 mb-6 font-bold w-fit">
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-600 mr-2 animate-pulse"></span> 中国出海商户首选的新兴市场聚合收单技术中台
+                    <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[11px] font-bold tracking-widest uppercase bg-wise-forest/5 text-wise-forest border border-wise-forest/10 mb-8 w-fit">
+                        <span class="w-2 h-2 rounded-full bg-wise-lime mr-2 animate-pulse"></span>
+                        新兴市场聚合清算中台
                     </span>
-                    <h1 class="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight font-sans leading-tight mb-6">
-                        出海企业的一站式技术服务商<br class="hidden sm:inline">
-                           技术赋能出海新兴市场
+
+                    <h1 class="text-4xl sm:text-6xl font-black text-wise-forest tracking-tight leading-[1.05] mb-6">
+                        跨境清算<br class="hidden sm:block">
+                        一条 API 通全球
                     </h1>
-                    <p class="text-xs sm:text-sm text-slate-500 mb-10 leading-relaxed font-sans font-medium max-w-2xl">
-                        FinLinks 为出海商家提供货物物流实时单据动态跟踪，供应链信息科技赋能等服务，助力企业出海新兴市场
+
+                    <p class="text-base sm:text-lg text-slate-600 mb-10 max-w-xl leading-relaxed font-medium">
+                        非托管 · 同名原路 · 合规直连。货流穿透审计，汇率本地即算。
                     </p>
-                    
+
                     <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="#contact-us-panel" class="inline-flex items-center justify-center px-8 py-3.5 text-xs font-bold uppercase tracking-wider text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition duration-200 shadow-lg shadow-blue-600/20 group font-mono text-center">
-                            配置沙箱技术对接
+                        <a href="#contact-us-panel" class="wise-cta inline-flex items-center justify-center px-10 py-4 text-sm font-black text-wise-forest bg-wise-lime hover:bg-[#b8f48a] rounded-full shadow-lg shadow-wise-lime/25 group">
+                            开通沙箱对接
                             <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                         </a>
-                        
-                        <a href="javascript:void(0);" onclick="openSovereignMarketView()" class="inline-flex items-center justify-center px-8 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-600 bg-white border border-slate-200 shadow-sm hover:bg-slate-100 hover:text-slate-900 rounded-xl transition duration-200 font-mono group cursor-pointer text-center">
-                            <i class="fa-solid fa-chart-line mr-2 text-emerald-500 group-hover:animate-bounce"></i> 实时外汇行情终端 (需特许授权)
+                        <a href="javascript:void(0);" onclick="openSovereignMarketView()" class="wise-cta inline-flex items-center justify-center px-10 py-4 text-sm font-bold text-wise-forest bg-white border-2 border-wise-forest/15 hover:border-wise-forest/30 rounded-full cursor-pointer">
+                            <i class="fa-solid fa-chart-line mr-2 text-amber-500"></i>
+                            外汇行情终端
                         </a>
                     </div>
                 </div>
 
+                <!-- 右侧：穿透审计大闸 V2 -->
                 <div class="lg:col-span-5 w-full">
-                    <div class="bg-white border border-slate-200 p-6 md:p-8 rounded-2xl shadow-xl shadow-slate-200/50 relative">
-                        <div class="absolute top-0 right-0 border-t border-r border-blue-500/20 w-4 h-4 rounded-tr-2xl"></div>
-                        <div class="absolute bottom-0 left-0 border-b border-l border-blue-500/20 w-4 h-4 rounded-bl-2xl"></div>
-                        
-                        <div class="flex items-center space-x-2 text-blue-600 mb-2">
-                            <i class="fa-solid fa-shield-halved text-xs"></i>
-                            <h3 class="text-xs font-bold tracking-widest font-mono uppercase">经常项目穿透审计大闸 // V2</h3>
+                    <div class="bg-white rounded-3xl border border-slate-200/80 p-7 md:p-9 shadow-xl shadow-wise-forest/5 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-wise-lime/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+
+                        <div class="flex items-center gap-2.5 text-wise-forest mb-3 relative">
+                            <i class="fa-solid fa-location-dot text-lg text-wise-forest/70"></i>
+                            <h3 class="text-xl sm:text-2xl font-black tracking-tight">物流运单实时跟踪</h3>
                         </div>
-                        <p class="text-[11px] text-slate-400 font-sans leading-relaxed mb-6">
-                            请输入由商户控制台签发的 16 位密码学安全令牌，以实时跟踪全球各大货运集装箱的实时位置与状态
+                        <p class="text-xs text-slate-500 leading-relaxed mb-6 relative">
+                            输入 16 位安全令牌，实时追踪全球货运集装箱位置与状态。
                         </p>
-                        
-                        <form id="audit-form" class="space-y-4">
+
+                        <form id="audit-form" class="space-y-4 relative">
                             <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">安全审计令牌 (Security Access Token)</label>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">Security Access Token</label>
                                 <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 font-mono text-xs">
-                                        <i class="fa-solid fa-key"></i>
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                                        <i class="fa-solid fa-key text-xs"></i>
                                     </div>
-                                    <input type="text" id="token-input" placeholder="例如：d9d2a0dba3100dd6" autocomplete="off" maxlength="16"
-                                        class="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-blue-600 placeholder-slate-300 focus:outline-none focus:border-blue-600 transition">
+                                    <input type="text" id="token-input" placeholder="d9d2a0dba3100dd6" autocomplete="off" maxlength="16"
+                                        class="w-full pl-10 pr-4 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-mono font-bold text-wise-forest placeholder-slate-300 focus:outline-none focus:border-wise-forest transition">
                                 </div>
                             </div>
                             <button type="submit" id="btn-submit"
-                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3 rounded-xl tracking-widest transition duration-150 uppercase shadow-md shadow-blue-600/10 flex items-center justify-center gap-2 font-mono">
-                                <i class="fa-solid fa-bolt-lightning text-[10px]"></i> 穿透审计并解包货流
+                                class="wise-cta w-full bg-wise-forest hover:bg-[#1f4a00] text-wise-lime font-black text-sm py-4 rounded-full tracking-wide flex items-center justify-center gap-2 font-mono">
+                                <i class="fa-solid fa-bolt-lightning text-xs"></i>
+                                穿透审计 · 解包货流
                             </button>
                         </form>
-                        <div id="error-box" class="mt-3 text-[11px] text-rose-500 font-mono hidden text-center bg-rose-50 border border-rose-100 p-2 rounded-lg"></div>
+                        <div id="error-box" class="mt-3 text-xs text-rose-600 font-mono hidden text-center bg-rose-50 border border-rose-100 p-2.5 rounded-xl"></div>
                     </div>
                 </div>
 
@@ -137,8 +160,9 @@
         </div>
     </section>
 
-    <div class="w-full border-t border-b border-slate-200 bg-white py-4 overflow-hidden z-20 relative">
-        <div class="marquee-track flex space-x-12 items-center text-[11px] font-mono tracking-widest text-slate-400 font-bold">
+    <!-- 承运商跑马灯 -->
+    <div class="w-full border-y border-slate-200 bg-white py-4 overflow-hidden z-20 relative">
+        <div class="marquee-track flex space-x-12 items-center text-[11px] font-mono tracking-widest text-slate-500 font-bold">
             <span><i class="fa-solid fa-anchor mr-1.5 text-blue-500"></i>MAERSK LINE AGGREGATOR [ACTIVE]</span> <span class="text-slate-200">//</span>
             <span><i class="fa-solid fa-ship mr-1.5 text-blue-500"></i>COSCO SHIPPING NODE [CONNECTED]</span> <span class="text-slate-200">//</span>
             <span><i class="fa-solid fa-satellite-dish mr-1.5 text-blue-500"></i>MSC MEDITERRANEAN SATELLITE FEED</span> <span class="text-slate-200">//</span>
@@ -146,6 +170,7 @@
             <span><i class="fa-solid fa-bezier-curve mr-1.5 text-blue-500"></i>CMA CGM COMPLIANCE SECURE</span> <span class="text-slate-200">//</span>
             <span><i class="fa-solid fa-microchip mr-1.5 text-blue-500"></i>EVERGREEN MARINE COORD [ONLINE]</span> <span class="text-slate-200">//</span>
             <span><i class="fa-solid fa-network-wired mr-1.5 text-blue-500"></i>HAPAG-LLOYD CONTAINER MATRIX</span> <span class="text-slate-200">//</span>
+            <span class="text-wise-forest/40"><i class="fa-solid fa-globe mr-1.5"></i>2400+ GLOBAL CARRIER NODES</span> <span class="text-slate-200">//</span>
             <span><i class="fa-solid fa-anchor mr-1.5 text-blue-500"></i>MAERSK LINE AGGREGATOR [ACTIVE]</span> <span class="text-slate-200">//</span>
             <span><i class="fa-solid fa-ship mr-1.5 text-blue-500"></i>COSCO SHIPPING NODE [CONNECTED]</span> <span class="text-slate-200">//</span>
             <span><i class="fa-solid fa-satellite-dish mr-1.5 text-blue-500"></i>MSC MEDITERRANEAN SATELLITE FEED</span> <span class="text-slate-200">//</span>
@@ -153,137 +178,131 @@
             <span><i class="fa-solid fa-bezier-curve mr-1.5 text-blue-500"></i>CMA CGM COMPLIANCE SECURE</span> <span class="text-slate-200">//</span>
             <span><i class="fa-solid fa-microchip mr-1.5 text-blue-500"></i>EVERGREEN MARINE COORD [ONLINE]</span> <span class="text-slate-200">//</span>
             <span><i class="fa-solid fa-network-wired mr-1.5 text-blue-500"></i>HAPAG-LLOYD CONTAINER MATRIX</span> <span class="text-slate-200">//</span>
+            <span class="text-wise-forest/40"><i class="fa-solid fa-globe mr-1.5"></i>2400+ GLOBAL CARRIER NODES</span> <span class="text-slate-200">//</span>
         </div>
     </div>
 
-    <section id="advantages" class="py-20 bg-slate-50">
+    <!-- 三大合规优势 -->
+    <section id="advantages" class="py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-sans uppercase">
-                    技术赋能出海企业开拓全球新兴市场
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <h2 class="text-3xl sm:text-4xl font-black tracking-tight text-wise-forest">
+                    三条红线，一条通路
                 </h2>
-                <div class="w-12 h-1 bg-blue-600 mx-auto mt-4 rounded-full"></div>
-                <p class="text-slate-400 text-xs mt-3 uppercase tracking-widest font-mono">
-                    Zero-Pool Policy · Pure Platform Middleware · Absolute Compliance
+                <p class="text-slate-500 text-sm mt-4 font-mono uppercase tracking-widest">
+                    Zero-Pool · Non-Custodial · Compliance-First
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="bg-white p-8 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-between transition duration-200 hover:-translate-y-1">
-                    <div class="space-y-5">
-                        <div class="w-12 h-12 bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center rounded-2xl shadow-inner">
-                            <i class="fa-solid fa-building-shield text-lg"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-900 font-sans flex items-center gap-2.5 before:content-[''] before:w-1 before:h-[18px] before:bg-blue-600 before:rounded-sm">合规直连 · 官方网关</h3>
-                        <p class="text-sm text-slate-500 leading-relaxed font-sans">
-                            我们仅与受监管金融机构的官方核心API 接口并线，从源头确保跨境贸易的透明与安全。
-                        </p>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <article class="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+                    <div class="w-14 h-14 bg-wise-forest/5 text-wise-forest flex items-center justify-center rounded-2xl mb-6">
+                        <i class="fa-solid fa-building-shield text-xl"></i>
                     </div>
-                    <div class="mt-8 pt-4 border-t border-slate-200 text-[11px] text-slate-400 font-mono">
-                        V4 Clean API Rails Connected
-                    </div>
-                </div>
+                    <h3 class="text-xl font-black text-wise-forest mb-3">合规直连</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        仅对接受监管金融机构官方 API，跨境贸易从源头透明可控。
+                    </p>
+                    <p class="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-400 font-mono">V4 Clean API Rails</p>
+                </article>
 
-                <div class="bg-white p-8 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-between transition duration-200 hover:-translate-y-1">
-                    <div class="space-y-5">
-                        <div class="w-12 h-12 bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center rounded-2xl shadow-inner">
-                            <i class="fa-solid fa-money-bill-transfer text-lg"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-900 font-sans flex items-center gap-2.5 before:content-[''] before:w-1 before:h-[18px] before:bg-blue-600 before:rounded-sm">同名原路 · 拒绝沉淀</h3>
-                        <p class="text-sm text-slate-500 leading-relaxed font-sans">
-                            通过数字化中台助您管理新兴市场采购订单，助力商家实现供应链上下游账目核对与实时货运单据跟踪
-                        </p>
+                <article class="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+                    <div class="w-14 h-14 bg-wise-lime/20 text-wise-forest flex items-center justify-center rounded-2xl mb-6">
+                        <i class="fa-solid fa-money-bill-transfer text-xl"></i>
                     </div>
-                    <div class="mt-8 pt-4 border-t border-slate-200 text-[11px] text-slate-400 font-mono">
-                        Own-Account Settlement Policy
-                    </div>
-                </div>
+                    <h3 class="text-xl font-black text-wise-forest mb-3">同名原路</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        资金不沉淀、不池化。采购订单与货流单据实时核对，账目自洽。
+                    </p>
+                    <p class="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-400 font-mono">Own-Account Settlement</p>
+                </article>
 
-                <div class="bg-white p-8 rounded-2xl shadow-md border border-slate-200 flex flex-col justify-between transition duration-200 hover:-translate-y-1">
-                    <div class="space-y-5">
-                        <div class="w-12 h-12 bg-amber-50 border border-amber-100 text-amber-600 flex items-center justify-center rounded-2xl shadow-inner">
-                            <i class="fa-solid fa-scale-balanced text-lg"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-900 font-sans flex items-center gap-2.5 before:content-[''] before:w-1 before:h-[18px] before:bg-blue-600 before:rounded-sm">分布式核销 · 影子总账</h3>
-                        <p class="text-sm text-slate-500 leading-relaxed font-sans">
-                            助力出海商家精准捕捉锁汇时机，实时跟踪捕获汇率动态，规避新兴市场的宏观风险
+                <article class="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+                    <div class="w-14 h-14 bg-amber-100 text-amber-700 flex items-center justify-center rounded-2xl mb-6">
+                        <i class="fa-solid fa-scale-balanced text-xl"></i>
                     </div>
-                    <div class="mt-8 pt-4 border-t border-slate-200 text-[11px] text-slate-400 font-mono">
-                        Real-time Reconciled Ledger
-                    </div>
-                </div>
+                    <h3 class="text-xl font-black text-wise-forest mb-3">影子总账</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        分布式核销，锁汇时机精准捕捉，规避新兴市场宏观波动。
+                    </p>
+                    <p class="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-400 font-mono">Real-time Reconciled Ledger</p>
+                </article>
             </div>
         </div>
     </section>
 
-    <section id="interactive-simulator" class="py-20 bg-slate-50 border-t border-slate-200">
+    <!-- 本地纯净汇率计算卡 -->
+    <section id="interactive-simulator" class="py-24 bg-white border-y border-slate-200/80">
         <div class="max-w-4xl mx-auto px-4 sm:px-6">
             <div class="text-center mb-12">
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-sans uppercase">
-                    财务对账参考汇率监控 (Reporting FX)
+                <h2 class="text-3xl sm:text-4xl font-black text-wise-forest tracking-tight">
+                    对账参考汇率
                 </h2>
-                <p class="text-xs text-slate-400 mt-2 font-mono uppercase">
-                    Real-time Reporting Exchange Rate Telemetry Indicator
+                <p class="text-xs text-slate-500 mt-3 font-mono uppercase tracking-widest">
+                    Local-Only · Zero Network Overhead
                 </p>
             </div>
 
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-md p-8 max-w-2xl mx-auto relative overflow-hidden">
-                <div class="text-center pb-5 border-b border-slate-200 mb-6">
-                    <span class="text-[10px] font-mono tracking-widest bg-blue-50 border border-blue-100 px-3 py-1 rounded-full text-blue-600 font-bold uppercase block w-max mx-auto mb-2">
-                        <i class="fa-solid fa-square-poll-vertical mr-1"></i> 动态即期参考汇率
+            <div class="bg-wise-warm rounded-3xl border border-slate-200 p-8 sm:p-10 max-w-2xl mx-auto shadow-sm">
+                <div class="text-center pb-6 border-b border-slate-200 mb-6">
+                    <span class="text-[10px] font-mono tracking-widest bg-wise-forest text-wise-lime px-4 py-1.5 rounded-full font-bold uppercase inline-block">
+                        动态即期参考汇率
                     </span>
-                    <p class="text-xs text-slate-400 mt-1">同业批发基准汇率</p>
+                    <p class="text-xs text-slate-500 mt-3">同业批发基准 · 纯本地演算</p>
                 </div>
 
-                <div class="space-y-4">
+                <div class="space-y-5">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">基准输入名义金额 (USD)</label>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">基准金额 (USD)</label>
                         <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 font-mono text-sm font-bold">$</div>
-                            <input type="number" id="baseUsdAmount" value="1000" class="w-full pl-8 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-lg font-mono font-bold text-slate-900 focus:outline-none focus:border-blue-600 transition" placeholder="0.00">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 font-mono font-bold">$</div>
+                            <input type="number" id="baseUsdAmount" value="1000"
+                                class="w-full pl-9 pr-4 py-3.5 bg-white border-2 border-slate-200 rounded-2xl text-xl font-mono font-black text-wise-forest focus:outline-none focus:border-wise-forest transition">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">对账目标货币</label>
-                            <select id="targetCurrency" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-blue-600 cursor-pointer">
-                                <option value="NGN">NGN - 尼日利亚奈拉 (Nigeria)</option>
-                                <option value="GHS">GHS - 加纳塞地 (Ghana)</option>
-                                <option value="TZS">TZS - 坦桑尼亚先令 (Tanzania)</option>
-                                <option value="ZMW">ZMW - 赞比亚克瓦查 (Zambia)</option>
-                                <option value="RWF">RWF - 卢旺达法郎 (Rwanda)</option>
-                                <option value="MWK">MWK - 马拉维克瓦查 (Malawi)</option>
-                                <option value="KES">KES - 肯尼亚先令 (Kenya)</option>
-                                <option value="BRL">BRL - 巴西雷亚尔 (Brazil)</option>
-                                <option value="MXN">MXN - 墨西哥比索 (Mexico)</option>
-                                <option value="TRY">TRY - 土耳其里拉 (Turkey)</option>
-                                <option value="PHP">PHP - 菲律宾比索 (Philippines)</option>
-                                <option value="IDR">IDR - 印度尼西亚盾 (Indonesia)</option>
-                                <option value="THB">THB - 泰国泰铢 (Thailand)</option>
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">目标货币</label>
+                            <select id="targetCurrency"
+                                class="w-full p-3.5 bg-white border-2 border-slate-200 rounded-2xl text-xs font-mono font-bold text-wise-forest focus:outline-none focus:border-wise-forest cursor-pointer">
+                                <option value="NGN">NGN — 尼日利亚奈拉</option>
+                                <option value="GHS">GHS — 加纳塞地</option>
+                                <option value="TZS">TZS — 坦桑尼亚先令</option>
+                                <option value="ZMW">ZMW — 赞比亚克瓦查</option>
+                                <option value="RWF">RWF — 卢旺达法郎</option>
+                                <option value="MWK">MWK — 马拉维克瓦查</option>
+                                <option value="KES">KES — 肯尼亚先令</option>
+                                <option value="BRL">BRL — 巴西雷亚尔</option>
+                                <option value="MXN">MXN — 墨西哥比索</option>
+                                <option value="TRY">TRY — 土耳其里拉</option>
+                                <option value="PHP">PHP — 菲律宾比索</option>
+                                <option value="IDR">IDR — 印度尼西亚盾</option>
+                                <option value="THB">THB — 泰国泰铢</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">实时大盘基准汇率</label>
-                            <div id="referenceRateDisplay" class="w-full p-3 bg-slate-50 font-mono font-bold text-blue-600 rounded-xl text-md flex items-center border border-slate-200">
-                                1 USD = 1,480.00 NGN
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">基准汇率</label>
+                            <div id="referenceRateDisplay"
+                                class="w-full p-3.5 bg-white font-mono font-black text-wise-forest rounded-2xl text-sm flex items-center border-2 border-slate-200 min-h-[52px]">
+                                1 USD = 1,502.00 NGN
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 mt-6 font-mono text-xs space-y-2">
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200 font-mono text-xs space-y-2">
                         <div class="flex justify-between items-center text-slate-400 border-b border-dashed border-slate-200 pb-2 mb-2">
                             <span>账目换算</span>
-                            <span>估计名义清算价值</span>
+                            <span>估计清算价值</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-slate-500">本币折算额:</span>
-                            <span id="convertedAmountDisplay" class="font-extrabold text-slate-900 text-sm">-- NGN</span>
+                            <span class="text-slate-500">本币折算额</span>
+                            <span id="convertedAmountDisplay" class="font-black text-wise-forest text-base">-- NGN</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-6 p-4 bg-blue-50 rounded-xl text-[11px] leading-relaxed text-blue-700 border border-blue-100 font-sans">
+                <div class="mt-6 p-4 bg-wise-forest/5 rounded-2xl text-xs leading-relaxed text-wise-forest border border-wise-forest/10 font-sans">
                     <p class="font-bold mb-1"><i class="fa-solid fa-circle-info mr-1"></i> [系统提示]</p>
                     *如需同步实时动态对账数据流以及启用云端财务安全验证协议，请使用企业专属数字证书登录您的智能对账控制台
                 </div>
@@ -291,57 +310,65 @@
         </div>
     </section>
 
-    <section id="contact-us-panel" class="py-24 bg-slate-50 border-t border-slate-200">
+    <!-- 商户意向登记 -->
+    <section id="contact-us-panel" class="py-24">
         <div class="max-w-3xl mx-auto px-4">
             <div class="text-center mb-12">
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-sans uppercase">
-                    商户意向登记与技术对接申请
+                <h2 class="text-3xl sm:text-4xl font-black text-wise-forest tracking-tight">
+                    商户意向登记
                 </h2>
+                <p class="text-slate-500 text-sm mt-3">递交即生成沙箱凭证，零后端依赖</p>
             </div>
 
-            <div class="bg-white rounded-2xl border border-slate-200 shadow-md p-8 sm:p-10 relative">
+            <div class="bg-white rounded-3xl border border-slate-200 p-8 sm:p-10 shadow-sm">
                 <form id="contactUsForm" class="space-y-5">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">商户/企业法定登记名称 (company_name) *</label>
-                        <input type="text" id="company_name" placeholder="例如：跨境小商品出口贸易主体" required class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-blue-600 transition text-slate-900">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">企业法定名称 *</label>
+                        <input type="text" id="company_name" placeholder="跨境出口贸易主体" required
+                            class="w-full p-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-mono focus:outline-none focus:border-wise-forest transition text-slate-900">
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">正式授权联络人全称 *</label>
-                            <input type="text" id="contact_name" placeholder="例如：张经理" required class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-blue-600 transition text-slate-900">
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">授权联络人 *</label>
+                            <input type="text" id="contact_name" placeholder="张经理" required
+                                class="w-full p-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-mono focus:outline-none focus:border-wise-forest transition text-slate-900">
                         </div>
                         <div>
-                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">联络凭证 (微信/Email/手机号) *</label>
-                            <input type="text" id="contact_info" placeholder="例如：tech_integration@pinebay.com" required class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-medium focus:outline-none focus:border-blue-600 transition text-slate-900">
+                            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">联络凭证 *</label>
+                            <input type="text" id="contact_info" placeholder="tech@company.com" required
+                                class="w-full p-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm font-mono focus:outline-none focus:border-wise-forest transition text-slate-900">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 font-mono">拟开通新兴市场清算走廊 *</label>
-                        <select id="target_currency" class="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:border-blue-600 transition cursor-pointer">
-                            <option value="NGN">🇳🇬 尼日利亚 - 离岸代收与同名轧差清算走廊 (NGN)</option>
-                            <option value="GHS">🇬🇭 加纳 - 移动货币代收网关 (GHS)</option>
-                            <option value="KES">🇰🇪 肯尼亚 - M-Pesa 移动收银特许专区 (KES)</option>
-                            <option value="TZS">🇹🇿 坦桑尼亚 - 电信直连结算总线矩阵 (TZS)</option>
-                            <option value="ZMW">🇿🇲 赞比亚 - 主权清算大闸控制仓 (ZMW)</option>
-                            <option value="RWF">🇷🇼 卢旺达 - 移动收单分流沙箱槽位 (RWF)</option>
-                            <option value="MWK">🇲🇼 马拉维 - 官方特许清算管道网关 (MWK)</option>
-                            <option value="IDR">🇮🇩 印度尼西亚 - 虚拟账户聚合代收线 (IDR)</option>
-                            <option value="PHP">🇵🇭 菲律宾 - GCash 极速收银台托管节点 (PHP)</option>
-                            <option value="THB">🇹🇭 泰国 - PromptPay 国家级统一扫码网关 (THB)</option>
-                            <option value="BRL">🇧🇷 巴西 - Pix 高频实时对账出海长廊 (BRL)</option>
-                            <option value="TRY">🇹🇷 土耳其 - 里拉全球影子总账核销端 (TRY)</option>
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">清算走廊 *</label>
+                        <select id="target_currency"
+                            class="w-full p-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-xs font-mono font-bold text-wise-forest focus:outline-none focus:border-wise-forest cursor-pointer">
+                            <option value="NGN">🇳🇬 尼日利亚 NGN</option>
+                            <option value="GHS">🇬🇭 加纳 GHS</option>
+                            <option value="KES">🇰🇪 肯尼亚 KES</option>
+                            <option value="TZS">🇹🇿 坦桑尼亚 TZS</option>
+                            <option value="ZMW">🇿🇲 赞比亚 ZMW</option>
+                            <option value="RWF">🇷🇼 卢旺达 RWF</option>
+                            <option value="MWK">🇲🇼 马拉维 MWK</option>
+                            <option value="IDR">🇮🇩 印度尼西亚 IDR</option>
+                            <option value="PHP">🇵🇭 菲律宾 PHP</option>
+                            <option value="THB">🇹🇭 泰国 THB</option>
+                            <option value="BRL">🇧🇷 巴西 BRL</option>
+                            <option value="TRY">🇹🇷 土耳其 TRY</option>
                         </select>
                     </div>
 
-                    <button type="submit" class="w-full mt-4 py-3.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold uppercase tracking-wider rounded-xl text-xs font-mono transition duration-200 shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-paper-plane"></i> 递交技术合作尽调申请
+                    <button type="submit"
+                        class="wise-cta w-full mt-2 py-4 px-4 bg-wise-lime hover:bg-[#b8f48a] text-wise-forest font-black uppercase tracking-wider rounded-full text-sm font-mono flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        递交尽调申请
                     </button>
-                    
-                    <div id="formSuccessStatus" class="hidden mt-6 bg-blue-50 border border-blue-100 rounded-xl p-5 space-y-4 font-mono text-xs">
-                        <div class="flex items-start gap-2.5 text-blue-900">
-                            <span class="text-blue-500 mt-0.5"><i class="fa-solid fa-circle-check text-base"></i></span>
+
+                    <div id="formSuccessStatus" class="hidden mt-6 bg-wise-lime/15 border border-wise-lime/30 rounded-2xl p-5 space-y-3 font-mono text-xs">
+                        <div class="flex items-start gap-2.5 text-wise-forest">
+                            <span class="text-wise-forest mt-0.5"><i class="fa-solid fa-circle-check text-base"></i></span>
                             <div>
                                 <strong class="font-sans text-sm block mb-1">意向申请已无损安全接收！</strong>
                                 <span class="text-slate-600 leading-relaxed block">
@@ -355,33 +382,11 @@
         </div>
     </section>
 
-    <footer class="bg-slate-900 text-slate-400 text-[11px] py-16 border-t border-slate-800 font-mono relative overflow-hidden">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-12">
-                <div>
-                    <div class="flex items-center space-x-2 text-white mb-4">
-                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xs">
-                            <i class="fa-solid fa-network-wired"></i>
-                        </div>
-                        <span class="text-xs font-bold font-sans">FinLinks 融链信息科技</span>
-                    </div>
-                    <p class="max-w-md leading-relaxed">
-                        &copy; 2026 FinLinks Tech. 版权所有 <br>
-                        支付底层技术软硬件架构与多边轧差对账算法供应商。 <br>
-                        专注于为全球高增长出海中资主体及跨国数字软件生态提供金融级合规中台隔离防御服务。
-                    </p>
-                </div>
-                
-                <div class="p-6 bg-slate-950 rounded-2xl border border-slate-800 leading-relaxed text-justify text-slate-400">
-                    <span class="font-bold text-white block mb-2 font-sans flex items-center gap-1.5"><i class="fa-solid fa-scale-balanced text-blue-500"></i> 技术合规与非托管法律 Notice:</span>
-                    FinLinks 严格作为第三方独立跨境支付软件技术底座提供商运行。本平台明确不属于吸储商业银行、标准持牌第三方跨境持牌收单中心或金钱服务经营者（MSO）。
-                </div>
-            </div>
-        </div>
+    <footer class="py-10 border-t border-slate-200/80 bg-wise-warm text-center text-[11px] text-slate-400 font-mono leading-relaxed">
+        <p>&copy; 2026 FinLinks Tech. 版权所有</p>
     </footer>
 
     <script type="module">
-        // 🔒 1:1 对齐生产底价，全量扩容至 2026 年最新大盘数据
         const FX_MATRICES = {
             "NGN": 1502.00, "GHS": 14.80, "TZS": 2610.00, "ZMW": 26.20, "RWF": 1315.00, "MWK": 1730.00,
             "KES": 131.00, "BRL": 5.15, "MXN": 17.85, "TRY": 32.45, "PHP": 58.20, "IDR": 16120.00, "THB": 36.45
@@ -400,24 +405,21 @@
 
             const formattedRate = rate > 100 ? rate.toFixed(2) : rate.toFixed(4);
             if (referenceRateDisplay) {
-                referenceRateDisplay.innerText = `1 USD = ${parseFloat(formattedRate).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})} ${target}`;
+                referenceRateDisplay.innerText = `1 USD = ${parseFloat(formattedRate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} ${target}`;
             }
             const converted = baseUsd * rate;
             if (convertedAmountDisplay) {
-                convertedAmountDisplay.innerText = `${converted.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 4})} ${target}`;
+                convertedAmountDisplay.innerText = `${converted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })} ${target}`;
             }
         }
 
-        // 🛡️ 绝杀 403 污染雷：首页计算卡退化为纯本地清算大盘，绝对不向后端发射网络请求
         baseUsdAmountInput.addEventListener("input", recalculateSimulation);
         targetCurrencySelect.addEventListener("change", recalculateSimulation);
-        
         recalculateSimulation();
 
-        // 📝 激活沙箱开通：数据隔离存储
         const sandboxAccessForm = document.getElementById("contactUsForm");
         const formSuccessStatus = document.getElementById("formSuccessStatus");
-        
+
         if (sandboxAccessForm) {
             sandboxAccessForm.addEventListener("submit", (e) => {
                 e.preventDefault();
@@ -425,16 +427,16 @@
                 const uContact = document.getElementById("contact_info").value;
                 const uCurrency = document.getElementById("target_currency").value;
 
-                const generatedMid = "FLK-SANDBOX-" + cName.toUpperCase().slice(0, 4).replace(/[^A-Z0-9]/g, 'X') + "-" + Math.floor(100+Math.random()*900);
-                const generatedSubId = "FINLINKS-SANDBOX-044-" + Math.floor(100000+Math.random()*900000);
-                
+                const generatedMid = "FLK-SANDBOX-" + cName.toUpperCase().slice(0, 4).replace(/[^A-Z0-9]/g, 'X') + "-" + Math.floor(100 + Math.random() * 900);
+                const generatedSubId = "FINLINKS-SANDBOX-044-" + Math.floor(100000 + Math.random() * 900000);
+
                 localStorage.setItem("FINLINKS_SANDBOX_MID", generatedMid);
                 localStorage.setItem("FINLINKS_SANDBOX_COMPANY_NAME", cName);
                 localStorage.setItem("finlinks_sandbox_subaccount_id", generatedSubId);
                 localStorage.setItem("FINLINKS_SANDBOX_LAST_CURRENCY", uCurrency);
 
                 if (formSuccessStatus) formSuccessStatus.classList.remove("hidden");
-                
+
                 const cleanToken = "sandbox_session_secret_token_" + btoa(encodeURIComponent(cName + ":" + uContact));
                 localStorage.setItem("finlinks_sandbox_token", cleanToken);
 
@@ -442,48 +444,42 @@
             });
         }
 
-        // 🚂 穿透审计级联跳转引擎 (绑定到大宗货单穿透审计框)
         const auditForm = document.getElementById('audit-form');
         if (auditForm) {
-            auditForm.addEventListener('submit', function(e) {
+            auditForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 const token = document.getElementById('token-input').value.trim();
                 const errBox = document.getElementById('error-box');
-                
+
                 if (token.length !== 16) {
-                    errBox.innerText = "🛑 错误：安全审计令牌长度必须精确为 16 位字符。";
+                    errBox.innerText = "错误：安全审计令牌长度必须精确为 16 位字符。";
                     errBox.classList.remove('hidden');
                     return;
                 }
-                
+
                 errBox.classList.add('hidden');
-                // 🚀 级联变轨：跳转大厅时带上单号和 Token 参数，确保沙箱应用平滑识别
                 window.location.href = `/tracker.html?token=${token}`;
             });
         }
 
-        // ==============================================================================
-        // 🎭 [TRADINGVIEW SHADOW MASK] 陌生人免登录外汇行情大盘伪装垫片
-        // ==============================================================================
-        window.openSovereignMarketView = function() {
+        window.openSovereignMarketView = function () {
             const mask = document.createElement('div');
             mask.id = "finlinks-sovereign-mask";
-            mask.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2,6,23,0.98); z-index:99999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; box-sizing:border-box;";
-            
+            mask.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(22,51,0,0.97);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;";
+
             mask.innerHTML = `
-                <div style="width:100%; max-width:1200px; display:flex; justify-content:between; align-items:center; margin-bottom:20px; border-bottom:1px solid #1e293b; padding-bottom:16px;">
+                <div style="width:100%;max-width:1200px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:16px;">
                     <div>
-                        <h2 style="color:#10b981; margin:0; font-size:16px; font-family:monospace; font-weight:900; letter-spacing:0.1em; text-align:left;">⚡ FINLINKS GLOBAL FX TICKER (DELAYED)</h2>
-                        <p style="color:#64748b; margin:6px 0 0 0; font-size:11px; font-family:sans-serif; font-weight:500; text-align:left;">[PUBLIC SECURITY ROUTE] 当前终端展示为国际合规延迟大盘（日级刷新），如需更多动态信息，请使用商户专属控制塔凭证登录。</p>
+                        <h2 style="color:#9FE870;margin:0;font-size:16px;font-family:monospace;font-weight:900;letter-spacing:0.1em;">FINLINKS GLOBAL FX TICKER</h2>
+                        <p style="color:rgba(255,255,255,0.5);margin:6px 0 0 0;font-size:11px;">[PUBLIC SECURITY ROUTE] 当前终端展示为国际合规延迟大盘（日级刷新），如需更多动态信息，请使用商户专属控制塔凭证登录。</p>
                     </div>
-                    <button onclick="document.getElementById('finlinks-sovereign-mask').remove()" style="background:#0f172a; color:#f1f5f9; border:1px solid #334155; padding:10px 20px; border-radius:10px; cursor:pointer; font-size:11px; font-family:monospace; font-weight:900; transition:all 0.2s; letter-spacing:0.05em;" onmouseover="this.style.background='#1e293b'; this.style.borderColor='#10b981';" onmouseout="this.style.background='#0f172a'; this.style.borderColor='#334155';">❌ 关闭终端 (CLOSE)</button>
+                    <button onclick="document.getElementById('finlinks-sovereign-mask').remove()" style="background:#163300;color:#9FE870;border:1px solid #9FE870;padding:10px 24px;border-radius:999px;cursor:pointer;font-size:11px;font-weight:900;">关闭</button>
                 </div>
-                
-                <div style="width:100%; max-width:1200px; height:78vh; border:1px solid #1e293b; border-radius:16px; overflow:hidden; background:#000; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
-                    <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_fx_widget&symbol=FX_IDC%3AUSDCNY&interval=D&symboledit=0&saveimage=0&toolbarbg=111827&theme=dark&style=1&timezone=Asia%2FShanghai&studies=%5B%5D&locale=zh_CN" style="width:100%; height:100%; border:none;"></iframe>
+                <div style="width:100%;max-width:1200px;height:78vh;border:1px solid rgba(159,232,112,0.2);border-radius:24px;overflow:hidden;background:#000;">
+                    <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_fx_widget&symbol=FX_IDC%3AUSDCNY&interval=D&symboledit=0&saveimage=0&toolbarbg=163300&theme=dark&style=1&timezone=Asia%2FShanghai&studies=%5B%5D&locale=zh_CN" style="width:100%;height:100%;border:none;"></iframe>
                 </div>
             `;
-            
+
             document.body.appendChild(mask);
         };
     </script>
