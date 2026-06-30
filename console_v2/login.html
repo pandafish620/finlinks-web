@@ -65,6 +65,9 @@
     </div>
 
     <script type="module">
+        const IS_LOCAL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+        const BASE_URL = IS_LOCAL ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
+
         window.triggerAccountRecovery = function() {
             const msgBox = document.getElementById('login-msg-box');
             msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-amber-500/30 text-amber-400 leading-relaxed";
@@ -84,51 +87,82 @@
             recoveryTrigger.classList.add('hidden');
             msgBox.classList.remove('hidden', 'text-rose-400', 'text-emerald-400', 'border-rose-500/30', 'border-emerald-500/30');
             msgBox.classList.add('text-amber-400', 'border-amber-500/20');
-            msgBox.innerText = "⚡ [AUTHENTICATING] 正在通过 NewAuthSentinel 自愈网关核销凭证...";
+            msgBox.innerText = "⚡ [AUTHENTICATING] 正在安全打包 OAuth2 标准密文表单载荷并叩击主骨骼端点...";
             btn.disabled = true;
             btn.classList.add("opacity-40", "cursor-not-allowed");
 
-            // 👑 🏁 呼叫主权安全哨兵
-            if (window.authSentinel && typeof window.authSentinel.loginMerchant === "function") {
-                window.authSentinel.loginMerchant(
-                    email, 
-                    password,
-                    // ✅ 成功回调
-                    (result) => {
-                        const currentStatus = (result.account_status || "APPROVED").toUpperCase().trim();
-                        
-                        if (currentStatus === "APPROVED") {
-                            msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-emerald-500/30 text-emerald-400 leading-relaxed shadow-lg";
-                            msgBox.innerText = "🟢 [SUCCESS] 凭证核销大胜！已获得完全控制权。正在毫秒级弹射控制大厅...";
-                            
-                            setTimeout(() => {
-                                const userLang = navigator.language || navigator.userLanguage;
-                                // 🎯 铁血级路径死锁对账：处于同级 /console_v2/ 物理轨道下，直接原位切换！
-                                window.location.href = userLang.includes('zh') ? 'dashboard_zh.html' : 'dashboard_en.html';
-                            }, 200);
-                        } else {
-                            msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-amber-500/30 text-amber-400 leading-relaxed shadow-lg";
-                            msgBox.innerText = `⚠️ [LIMITED TERMINAL] 身份为 ${currentStatus}。核心清算已阻断，正在物理引流合规准入舱...`;
-                            
-                            setTimeout(() => {
-                                window.location.href = 'kyb_portal.html';
-                            }, 1000);
-                        }
+            try {
+                // 🚀 刚性修正：走真身验证弹道，使用 URLSearchParams 严格向 200 OK 旧接口发包
+                const formData = new URLSearchParams();
+                formData.append('username', email);
+                formData.append('password', password);
+
+                let response = await fetch(`${BASE_URL}/api/v1/auth/login`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'accept': 'application/json'
                     },
-                    // ❌ 失败回调
-                    (errDetail) => {
-                        msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-rose-500/30 text-rose-400 leading-relaxed";
-                        msgBox.innerText = `❌ [ERROR] 中台物理拒绝放行: ${errDetail}`;
-                        btn.disabled = false;
-                        btn.classList.remove("opacity-40", "cursor-not-allowed");
-                        recoveryTrigger.classList.remove('hidden');
-                    }
-                );
-            } else {
+                    body: formData
+                });
+
+                let data;
+                if (response.status === 422) {
+                    msgBox.innerText = "🔄 [RETRY] 接口格式排异，自动激活第二备用总线（纯 JSON 结构体回滚）...";
+                    const jsonResponse = await fetch(`${BASE_URL}/api/v1/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
+                        body: JSON.stringify({ username: email, password: password })
+                    });
+                    data = await jsonResponse.json();
+                    if (!jsonResponse.ok) throw new Error(data.detail || "JSON 隔离通道拒绝放行凭证");
+                } else if (response.status === 404 || response.status === 405) {
+                    throw new Error("后端核心登录门牌号匹配失败 (404/405)。");
+                } else {
+                    data = await response.json();
+                    if (!response.ok) throw new Error(data.detail || "中台风控大闸物理拒绝放行");
+                }
+
+                const token = data.access_token || data.token;
+                const merchantId = data.merchant_id || email;
+                
+                if (!token) throw new Error("回执载荷异常：未包含有效签名的 JWT 黄金令牌");
+                
+                // 🧱 严格对齐 dashboard.js 的小写小口子注入缓存
+                localStorage.setItem('finlinks_auth_token', token);
+                localStorage.setItem('FINLINKS_ACTIVE_MID', merchantId.trim().toLowerCase());
+                if (data.company_name) localStorage.setItem('FINLINKS_COMPANY_NAME', data.company_name);
+                
+                // 🚦 提取合规状态并本地落地
+                const accountPayload = data.account_payload || {};
+                const rawStatus = data.status || accountPayload.status || "APPROVED";
+                const currentStatus = rawStatus.toUpperCase().trim();
+                localStorage.setItem('FINLINKS_ACCOUNT_STATUS', currentStatus);
+
+                // 200ms 极速物理放行，完美接力 dashboard.js 的首屏 Promise 并发大总线！
+                if (currentStatus === "APPROVED") {
+                    msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-emerald-500/30 text-emerald-400 leading-relaxed shadow-lg";
+                    msgBox.innerText = "🟢 [SUCCESS] 凭证核销成功！真身血管已通电。正在秒级弹射大厅...";
+                    
+                    setTimeout(() => {
+                        const userLang = navigator.language || navigator.userLanguage;
+                        window.location.href = userLang.includes('zh') ? 'dashboard_zh.html' : 'dashboard_en.html';
+                    }, 200);
+                } else {
+                    msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-amber-500/30 text-amber-400 leading-relaxed shadow-lg";
+                    msgBox.innerText = `⚠️ [LIMITED TERMINAL] 身份为 ${currentStatus}。核心清算已阻断，正在物理引流合规准入舱...`;
+                    
+                    setTimeout(() => {
+                        window.location.href = 'kyb_portal.html';
+                    }, 1000);
+                }
+
+            } catch (err) {
                 msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-rose-500/30 text-rose-400 leading-relaxed";
-                msgBox.innerText = "❌ [CRITICAL CODE BLOCK] 鉴权安全哨兵总线 (../assets/js/new_auth_sentinel.js) 挂载断路，请检查物理树路径。";
+                msgBox.innerText = `❌ [ERROR] 登录认证熔断: ${err.message}`;
                 btn.disabled = false;
                 btn.classList.remove("opacity-40", "cursor-not-allowed");
+                recoveryTrigger.classList.remove('hidden');
             }
         }
     </script>
