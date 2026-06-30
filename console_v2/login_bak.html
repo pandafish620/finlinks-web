@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinLinks 5.2.0 - 安全认证控制塔</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { background-color: #020617; color: #f8fafc; }
+        /* 👑 注入高级外汇工作站独占的极光漫反射特效 */
+        .ambient-glow {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.04) 0%, rgba(0, 0, 0, 0) 70%);
+            top: -250px;
+            left: -250px;
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased flex items-center justify-center h-screen bg-slate-950 relative overflow-hidden select-none">
+
+    <div class="ambient-glow animate-pulse"></div>
+    <div class="absolute right-[-200px] bottom-[-200px] w-[600px] h-[600px] bg-[radial-gradient(circle,rgba(20,184,166,0.03)_0%,rgba(0,0,0,0)_60%)] pointer-events-none z-0"></div>
+
+    <div class="w-full max-w-md p-8 bg-slate-900/80 backdrop-blur-xl border border-slate-800/80 rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.7)] space-y-6 z-10 relative transition-all duration-500 hover:border-slate-700/50">
+        
+        <div class="space-y-2 relative">
+            <div class="flex items-center space-x-1.5 mb-1 justify-center">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-[10px] uppercase font-mono tracking-[0.2em] text-slate-500 font-bold">SOVEREIGN NETWORK ADAPTER</span>
+            </div>
+            <h1 class="text-3xl font-black tracking-tighter text-center bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 bg-clip-text text-transparent font-mono">
+                FinLinks <span class="text-xs font-normal text-slate-500 font-sans tracking-normal">v5.2.0</span>
+            </h1>
+            <p class="text-slate-400 text-center text-xs font-medium tracking-wide">全球多通道聚合商户控制台安全门禁</p>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLiveLogin(event)" class="space-y-4 pt-2">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">商户主权认证邮箱 (Email)</label>
+                <input type="email" id="loginEmail" value="zhangxiaoyu620@hotmail.com" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 text-xs text-emerald-400 placeholder-slate-600 focus:outline-none focus:border-emerald-500/50 focus:shadow-[0_0_15px_rgba(16,185,129,0.05)] font-mono transition-all duration-300" required placeholder="请输入您的法人电子邮箱">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">安全访问密匙 (Password)</label>
+                <input type="password" id="loginPassword" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-500/50 focus:shadow-[0_0_15px_rgba(16,185,129,0.05)] font-mono transition-all duration-300" required placeholder="请输入您的安全密码">
+            </div>
+
+            <div id="login-msg-box" class="hidden text-[11px] font-mono p-3 bg-slate-950/90 rounded-xl border border-slate-800 transition-all duration-300 leading-relaxed shadow-inner"></div>
+
+            <button type="submit" id="loginBtn" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold py-3.5 rounded-xl text-xs tracking-widest transition-all duration-300 uppercase shadow-lg shadow-emerald-500/10 active:scale-[0.98] cursor-pointer mt-2">
+                🔒 击发实弹确权登录 (AUTHENTICATE)
+            </button>
+        </form>
+
+        <div class="mt-4 pt-4 border-t border-slate-800/60 flex flex-col space-y-3 text-center">
+            <p class="text-xs text-slate-500 tracking-wide">新跨境商户？<a href="register.html" class="text-emerald-400 hover:text-emerald-300 font-bold underline underline-offset-4 ml-1 transition-all">自主入驻申请开户 →</a></p>
+            <div id="forgot-password-trigger" class="hidden animate-fade-in">
+                <a href="javascript:void(0);" onclick="triggerAccountRecovery()" class="text-[10px] font-mono text-slate-500 hover:text-teal-400 transition-colors uppercase tracking-wider">⚠️ [CREDENTIAL RECOVERY] 忘记密码或用户名找回?</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        const IS_LOCAL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
+        // 自动分流探测网关端点
+        const BASE_URL = IS_LOCAL ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
+
+        // 临时兜底：找回密码核销弹窗
+        window.triggerAccountRecovery = function() {
+            msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-amber-500/30 text-amber-400 leading-relaxed";
+            msgBox.innerText = "ℹ️ [SYSTEM INFRA] 自主身份重置网关并线中。请将您的注册企业法人主体证明发送至 compliance@finlinks.io 申请人工核销放行。";
+            msgBox.classList.remove('hidden');
+        };
+
+        window.handleLiveLogin = async function(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const msgBox = document.getElementById('login-msg-box');
+            const btn = document.getElementById('loginBtn');
+            const recoveryTrigger = document.getElementById('forgot-password-trigger');
+
+            // 点火黑金提示流
+            recoveryTrigger.classList.add('hidden');
+            msgBox.classList.remove('hidden', 'text-rose-400', 'text-emerald-400', 'border-rose-500/30', 'border-emerald-500/30');
+            msgBox.classList.add('text-amber-400', 'border-amber-500/20');
+            msgBox.innerText = "⚡ [AUTHENTICATING] 正在安全打包 OAuth2 标准密文表单载荷...";
+            btn.disabled = true;
+            btn.classList.add("opacity-40", "cursor-not-allowed");
+
+            try {
+                // 1. 编译 FastAPI 期待的 x-www-form-urlencoded 标准表单流（对齐老线 auth_router 承重墙）
+                const formData = new URLSearchParams();
+                formData.append('username', email);
+                formData.append('password', password);
+
+                let response = await fetch(`${BASE_URL}/api/v1/auth/login`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'accept': 'application/json'
+                    },
+                    body: formData
+                });
+
+                let data;
+                
+                // 🛡️ 防御性分流拦截自愈大闸：尝试轰击老线 /auth/login
+                if (response.status === 422) {
+                    msgBox.innerText = "🔄 [RETRY] 接口格式排异，自动激活第二备用总线（纯 JSON 结构体回滚）...";
+                    const jsonResponse = await fetch(`${BASE_URL}/api/v1/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
+                        body: JSON.stringify({ username: email, password: password })
+                    });
+                    data = await jsonResponse.json();
+                    if (!jsonResponse.ok) throw new Error(data.detail || "JSON 隔离通道拒绝放行凭证");
+                } else if (response.status === 404 || response.status === 405) {
+                    // ⚙️ 彻底绝杀流氓前缀，不给 404 任何容错空间，直接阻断
+                    throw new Error("后端核心登录门牌号匹配失败 (404/405)，请确保后端 main.py 挂载了正确的 /api/v1/auth 前缀。");
+                } else {
+                    data = await response.json();
+                    if (!response.ok) throw new Error(data.detail || "中台风控大闸物理拒绝放行");
+                }
+
+                // =============================================================
+                // 👑 【全线并线合拢大捷点】：提取黄金令牌并完美注入多币种命名空间 👑
+                // =============================================================
+                const token = data.access_token || data.token;
+                const merchantId = data.merchant_id || email; // 提取真身商户号指纹
+                
+                if (!token) throw new Error("回执载荷异常：未包含有效签名的 JWT 黄金令牌");
+                
+                // A. 严格灌入老线小写命名空间，确保 client 总线无损调用！
+                localStorage.setItem('finlinks_auth_token', token);
+                
+                // B. 严格锁死新版外汇多币种冷钱包与商户企业名牌特征码！
+                localStorage.setItem('FINLINKS_ACTIVE_MID', merchantId.trim().toLowerCase());
+                if (data.company_name) localStorage.setItem('FINLINKS_COMPANY_NAME', data.company_name);
+
+                // =============================================================
+                // 🧱 【新代码插入位置 2】：实弹高频叩击 /users/me 黄金门禁，拦截并实施三级风控分流
+                // =============================================================
+                msgBox.innerText = "🔍 [SHADOW LEDGER AUDIT] 令牌解密成功，正在下钻打捞商户行级合规状态状态机...";
+                
+                const profileResponse = await fetch(`${BASE_URL}/api/v1/auth/users/me`, {
+                    method: 'GET',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'accept': 'application/json'
+                    }
+                });
+
+                if (!profileResponse.ok) {
+                    throw new Error("在中台提取多租户隔离边界失败，账户可能处于高危死锁状态。");
+                }
+
+                const profileData = await profileResponse.json();
+                const accountPayload = profileData.account_payload || {};
+                // 🎯 纠偏：将 Python 的 .strip() 刚性修正为 JavaScript 唯一的 .trim()！
+                const currentStatus = (accountPayload.status || "PENDING_VERIFY").toUpperCase().trim();
+
+                localStorage.setItem('FINLINKS_ACCOUNT_STATUS', currentStatus);
+                if (accountPayload.company_name) localStorage.setItem('FINLINKS_COMPANY_NAME', accountPayload.company_name);
+
+                // 🚦 三级渐进式合规分流拦截总闸
+                if (currentStatus === "APPROVED") {
+                    // ✅ 第 3 类用户：全量完全体主宰者，直接开放完整看板
+                    msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-emerald-500/30 text-emerald-400 leading-relaxed shadow-lg";
+                    msgBox.innerText = "🟢 [SUCCESS] 核心清算授权完毕！已获得 G10 通道完全控制权。正在弹射进入全量持仓大厅...";
+                    
+                    setTimeout(() => {
+                        const userLang = navigator.language || navigator.userLanguage;
+                        if (userLang.includes('zh')) {
+                            window.location.href = 'dashboard_zh.html'; 
+                        } else {
+                            window.location.href = 'dashboard_en.html'; 
+                        }
+                    }, 800);
+
+                } else {
+                    // 🟡 第 2 类用户：挂起观察者 (PENDING_VERIFY / EMAIL_VERIFIED / PENDING_APPROVAL)
+                    // 准许其进入 Dashboard 看汇率，但在主控制台内强制抹灰并引流至你的 KYB portal
+                    msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-amber-500/30 text-amber-400 leading-relaxed shadow-lg";
+                    msgBox.innerText = `⚠️ [LIMITED TERMINAL] 身份为 ${currentStatus}。根据巴塞尔反洗钱法案，核心清算功能已抹灰。系统正引导您进入高级 KYB 备案大厅...`;
+                    
+                    // 🎯 像素级咬合你写好的 KYB 模块！直接强制引流
+                    setTimeout(() => {
+                        window.location.href = 'kyb_portal.html';
+                    }, 1200);
+                }
+
+            } catch (err) {
+                // ❌ 第 1 类用户：账密错、撞门失败或被拒绝放行
+                msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-rose-500/30 text-rose-400 leading-relaxed";
+                msgBox.innerText = `❌ [ERROR] 登录认证熔断: ${err.message}`;
+                btn.disabled = false;
+                btn.classList.remove("opacity-40", "cursor-not-allowed");
+                // 原位炸开忘记密码的特赦链接
+                recoveryTrigger.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
