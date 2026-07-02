@@ -169,20 +169,26 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
 /**
  * 💱 2. 实弹确权交割算子（100% 像素级对齐后端强类型 Body 契约）
  */
-export async function submitFxConversion(null1, null2, null3, pushAuditLog, showPremiumNotification, fetchBalances) {
-    const sellCurrency = document.getElementById("sell-currency").value.toUpperCase().trim();
-    const buyCurrency = document.getElementById("buy-currency").value.toUpperCase().trim();
-    const sellAmount = parseFloat(document.getElementById("sell-amount").value);
+// =====================================================================
+// 💾 assets/js/fx_processor.js 纯净生产级原子化清算血管（完全体）
+// =====================================================================
+export async function submitFxConversion(sellCurrencyParam, buyCurrencyParam, sellAmountParam, lockedRateParam, quoteTimestampParam, routingViaParam, pushAuditLog, showPremiumNotification, fetchBalances) {
+    // 🛰️ 如果外部未显式投喂（兼容老式调用），则刚性从当前控制大厅 DOM 中即时刮取
+    const sellCurrency = (sellCurrencyParam || document.getElementById("sell-currency").value).toUpperCase().trim();
+    const buyCurrency = (buyCurrencyParam || document.getElementById("buy-currency").value).toUpperCase().trim();
+    const sellAmount = parseFloat(sellAmountParam || document.getElementById("sell-amount").value);
     
     const elQuoteTimestamp = document.getElementById("fx-quote-timestamp");
-    const quoteTimestamp = elQuoteTimestamp ? parseInt(elQuoteTimestamp.value || "0") : 0;
+    const quoteTimestamp = quoteTimestampParam ? parseInt(quoteTimestampParam) : (elQuoteTimestamp ? parseInt(elQuoteTimestamp.value || "0") : 0);
     
     const modalConfirm = document.getElementById("fx-modal-confirm");
-    const fxRate = modalConfirm ? parseFloat(modalConfirm.dataset.currentRate || "0") : 0;
-    const routingVia = modalConfirm ? (modalConfirm.dataset.routingVia || "FLUTTERWAVE").toUpperCase().trim() : "FLUTTERWAVE";
+    const fxRate = lockedRateParam ? parseFloat(lockedRateParam) : (modalConfirm ? parseFloat(modalConfirm.dataset.currentRate || "0") : 0);
+    
+    // 🎯 核心纠偏：优先使用传入的指定渠道，若无则读取 dataset，最后兜底锁死大厂 AIRWALLEX
+    const routingVia = (routingViaParam || (modalConfirm ? modalConfirm.dataset.routingVia : "AIRWALLEX") || "AIRWALLEX").toUpperCase().trim();
 
     if (!sellAmount || fxRate <= 0 || !routingVia) {
-        if (typeof pushAuditLog === "function") pushAuditLog(`[EXECUTE DENIED] 🚨 固价合同失效，拒绝向中台打流！`);
+        if (typeof pushAuditLog === "function") pushAuditLog(`[EXECUTE DENIED] 🚨 固价合同校验失败 (Rate: ${fxRate}, Via: ${routingVia})，拒绝向中台打流！`);
         return;
     }
 
@@ -208,13 +214,8 @@ export async function submitFxConversion(null1, null2, null3, pushAuditLog, show
     const defaultRouting = buyCurrency === "NGN" ? "" : "021000021";
     const defaultTargetAcc = buyCurrency === "NGN" ? "0690000031" : "1234567890";
 
-    // =================================================================
     // 🚨 局部加塞：FinLinks 5.2.0 前端主权资本管制优雅降级门禁
-    // 🎯 拒绝将假指纹抛给后端，就地置灰按钮并给出金融级合规弹窗提示
-    // =================================================================
     const isInternalWalletSwap = (sellCurrency === "NGN" && buyCurrency === "USD");
-    
-    // 判断是否是没有填写受益人的纯自持钱包对敲
     const hasUserFilledTarget = elAccNum && elAccNum.value.trim() && elAccNum.value.trim() !== "string";
 
     if (isInternalWalletSwap && !hasUserFilledTarget) {
@@ -226,9 +227,10 @@ export async function submitFxConversion(null1, null2, null3, pushAuditLog, show
             pushAuditLog(`[COMPLIANCE BLOCKED] 🚨 拦截到自持钱包 NGN->USD 结汇。因西非资本管制，该方向功能不可用。`);
         }
         alert("【地缘风控熔断】因西非主权外汇资本管制，平台目前暂不支持【自持奈拉账户】直接结汇为【美元持仓账户】。\n\n该方向换汇功能暂时不可用，请绑定真实的离岸解付收款银行以触发跨境直付。");
-        return; // 刚性强退，火炮就地熄火
+        return;
     }
 
+    // 📦 组装金融级清算载荷（Payload），确保 Key 与后端 Pydantic 模型雷打不动地高度对齐
     const payloadBody = {
         "sell_currency": sellCurrency,
         "sell_amount": sellAmount,
@@ -265,7 +267,8 @@ export async function submitFxConversion(null1, null2, null3, pushAuditLog, show
         const data = await response.json();
 
         if (response.status === 200 && data.status === "success") {
-            if (fxTimerHandle) { clearInterval(fxTimerHandle); fxTimerHandle = null; }
+            // 掐断全局倒计时句柄
+            if (window.fxTimerHandle) { clearInterval(window.fxTimerHandle); window.fxTimerHandle = null; }
 
             if (typeof pushAuditLog === "function") {
                 pushAuditLog(`[CLEARING SUCCESS] 🎉 外汇交割成功！流水批次: ${data.fx_ref || data.fx_batch_ref}`);
@@ -275,12 +278,13 @@ export async function submitFxConversion(null1, null2, null3, pushAuditLog, show
             const elSellAmount = document.getElementById("sell-amount");
             if (elSellAmount) elSellAmount.value = "";
             
-            if (typeof window.fetchBalances === "function") {
+            // 冲刷重绘大厅资产
+            if (typeof fetchBalances === "function") {
                 if (typeof pushAuditLog === "function") {
                     pushAuditLog(`[LIVE AUTOMATION] 物理轧差锁定，正在等待云端多账本清算对齐...`);
                 }
                 setTimeout(async () => {
-                    await window.fetchBalances(); 
+                    await fetchBalances(); 
                     if (typeof pushAuditLog === "function") {
                         pushAuditLog(`[LIVE REPAINT] 🟢 全局多币种可用头寸重绘重组完毕，数字已自发自动更新！`);
                     }
