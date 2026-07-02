@@ -238,7 +238,7 @@ export async function submitFxConversion(null1, null2, null3, pushAuditLog, show
     console.log("📡 [FINLINKS V5.2.0 FIRE] 绝杀 422 强类型合规 30s 延时 JSON 发射:", payloadBody);
 
     try {
-        const response = await client("/fx/convert", {
+        const response = await client("ledger/fx/convert", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
