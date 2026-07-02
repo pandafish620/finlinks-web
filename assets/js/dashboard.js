@@ -70,10 +70,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 绑定询价（第一窗）与实弹交割（第二窗）的 onclick 发射纽带
     window.executeLiveQuoteInquiry = () => triggerLiveQuote(pushAuditLog, window.showPremiumNotification || showPremiumNotification);
-    window.executeLiveFxConversion = () => submitFxConversion(null, null, null, pushAuditLog, showPremiumNotification, () => {
-        fetchBalances();
-        fetchTransactionHistory(); // 换汇交割大胜后，流水大厅同步冲刷重绘！
-    });
+    // =====================================================================
+    // 👑 刚性核销对接：Execute 触发时，像素级刮取询价凭证并硬核装填打流
+    // =====================================================================
+    window.executeLiveFxConversion = () => {
+        const modalConfirm = document.getElementById("fx-modal-confirm");
+        const elQuoteTimestamp = document.getElementById("fx-quote-timestamp");
+        const sellCurrency = document.getElementById("sell-currency").value;
+        const buyCurrency = document.getElementById("buy-currency").value;
+        const sellAmount = parseFloat(document.getElementById("sell-amount").value);
+
+        // 🔍 从 DOM dataset 中光速抽离询价落锁时的原始数据指纹
+        const lockedRate = modalConfirm ? modalConfirm.dataset.currentRate : null;
+        const quoteTimestamp = elQuoteTimestamp ? elQuoteTimestamp.value : null;
+
+        // 📡 将实弹参数刚性喂给 submitFxConversion
+        // 契约顺序：submitFxConversion(sellCurrency, buyCurrency, amount, rate, timestamp, pushAuditLog, ...)
+        // 🎯 注意：请根据你本地 submitFxConversion 具体的形参位置精准投喂：
+        submitFxConversion(
+            sellCurrency, 
+            buyCurrency, 
+            sellAmount, 
+            lockedRate, 
+            quoteTimestamp, 
+            pushAuditLog, 
+            showPremiumNotification, 
+            () => {
+                fetchBalances();
+                fetchTransactionHistory(); // 换汇交割大胜后，流水大厅同步冲刷重绘！
+            }
+        );
+    };
 
     // ⚡ 积木 3：自主出金放款代付触点通电（传入核心平账刷盘算子组）
     window.executeLivePayoutDisbursal = () => handleLivePayoutDisbursal(() => {
