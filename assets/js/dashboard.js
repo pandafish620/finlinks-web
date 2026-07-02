@@ -58,7 +58,11 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     
     window.closeFxModal = () => {
-        if (typeof window.forceCancelFxTimer === "function") window.forceCancelFxTimer();
+        // ⏱️ 刚性合流：关闭窗口时，物理掐断 fx_processor.js 注入在内存中的动态自适应时钟，绝杀僵尸定时器
+        if (window.fxTimerHandle) { 
+            clearInterval(window.fxTimerHandle); 
+            window.fxTimerHandle = null; 
+        }
         document.getElementById("fx-modal-input")?.classList.add("pointer-events-none", "opacity-0");
         document.getElementById("fx-modal-confirm")?.classList.add("pointer-events-none", "opacity-0");
         document.getElementById("fx-modal")?.classList.add("pointer-events-none", "opacity-0");
@@ -173,25 +177,26 @@ document.addEventListener("DOMContentLoaded", () => {
  * 📊 1. 动态拉取左上角 Ticker 基准大盘
  */
 async function initGlobalFxTicker() {
-    const tickerContainer = document.getElementById("global-fx-ticker");
-    if (!tickerContainer) return;
-    try {
-        const response = await client("/fx/quote?sell_currency=USD&buy_currency=NGN&sell_amount=1", { method: "GET" });
-        if (response.status === 200) {
-            const data = await response.json();
-            const liveRate = data.final_settlement_rate || data.lock_rate || 1428.37;
-            tickerContainer.innerHTML = `
-                <div class="flex items-center space-x-4 text-[11px] font-mono text-slate-400">
-                    <span class="flex items-center">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-ping"></span>
-                        USD/NGN 基准参考: <strong class="text-slate-200 ml-1">${liveRate}</strong>
-                    </span>
-                </div>`;
+        const tickerContainer = document.getElementById("global-fx-ticker");
+        if (!tickerContainer) return;
+        try {
+            // 🛰️ 刚性校正物理路径为 /ledger/fx/quote，并将币种切回大厂真锁价生产线
+            const response = await client("/ledger/fx/quote?sell_currency=USD&buy_currency=JPY&sell_amount=1", { method: "GET" });
+            if (response.status === 200) {
+                const data = await response.json();
+                const liveRate = data.final_settlement_rate || data.lock_rate || 152.20;
+                tickerContainer.innerHTML = `
+                    <div class="flex items-center space-x-4 text-[11px] font-mono text-slate-400">
+                        <span class="flex items-center">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-ping"></span>
+                            USD/JPY 基准成本价 (含滑点): <strong class="text-emerald-400 ml-1">${parseFloat(liveRate).toFixed(4)}</strong>
+                        </span>
+                    </div>`;
+            }
+        } catch (e) { 
+            tickerContainer.innerHTML = `<span class="text-xs text-slate-500 font-mono">⚡ FinLinks 全球行情底座物理通电成功</span>`; 
         }
-    } catch (e) { 
-        tickerContainer.innerHTML = `<span class="text-xs text-slate-500 font-mono">⚡ FinLinks 全球行情底座物理通电成功</span>`; 
     }
-}
 
 /**
  * 👑 2. 【积木 1 核心功能】：影子总账可用头寸刷盘上屏
