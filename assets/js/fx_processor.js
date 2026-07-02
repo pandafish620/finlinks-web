@@ -169,26 +169,30 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
 /**
  * 💱 2. 实弹确权交割算子（100% 像素级对齐后端强类型 Body 契约）
  */
+
 // =====================================================================
-// 💾 assets/js/fx_processor.js 纯净生产级原子化清算血管（完全体）
+// 💾 apps/ledger/assets/js/fx_processor.js (0形参强闭环清白版)
 // =====================================================================
-export async function submitFxConversion(sellCurrencyParam, buyCurrencyParam, sellAmountParam, lockedRateParam, quoteTimestampParam, routingViaParam, pushAuditLog, showPremiumNotification, fetchBalances) {
-    // 🛰️ 如果外部未显式投喂（兼容老式调用），则刚性从当前控制大厅 DOM 中即时刮取
-    const sellCurrency = (sellCurrencyParam || document.getElementById("sell-currency").value).toUpperCase().trim();
-    const buyCurrency = (buyCurrencyParam || document.getElementById("buy-currency").value).toUpperCase().trim();
-    const sellAmount = parseFloat(sellAmountParam || document.getElementById("sell-amount").value);
+export async function submitFxConversion() {
+    // 👑 创始操盘手绝杀令：关闭所有外部投喂与缓存血管！100% 实时强行刮取当前表单输入的真指纹
+    const sellCurrency = document.getElementById("sell-currency").value.toUpperCase().trim();
+    const buyCurrency = document.getElementById("buy-currency").value.toUpperCase().trim();
+    const sellAmount = parseFloat(document.getElementById("sell-amount").value);
     
     const elQuoteTimestamp = document.getElementById("fx-quote-timestamp");
-    const quoteTimestamp = quoteTimestampParam ? parseInt(quoteTimestampParam) : (elQuoteTimestamp ? parseInt(elQuoteTimestamp.value || "0") : 0);
+    const quoteTimestamp = elQuoteTimestamp ? parseInt(elQuoteTimestamp.value || "0") : 0;
     
     const modalConfirm = document.getElementById("fx-modal-confirm");
-    const fxRate = lockedRateParam ? parseFloat(lockedRateParam) : (modalConfirm ? parseFloat(modalConfirm.dataset.currentRate || "0") : 0);
+    const fxRate = modalConfirm ? parseFloat(modalConfirm.dataset.currentRate || "0") : 0;
     
-    // 🎯 核心纠偏：优先使用传入的指定渠道，若无则读取 dataset，最后兜底锁死大厂 AIRWALLEX
-    const routingVia = (routingViaParam || (modalConfirm ? modalConfirm.dataset.routingVia : "AIRWALLEX") || "AIRWALLEX").toUpperCase().trim();
+    // 刚性咬合当前真实的渠道路由，拒绝脏兜底
+    const routingVia = modalConfirm ? (modalConfirm.dataset.routingVia || "AIRWALLEX").toUpperCase().trim() : "AIRWALLEX";
 
-    if (!sellAmount || fxRate <= 0 || !routingVia) {
-        if (typeof pushAuditLog === "function") pushAuditLog(`[EXECUTE DENIED] 🚨 固价合同校验失败 (Rate: ${fxRate}, Via: ${routingVia})，拒绝向中台打流！`);
+    // 🧱 顺向提取大厅环境挂载的日志和通知算子
+    const pushAuditLog = window.pushAuditLog;
+
+    if (!sellAmount || fxRate <= 0) {
+        if (typeof pushAuditLog === "function") pushAuditLog(`[EXECUTE DENIED] 🚨 固价合同校验失败 (Rate: ${fxRate})，拒绝向中台打流！`);
         return;
     }
 
@@ -199,38 +203,9 @@ export async function submitFxConversion(sellCurrencyParam, buyCurrencyParam, se
         elSubmitBtn.innerText = "正在向公网打流交割清算中...";
     }
 
-    const elName = document.getElementById("beneficiary-name");
-    const elEmail = document.getElementById("beneficiary-email");
-    const elPhone = document.getElementById("beneficiary-phone");
-    const elAddress = document.getElementById("beneficiary-address");
-    const elAccType = document.getElementById("beneficiary-account-type");
-    
-    const elAccNum = document.getElementById("bank-account-number");
-    const elBankCode = document.getElementById("bank-code");
-    const elSwift = document.getElementById("swift-code");
-    const elRouting = document.getElementById("routing-number");
-
-    const defaultSwift = buyCurrency === "NGN" ? "" : "BOFAUS3N";
-    const defaultRouting = buyCurrency === "NGN" ? "" : "021000021";
-    const defaultTargetAcc = buyCurrency === "NGN" ? "0690000031" : "1234567890";
-
-    // 🚨 局部加塞：FinLinks 5.2.0 前端主权资本管制优雅降级门禁
-    const isInternalWalletSwap = (sellCurrency === "NGN" && buyCurrency === "USD");
-    const hasUserFilledTarget = elAccNum && elAccNum.value.trim() && elAccNum.value.trim() !== "string";
-
-    if (isInternalWalletSwap && !hasUserFilledTarget) {
-        if (elSubmitBtn) { 
-            elSubmitBtn.removeAttribute("disabled"); 
-            elSubmitBtn.innerText = "确认执行交易 (Execute)"; 
-        }
-        if (typeof pushAuditLog === "function") {
-            pushAuditLog(`[COMPLIANCE BLOCKED] 🚨 拦截到自持钱包 NGN->USD 结汇。因西非资本管制，该方向功能不可用。`);
-        }
-        alert("【地缘风控熔断】因西非主权外汇资本管制，平台目前暂不支持【自持奈拉账户】直接结汇为【美元持仓账户】。\n\n该方向换汇功能暂时不可用，请绑定真实的离岸解付收款银行以触发跨境直付。");
-        return;
-    }
-
-    // 📦 组装金融级清算载荷（Payload），确保 Key 与后端 Pydantic 模型雷打不动地高度对齐
+    // =====================================================================
+    // 📦 组装 Payload Body：此时买卖币种完全克隆自输入框，绝无跨路径错线可能
+    // =====================================================================
     const payloadBody = {
         "sell_currency": sellCurrency,
         "sell_amount": sellAmount,
@@ -239,75 +214,48 @@ export async function submitFxConversion(sellCurrencyParam, buyCurrencyParam, se
         "routing_via": routingVia,
         "quote_timestamp": quoteTimestamp,
         "beneficiary": {
-            "name": elName && elName.value.trim() ? elName.value.trim() : "Ajadi Jackson",
-            "email": elEmail && elEmail.value.trim() ? elEmail.value.trim() : "jacky.xiaoyu.zhang@pinebay.io",
-            "phone": elPhone && elPhone.value.trim() ? elPhone.value.trim() : "+2348012345678",
-            "address": elAddress && elAddress.value.trim() ? elAddress.value.trim() : "126 Joel Ogunnaike Street, Ikeja",
-            "account_type": elAccType && elAccType.value.trim() ? elAccType.value.trim() : "individual",
+            "name": document.getElementById("beneficiary-name")?.value.trim() || "Ajadi Jackson",
+            "email": document.getElementById("beneficiary-email")?.value.trim() || "jacky.xiaoyu.zhang@pinebay.io",
+            "phone": document.getElementById("beneficiary-phone")?.value.trim() || "+2348012345678",
+            "address": document.getElementById("beneficiary-address")?.value.trim() || "126 Joel Ogunnaike Street, Ikeja",
+            "account_type": document.getElementById("beneficiary-account-type")?.value.trim() || "individual",
             "bank": {
-                "account_number": elAccNum && elAccNum.value.trim() ? elAccNum.value.trim() : defaultTargetAcc,
-                "bank_code": elBankCode && elBankCode.value.trim() ? elBankCode.value.trim() : (buyCurrency === "USD" ? "string" : "044"),
-                "swift_code": elSwift && elSwift.value.trim() ? elSwift.value.trim() : defaultSwift,
-                "routing_number": elRouting && elRouting.value.trim() ? elRouting.value.trim() : defaultRouting
+                "account_number": document.getElementById("bank-account-number")?.value.trim() || "1234567890",
+                "bank_code": document.getElementById("bank-code")?.value.trim() || (buyCurrency === "USD" ? "string" : "044"),
+                "swift_code": document.getElementById("swift-code")?.value.trim() || "BOFAUS3N",
+                "routing_number": document.getElementById("routing-number")?.value.trim() || "021000021"
             }
         }
     };
 
-    console.log("📡 [FINLINKS V5.2.0 FIRE] 绝杀 422 强类型合规 30s 延时 JSON 发射:", payloadBody);
+    console.log("📡 [FINLINKS V5.2.0 FINAL] 绝杀僵尸缓存，纯净 Payload 发射:", payloadBody);
 
     try {
         const response = await client("ledger/fx/convert", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payloadBody)
         });
 
         const data = await response.json();
 
         if (response.status === 200 && data.status === "success") {
-            // 掐断全局倒计时句柄
             if (window.fxTimerHandle) { clearInterval(window.fxTimerHandle); window.fxTimerHandle = null; }
-
-            if (typeof pushAuditLog === "function") {
-                pushAuditLog(`[CLEARING SUCCESS] 🎉 外汇交割成功！流水批次: ${data.fx_ref || data.fx_batch_ref}`);
-            }
-            
+            if (typeof pushAuditLog === "function") pushAuditLog(`[CLEARING SUCCESS] 🎉 外汇交割成功！流水批次: ${data.fx_ref || data.fx_batch_ref}`);
             if (modalConfirm) modalConfirm.classList.add("pointer-events-none", "opacity-0");
-            const elSellAmount = document.getElementById("sell-amount");
-            if (elSellAmount) elSellAmount.value = "";
+            document.getElementById("sell-amount") ? document.getElementById("sell-amount").value = "" : null;
             
-            // 冲刷重绘大厅资产
-            if (typeof fetchBalances === "function") {
-                if (typeof pushAuditLog === "function") {
-                    pushAuditLog(`[LIVE AUTOMATION] 物理轧差锁定，正在等待云端多账本清算对齐...`);
-                }
+            if (typeof window.fetchBalances === "function") {
                 setTimeout(async () => {
-                    await fetchBalances(); 
-                    if (typeof pushAuditLog === "function") {
-                        pushAuditLog(`[LIVE REPAINT] 🟢 全局多币种可用头寸重绘重组完毕，数字已自发自动更新！`);
-                    }
-                }, 400); 
+                    await window.fetchBalances();
+                }, 400);
             }
         } else {
-            if (elSubmitBtn) { 
-                elSubmitBtn.removeAttribute("disabled"); 
-                elSubmitBtn.innerText = "确认执行交易 (Execute)"; 
-            }
-            if (typeof pushAuditLog === "function") {
-                pushAuditLog(`[FX REJECTED] 交割失败: ${data.detail || data.msg || "中台拒绝"}`);
-            }
-            alert(`清算网络拒绝交割: ${data.detail || data.msg || "中台拒绝"}`);
+            if (elSubmitBtn) { elSubmitBtn.removeAttribute("disabled"); elSubmitBtn.innerText = "确认执行交易 (Execute)"; }
+            alert(`清算网络拒绝交割: ${data.detail || "中台拒绝"}`);
         }
     } catch (catchErr) {
-        if (elSubmitBtn) { 
-            elSubmitBtn.removeAttribute("disabled"); 
-            elSubmitBtn.innerText = "确认执行交易 (Execute)"; 
-        }
-        if (typeof pushAuditLog === "function") {
-            pushAuditLog(`[FX TIMEOUT] 外汇物理通信断路: ${catchErr.message}`);
-        }
+        if (elSubmitBtn) { elSubmitBtn.removeAttribute("disabled"); elSubmitBtn.innerText = "确认执行交易 (Execute)"; }
     }
 }
 

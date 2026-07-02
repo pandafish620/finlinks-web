@@ -73,34 +73,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // =====================================================================
     // 👑 刚性核销对接：Execute 触发时，像素级契约对齐，绝杀 STATELESS CONVERT
     // =====================================================================
+    // 💾 apps/ledger/assets/js/dashboard.js 对应原位覆盖
     window.executeLiveFxConversion = () => {
-        const modalConfirm = document.getElementById("fx-modal-confirm");
-        const elQuoteTimestamp = document.getElementById("fx-quote-timestamp");
-        const sellCurrency = document.getElementById("sell-currency").value;
-        const buyCurrency = document.getElementById("buy-currency").value;
-        const sellAmount = parseFloat(document.getElementById("sell-amount").value);
-
-        // 🔍 从 DOM dataset 中刮取原始数据指纹
-        const lockedRate = modalConfirm ? modalConfirm.dataset.currentRate : null;
-        const quoteTimestamp = elQuoteTimestamp ? elQuoteTimestamp.value : null;
-        const routingVia = modalConfirm ? modalConfirm.dataset.routingVia : "AIRWALLEX";
-
-        // 📡 刚性契约咬合：根据你的前端 submitFxConversion 具体的传参位置，
-        // 传递这 3 个完全对齐后端 Pydantic 字段的核心 Payload：
-        submitFxConversion(
-            sellCurrency, 
-            buyCurrency, 
-            sellAmount, 
-            lockedRate,       // 👈 传递锁定汇率 (对应后端 payload.fx_rate)
-            quoteTimestamp,   // 👈 传递原始时间戳 (对应后端 payload.quote_timestamp)
-            routingVia,       // 👈 传递渠道路由 (对应后端 payload.routing_via)
-            pushAuditLog, 
-            showPremiumNotification, 
-            () => {
-                fetchBalances();
-                fetchTransactionHistory(); // 换汇交割大胜后，流水大厅同步冲刷重绘！
-            }
-        );
+        // 🎯 零形参，零数据偷渡隐患！直接干净击发！
+        submitFxConversion();
     };
 
     // ⚡ 积木 3：自主出金放款代付触点通电（传入核心平账刷盘算子组）
