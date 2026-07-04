@@ -1,18 +1,14 @@
-// -*- coding: utf-8 -*-
-// 文件位置：assets/js/fx_processor.js
-// 🎯 FinLinks 5.2.0 外汇主权隔离沙箱：完全体前后端像素级咬合生产版（30秒 TTL 滑点保护校准）
 // =====================================================================
-// 💾 apps/ledger/assets/js/fx_processor.js 纯净大厂生产线完全体版
+// 💾 apps/ledger/assets/js/fx_processor.js (第四阶段完全体：契约落锁版)
 // =====================================================================
 import { client } from './finlinks_client.js';
 
-// ⏱️ 全局时钟句柄挂载
-let fxTimerHandle = null;
-let fxRemainingSeconds = 0.0; // 弹性无状态变量，满血承接后端 80% 精算裁剪后的动态 TTL
+// ⏱️ 全局最高指挥时钟句柄挂载（统一血缘，挂载于 window 确保全局可控）
+window.fxTimerHandle = null;
+let fxRemainingSeconds = 0.0; // 弹性无状态变量，承接后端 20% 裁剪后的动态 TTL
 
 /**
- * 🔮 1. 独立静默询价算子（大厂真生产线完全体版）
- * 🎯 100% 对齐后端纯净版 get_fx_quote_pure_production 契约
+ * 🔮 1. 独立静默询价算子（第三、四阶段完全体合流版）
  */
 export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
     const sellCurrency = document.getElementById("sell-currency").value;
@@ -26,7 +22,7 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
     }
 
     // 强力扼杀上一次遗留的僵尸时钟，防止时钟多线重叠、倒计时狂飙
-    if (fxTimerHandle) { clearInterval(fxTimerHandle); fxTimerHandle = null; }
+    if (window.fxTimerHandle) { clearInterval(window.fxTimerHandle); window.fxTimerHandle = null; }
 
     const elInquiryBtn = document.getElementById("fx-inquiry-btn");
     if (elInquiryBtn) { 
@@ -35,7 +31,7 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
     }
 
     try {
-        // 🎯 向后端纯净版 GET /ledger/fx/quote 端点发射标准的 Query 载荷
+        // 🎯 向后端中台端点发射标准的 Query 载荷
         const response = await client(`/ledger/fx/quote?sell_currency=${sellCurrency}&buy_currency=${buyCurrency}&sell_amount=${sellAmount}&client_extra_spread=${clientExtraSpread}`, {
             method: "GET"
         });
@@ -49,27 +45,37 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
         }
 
         // =====================================================================
-        // 🟢 状态 A：中台成功锁定真盘口（大厂实弹 quoted 成功）
+        // 🟢 【第五阶段终审核销】：完全体主权货币镜像对轧算子（彻底根除交叉盘倒挂）
         // =====================================================================
         if (response.status === 200 && result.status === "quoted") {
-            let displayRate = result.final_settlement_rate;
+            // 🎯 【像素级对齐】：精准捞取后端第三阶段吐出的 rate 字段
+            let displayRate = result.rate; 
             let computedBuyAmount = 0.00;
 
             const sellCurrUpper = sellCurrency.toUpperCase().trim();
             const buyCurrUpper = buyCurrency.toUpperCase().trim();
 
-            // 🧮 顺向对轧公式计算到账预测
-            if (sellCurrUpper === "USD") {
+            // 👑 【金融级极性对齐大闸】：读取后端透传的 quote_contract 核心契约印记
+            const quoteContract = result.quote_contract || {};
+            const serverDealtSide = (quoteContract.dealt_side || "sell").toLowerCase().trim();
+            // 📡 提取大厂报价体系中真正的定价基准主权（Base Currency）
+            const serverBaseCurrency = (quoteContract.base_currency || sellCurrUpper).toUpperCase().trim();
+
+            // 🧮 【主权镜像对轧核心算法】：绝杀一切反向计价导致的倒挂硬伤
+            if (serverBaseCurrency === buyCurrUpper) {
+                // 🎯 如果大厂是以买入币种(如NZD)为基准报价，说明是反向率，前端必须刚性执行除法回正！
+                computedBuyAmount = sellAmount / displayRate;
+            } else if (serverBaseCurrency === sellCurrUpper) {
+                // 🎯 如果大厂是以卖出币种(如CAD)为基准报价，说明是顺向率，前端执行乘法
                 computedBuyAmount = sellAmount * displayRate;
-            } else if (buyCurrUpper === "USD") {
-                computedBuyAmount = displayRate < 1.0 ? (sellAmount * displayRate) : (sellAmount / displayRate);
             } else {
-                computedBuyAmount = sellAmount * displayRate;
+                // ⏱️ 极端不可测情况下的弹性数字盾自适应保底
+                computedBuyAmount = displayRate < 1.0 ? (sellAmount / displayRate) : (sellAmount * displayRate);
             }
 
             // 📝 吹哨将生产级报价投喂给大厅流水台
             if (typeof pushAuditLog === "function") {
-                pushAuditLog(`[LIVE QUOTE] 👑 大厂生产盘口落锁！汇率: ${displayRate.toFixed(4)} | 动态剪裁时钟: ${result.ttl_seconds}s (已扣除20%延迟敞口) | 路由: [${result.best_provider_key}]`);
+                pushAuditLog(`[LIVE QUOTE] 👑 大厂生产盘口落锁！汇率: ${displayRate.toFixed(4)} | 定价基准: ${serverBaseCurrency} | 预计到账: ${computedBuyAmount.toFixed(2)} ${buyCurrUpper}`);
             }
 
             // 🧱 像素级重绘前端第二窗 UI
@@ -88,18 +94,19 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
                 elQuoteTimestamp.value = result.quote_timestamp || Math.floor(Date.now() / 1000);
             }
 
-            // 💾 将汇率与渠道暂存在 DOM 数据集里，供下一步的 POST /convert 实弹扣杀
+            // 💾 将核心资产契约数据暂存在 DOM 数据集里，供下一步的 POST 实弹扣杀
             const modalConfirm = document.getElementById("fx-modal-confirm");
             if (modalConfirm) {
-                modalConfirm.dataset.currentRate = result.final_settlement_rate.toString(); 
-                modalConfirm.dataset.routingVia = result.best_provider_key || "AIRWALLEX";
+                modalConfirm.dataset.currentRate = displayRate.toString(); 
+                modalConfirm.dataset.routingVia = result.provider_key || "AIRWALLEX";
+                modalConfirm.dataset.exchangeId = result.exchange_id || "";
+                modalConfirm.dataset.sellAmount = sellAmount.toString();
             }
 
             // 视图切换：隐藏第一窗输入框，平滑展开第二窗确认按钮
             const modalInput = document.getElementById("fx-modal-input");
             if (modalInput) modalInput.classList.add("pointer-events-none", "opacity-0");
             if (modalConfirm) modalConfirm.classList.remove("pointer-events-none", "opacity-0");
-
             // =================================================================
             // ⏱️ 接管：完全顺承后端裁剪后的自适应动态生命周期时钟大闸
             // =================================================================
@@ -121,13 +128,13 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
                 elProgressBar.classList.add("from-emerald-500", "to-teal-400", "opacity-100");
             }
 
-            // 开启高频 100ms 心跳递减时钟，保障进度条毫无卡顿、丝滑缩减
-            fxTimerHandle = setInterval(() => {
+            // 开启高频 100ms 心跳递减时钟
+            window.fxTimerHandle = setInterval(() => {
                 fxRemainingSeconds -= 0.1;
                 if (elTimerText) elTimerText.innerText = `${Math.max(0, fxRemainingSeconds).toFixed(1)}s`;
                 if (elProgressBar) elProgressBar.style.width = `${(fxRemainingSeconds / dynamicTotalTtl) * 100}%`;
 
-                // 时钟进入最后 15% 的红线倒计时，进度条切红
+                // 进入最后 15% 的红线倒计时，进度条切红
                 if ((fxRemainingSeconds / dynamicTotalTtl) <= 0.15 && elProgressBar) {
                     elProgressBar.classList.remove("from-emerald-500", "to-teal-400");
                     elProgressBar.classList.add("from-red-500", "to-rose-600");
@@ -135,15 +142,18 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
 
                 // 物理熔断：前端主动宣布合同到期作废
                 if (fxRemainingSeconds <= 0) {
-                    clearInterval(fxTimerHandle);
-                    fxTimerHandle = null;
+                    clearInterval(window.fxTimerHandle);
+                    window.fxTimerHandle = null;
                     if (typeof pushAuditLog === "function") pushAuditLog(`[FX TIMEOUT] 🚨 动态锁价合同到期，已被中台作废！`);
                     if (elSubmitBtn) {
                         elSubmitBtn.setAttribute("disabled", "true");
                         elSubmitBtn.classList.add("cursor-not-allowed", "opacity-30");
                         elSubmitBtn.innerText = "合同已过期作废";
                     }
-                    if (modalConfirm) modalConfirm.dataset.currentRate = "0";
+                    if (modalConfirm) {
+                        modalConfirm.dataset.currentRate = "0";
+                        modalConfirm.dataset.exchangeId = "";
+                    }
                 }
             }, 100);
 
@@ -157,7 +167,6 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
         }
 
     } catch (err) {
-        // 🛡️ 异常兜底：防范任何未知的公网网络连线崩溃
         if (elInquiryBtn) { 
             elInquiryBtn.removeAttribute("disabled"); 
             elInquiryBtn.innerText = "获取即期汇率报价 (Request Quote)"; 
@@ -166,33 +175,38 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
         alert(`网络连接异常，无法连线 FinLinks 清算中台。`);
     }
 }
-/**
- * 💱 2. 实弹确权交割算子（100% 像素级对齐后端强类型 Body 契约）
- */
 
-// =====================================================================
-// 💾 apps/ledger/assets/js/fx_processor.js (0形参强闭环清白版)
-// =====================================================================
+/**
+ * 💱 2. 实弹确权交割算子（100% 绑定契约锁投弹）
+ */
 export async function submitFxConversion() {
-    // 👑 创始操盘手绝杀令：关闭所有外部投喂与缓存血管！100% 实时强行刮取当前表单输入的真指纹
     const sellCurrency = document.getElementById("sell-currency").value.toUpperCase().trim();
     const buyCurrency = document.getElementById("buy-currency").value.toUpperCase().trim();
-    const sellAmount = parseFloat(document.getElementById("sell-amount").value);
     
+    // 🟢 必须恢复原版：实时抓取用户输入框中的真实额度，坚决不从不存在的 dataset 里盲捞
+    const sellAmount = parseFloat(document.getElementById("sell-amount").value);
+
     const elQuoteTimestamp = document.getElementById("fx-quote-timestamp");
     const quoteTimestamp = elQuoteTimestamp ? parseInt(elQuoteTimestamp.value || "0") : 0;
     
     const modalConfirm = document.getElementById("fx-modal-confirm");
     const fxRate = modalConfirm ? parseFloat(modalConfirm.dataset.currentRate || "0") : 0;
-    
-    // 刚性咬合当前真实的渠道路由，拒绝脏兜底
     const routingVia = modalConfirm ? (modalConfirm.dataset.routingVia || "AIRWALLEX").toUpperCase().trim() : "AIRWALLEX";
+    
+    const exchangeId = modalConfirm ? (modalConfirm.dataset.exchangeId || "") : "";
 
-    // 🧱 顺向提取大厅环境挂载的日志和通知算子
     const pushAuditLog = window.pushAuditLog;
 
+    // 接下来保持你原有的风控校验和防超时期锁死逻辑不动...
     if (!sellAmount || fxRate <= 0) {
         if (typeof pushAuditLog === "function") pushAuditLog(`[EXECUTE DENIED] 🚨 固价合同校验失败 (Rate: ${fxRate})，拒绝向中台打流！`);
+        return;
+    }
+
+    // 防御过期的合同执行扣杀
+    if (!exchangeId && routingVia === "AIRWALLEX") {
+        if (typeof pushAuditLog === "function") pushAuditLog(`[EXECUTE DENIED] 🚨 缺乏合规的交割契约 ID，拒绝向中台打流！`);
+        alert("错误: 锁价契约凭证已作废，请重新询价。");
         return;
     }
 
@@ -204,7 +218,7 @@ export async function submitFxConversion() {
     }
 
     // =====================================================================
-    // 📦 组装 Payload Body：此时买卖币种完全克隆自输入框，绝无跨路径错线可能
+    // 📦 组装 Payload Body：刚性追加 exchange_id，满血契约对齐
     // =====================================================================
     const payloadBody = {
         "sell_currency": sellCurrency,
@@ -213,6 +227,14 @@ export async function submitFxConversion() {
         "fx_rate": fxRate,
         "routing_via": routingVia,
         "quote_timestamp": quoteTimestamp,
+        "exchange_id": exchangeId, // 👈 🎯 绝杀 409 的终极对账钢印
+        "provider_options": {
+            "quote_contract": {
+                "quote_id": exchangeId,
+                "base_currency": sellCurrency,
+                "dealt_side": "sell"
+            }
+        },
         "beneficiary": {
             "name": document.getElementById("beneficiary-name")?.value.trim() || "Ajadi Jackson",
             "email": document.getElementById("beneficiary-email")?.value.trim() || "jacky.xiaoyu.zhang@pinebay.io",
@@ -228,7 +250,7 @@ export async function submitFxConversion() {
         }
     };
 
-    console.log("📡 [FINLINKS V5.2.0 FINAL] 绝杀僵尸缓存，纯净 Payload 发射:", payloadBody);
+    console.log("📡 [FINLINKS V5.4.6 FINAL] 前后端全合流，契约 Payload 发射:", payloadBody);
 
     try {
         const response = await client("ledger/fx/convert", {
@@ -242,13 +264,17 @@ export async function submitFxConversion() {
         if (response.status === 200 && data.status === "success") {
             if (window.fxTimerHandle) { clearInterval(window.fxTimerHandle); window.fxTimerHandle = null; }
             if (typeof pushAuditLog === "function") pushAuditLog(`[CLEARING SUCCESS] 🎉 外汇交割成功！流水批次: ${data.fx_ref || data.fx_batch_ref}`);
-            if (modalConfirm) modalConfirm.classList.add("pointer-events-none", "opacity-0");
-            document.getElementById("sell-amount") ? document.getElementById("sell-amount").value = "" : null;
             
+            // 🎯 【修改点 1】：擦除人肉修改 modalConfirm 的补丁，顺向调用 dashboard.js 注册的全局规范收陇大闸
+            window.closeFxModal();
+            
+            if (document.getElementById("sell-amount")) {
+                document.getElementById("sell-amount").value = "";
+            }
+            
+            // 🎯 【修改点 2】：去掉隐患的 400ms 延迟猜时，改为刚性 await 同步确权，保证头寸刷新绝无时间差
             if (typeof window.fetchBalances === "function") {
-                setTimeout(async () => {
-                    await window.fetchBalances();
-                }, 400);
+                await window.fetchBalances();
             }
         } else {
             if (elSubmitBtn) { elSubmitBtn.removeAttribute("disabled"); elSubmitBtn.innerText = "确认执行交易 (Execute)"; }
@@ -256,6 +282,8 @@ export async function submitFxConversion() {
         }
     } catch (catchErr) {
         if (elSubmitBtn) { elSubmitBtn.removeAttribute("disabled"); elSubmitBtn.innerText = "确认执行交易 (Execute)"; }
+        // 🎯 【修改点 3】：在原先空置的 catch 块中，补焊物理断路提示，防止因 7897 隧道休克导致前端界面无响应死锁
+        alert(`公网打流失败，请检查 7897 隧道连通性或代理配置。`);
     }
 }
 
@@ -263,11 +291,11 @@ export async function submitFxConversion() {
  * 🔒 3. 强力注销红字冲正算子
  */
 window.forceCancelFxTimer = function() {
-    if (fxTimerHandle) {
-        clearInterval(fxTimerHandle);
-        fxTimerHandle = null;
+    if (window.fxTimerHandle) {
+        clearInterval(window.fxTimerHandle);
+        window.fxTimerHandle = null;
         if (typeof window.pushAuditLog === "function") {
-            window.pushAuditLog("[FX ABORT] ⚖️ 操盘手主动撤销合同，固价合同安全注销，30S时钟大闸释放冲正。");
+            window.pushAuditLog("[FX ABORT] ⚖️ 操盘手主动撤销合同，固价合同安全注销，100ms时钟大闸释放冲正。");
         }
     }
 };

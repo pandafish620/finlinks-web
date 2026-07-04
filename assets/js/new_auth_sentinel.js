@@ -19,7 +19,7 @@ class NewAuthSentinel {
             console.warn("🚨 [SECURITY BREACH] 零信任哨兵强力拦截非法无令牌入场（或存量伪沙箱令牌）！");
             localStorage.removeItem("finlinks_auth_token");
             localStorage.removeItem("FINLINKS_ACTIVE_MID");
-            window.location.href = "../login.html"; // 物理放逐至确权大厅
+            window.location.href = "/console_v2/login.html";
             return false;
         }
         return true;

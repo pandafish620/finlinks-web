@@ -178,30 +178,28 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 });
 /**
- * 📊 1. 动态拉取左上角 Ticker 基准大盘
+ /**
+ * 📊 1. 动态拉取左上角 Ticker 基准大盘（第四阶段：全链路无损静音版）
+ * 🎯 彻底废除开机 1 美元美日询价，绝杀大厂沙箱风控拉黑隐患
  */
 async function initGlobalFxTicker() {
-        const tickerContainer = document.getElementById("global-fx-ticker");
-        if (!tickerContainer) return;
-        try {
-            // 🛰️ 刚性校正物理路径为 /ledger/fx/quote，并将币种切回大厂真锁价生产线
-            const response = await client("/ledger/fx/quote?sell_currency=USD&buy_currency=JPY&sell_amount=1", { method: "GET" });
-            if (response.status === 200) {
-                const data = await response.json();
-                const liveRate = data.final_settlement_rate || data.lock_rate || 152.20;
-                tickerContainer.innerHTML = `
-                    <div class="flex items-center space-x-4 text-[11px] font-mono text-slate-400">
-                        <span class="flex items-center">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-ping"></span>
-                            USD/JPY 基准成本价 (含滑点): <strong class="text-emerald-400 ml-1">${parseFloat(liveRate).toFixed(4)}</strong>
-                        </span>
-                    </div>`;
-            }
-        } catch (e) { 
-            tickerContainer.innerHTML = `<span class="text-xs text-slate-500 font-mono">⚡ FinLinks 全球行情底座物理通电成功</span>`; 
-        }
+    const tickerContainer = document.getElementById("global-fx-ticker");
+    if (!tickerContainer) return;
+    
+    // 👑 操盘手绝杀令：将异步网络流直接截断，100% 切换为静态高奢保底行情垫片
+    try {
+        const liveRate = 152.2045; // 刚性锁死国际基准保底静态价，0 叩击后端
+        tickerContainer.innerHTML = `
+            <div class="flex items-center space-x-4 text-[11px] font-mono text-slate-400">
+                <span class="flex items-center">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-ping"></span>
+                    USD/JPY 基准成本价 (静态保底): <strong class="text-emerald-400 ml-1">${parseFloat(liveRate).toFixed(4)}</strong>
+                </span>
+            </div>`;
+    } catch (e) { 
+        tickerContainer.innerHTML = `<span class="text-xs text-slate-500 font-mono">⚡ FinLinks 全球行情底座物理通电成功</span>`; 
     }
-
+}
 /**
  * 👑 2. 【积木 1 核心功能】：影子总账可用头寸刷盘上屏
  */
