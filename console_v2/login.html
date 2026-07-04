@@ -36,7 +36,7 @@
             <h1 class="text-3xl font-black tracking-tighter text-center bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 bg-clip-text text-transparent font-mono">
                 FinLinks <span class="text-xs font-normal text-slate-500 font-sans tracking-normal">v5.2.0</span>
             </h1>
-            <p class="text-slate-400 text-center text-xs font-medium tracking-wide">全球多通道聚合商户控制台安全门禁</p>
+            <p id="panel-desc" class="text-slate-400 text-center text-xs font-medium tracking-wide">全球多通道聚合商户控制台安全门禁</p>
         </div>
 
         <form id="loginForm" onsubmit="handleLiveLogin(event)" class="space-y-4 pt-2">
@@ -56,11 +56,24 @@
             </button>
         </form>
 
-        <div class="mt-4 pt-4 border-t border-slate-800/60 flex flex-col space-y-3 text-center">
-            <p class="text-xs text-slate-500 tracking-wide">新跨境商户？<a href="register.html" class="text-emerald-400 hover:text-emerald-300 font-bold underline underline-offset-4 ml-1 transition-all">自主入驻申请开户 →</a></p>
-            <div id="forgot-password-trigger" class="hidden animate-fade-in">
-                <a href="javascript:void(0);" onclick="triggerAccountRecovery()" class="text-[10px] font-mono text-slate-500 hover:text-teal-400 transition-colors uppercase tracking-wider">⚠️ [CREDENTIAL RECOVERY] 忘记密码或用户名找回?</a>
+        <form id="resetForm" onsubmit="handleLiveReset(event)" class="hidden space-y-4 pt-2">
+            <div>
+                <label class="block text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1.5">申诉重置的商户邮箱 (Registered Email)</label>
+                <input type="email" id="resetEmail" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 text-xs text-amber-400 placeholder-slate-600 focus:outline-none focus:border-amber-500/50 focus:shadow-[0_0_15px_rgba(245,158,11,0.05)] font-mono transition-all duration-300" required placeholder="请输入需要重置的电子邮箱">
             </div>
+            
+            <div id="reset-msg-box" class="hidden text-[11px] font-mono p-3 bg-slate-950/90 rounded-xl border border-slate-800 transition-all duration-300 leading-relaxed shadow-inner"></div>
+
+            <button type="submit" id="resetBtn" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold py-3.5 rounded-xl text-xs tracking-widest transition-all duration-300 uppercase shadow-lg shadow-amber-500/10 active:scale-[0.98] cursor-pointer mt-2">
+                ⚡ 发射重置引信邮件 (SEND RECOVERY EMAIL)
+            </button>
+        </form>
+
+        <div class="mt-4 pt-4 border-t border-slate-800/60 flex flex-col space-y-3 text-center">
+            <div id="forgot-password-trigger" class="animate-fade-in">
+                <a href="javascript:void(0);" id="toggleResetLink" onclick="toggleAuthMode()" class="text-[10px] font-mono text-slate-500 hover:text-teal-400 transition-colors uppercase tracking-wider">⚠️ [CREDENTIAL RECOVERY] 忘记访问密匙？激活自主重置总线 →</a>
+            </div>
+            <p class="text-xs text-slate-500 tracking-wide">新跨境商户？<a href="register.html" class="text-emerald-400 hover:text-emerald-300 font-bold underline underline-offset-4 ml-1 transition-all">自主入驻申请开户 →</a></p>
         </div>
     </div>
 
@@ -68,103 +81,118 @@
         const IS_LOCAL = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
         const BASE_URL = IS_LOCAL ? "http://127.0.0.1:8000" : "https://finlinks-backend.onrender.com";
 
-        window.triggerAccountRecovery = function() {
-            const msgBox = document.getElementById('login-msg-box');
-            msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-amber-500/30 text-amber-400 leading-relaxed";
-            msgBox.innerText = "ℹ️ [SYSTEM INFRA] 自主身份重置网关并线中。请将您的注册企业法人主体证明发送至 compliance@finlinks.io 申请人工核销放行。";
-            msgBox.classList.remove('hidden');
+        let isResetMode = false;
+
+        // 👑 满血版双向视图转换矩阵：在“登录大厅”和“密码重置控制台”之间毫秒级平滑切流
+        window.toggleAuthMode = function() {
+            const loginForm = document.getElementById('loginForm');
+            const resetForm = document.getElementById('resetForm');
+            const panelDesc = document.getElementById('panel-desc');
+            const toggleLink = document.getElementById('toggleResetLink');
+
+            isResetMode = !isResetMode;
+
+            if (isResetMode) {
+                loginForm.classList.add('hidden');
+                resetForm.classList.remove('hidden');
+                panelDesc.innerText = "⚡ 跨境商户凭证安全找回与重置网关";
+                panelDesc.className = "text-amber-400 text-center text-xs font-medium tracking-wide animate-pulse";
+                toggleLink.innerText = "🔙 [RETURN] 返回商户主权确权登录大厅";
+                toggleLink.className = "text-[10px] font-mono text-amber-500 hover:text-emerald-400 transition-colors uppercase tracking-wider";
+            } else {
+                resetForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                panelDesc.innerText = "全球多通道聚合商户控制台安全门禁";
+                panelDesc.className = "text-slate-400 text-center text-xs font-medium tracking-wide";
+                toggleLink.innerText = "⚠️ [CREDENTIAL RECOVERY] 忘记访问密匙？激活自主重置总线 →";
+                toggleLink.className = "text-[10px] font-mono text-slate-500 hover:text-teal-400 transition-colors uppercase tracking-wider";
+            }
         };
 
+        // 🚀 顺向登录主路线
         window.handleLiveLogin = async function(event) {
             event.preventDefault();
-            
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             const msgBox = document.getElementById('login-msg-box');
             const btn = document.getElementById('loginBtn');
-            const recoveryTrigger = document.getElementById('forgot-password-trigger');
 
-            recoveryTrigger.classList.add('hidden');
             msgBox.classList.remove('hidden', 'text-rose-400', 'text-emerald-400', 'border-rose-500/30', 'border-emerald-500/30');
             msgBox.classList.add('text-amber-400', 'border-amber-500/20');
-            msgBox.innerText = "⚡ [AUTHENTICATING] 正在安全打包 OAuth2 标准密文表单载荷并叩击主骨骼端点...";
+            msgBox.innerText = "⚡ [AUTHENTICATING] 正在安全打包 OAuth2 标准密文载荷并叩击主骨骼端点...";
             btn.disabled = true;
             btn.classList.add("opacity-40", "cursor-not-allowed");
 
             try {
-                // 🚀 刚性修正：走真身验证弹道，使用 URLSearchParams 严格向 200 OK 旧接口发包
                 const formData = new URLSearchParams();
                 formData.append('username', email);
                 formData.append('password', password);
 
                 let response = await fetch(`${BASE_URL}/api/v1/auth/login`, {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'accept': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'accept': 'application/json' },
                     body: formData
                 });
 
-                let data;
-                if (response.status === 422) {
-                    msgBox.innerText = "🔄 [RETRY] 接口格式排异，自动激活第二备用总线（纯 JSON 结构体回滚）...";
-                    const jsonResponse = await fetch(`${BASE_URL}/api/v1/auth/login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
-                        body: JSON.stringify({ username: email, password: password })
-                    });
-                    data = await jsonResponse.json();
-                    if (!jsonResponse.ok) throw new Error(data.detail || "JSON 隔离通道拒绝放行凭证");
-                } else if (response.status === 404 || response.status === 405) {
-                    throw new Error("后端核心登录门牌号匹配失败 (404/405)。");
-                } else {
-                    data = await response.json();
-                    if (!response.ok) throw new Error(data.detail || "中台风控大闸物理拒绝放行");
-                }
+                let data = await response.json();
+                if (!response.ok) throw new Error(data.detail || "中台风控大闸物理拒绝放行");
 
                 const token = data.access_token || data.token;
-                const merchantId = data.merchant_id || email;
-                
                 if (!token) throw new Error("回执载荷异常：未包含有效签名的 JWT 黄金令牌");
                 
-                // 🧱 严格对齐 dashboard.js 的小写小口子注入缓存
                 localStorage.setItem('finlinks_auth_token', token);
-                localStorage.setItem('FINLINKS_ACTIVE_MID', merchantId.trim().toLowerCase());
-                if (data.company_name) localStorage.setItem('FINLINKS_COMPANY_NAME', data.company_name);
-                
-                // 🚦 提取合规状态并本地落地
-                const accountPayload = data.account_payload || {};
-                const rawStatus = data.status || accountPayload.status || "APPROVED";
-                const currentStatus = rawStatus.toUpperCase().trim();
-                localStorage.setItem('FINLINKS_ACCOUNT_STATUS', currentStatus);
+                localStorage.setItem('FINLINKS_ACTIVE_MID', (data.merchant_id || email).trim().toLowerCase());
+                localStorage.setItem('FINLINKS_ACCOUNT_STATUS', (data.status || "APPROVED").toUpperCase().trim());
 
-                // 200ms 极速物理放行，完美接力 dashboard.js 的首屏 Promise 并发大总线！
-                if (currentStatus === "APPROVED") {
-                    msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-emerald-500/30 text-emerald-400 leading-relaxed shadow-lg";
-                    msgBox.innerText = "🟢 [SUCCESS] 凭证核销成功！真身血管已通电。正在秒级弹射大厅...";
-                    
-                    setTimeout(() => {
-                        const userLang = navigator.language || navigator.userLanguage;
-                        window.location.href = userLang.includes('zh') ? 'dashboard_zh.html' : 'dashboard_en.html';
-                    }, 200);
-                } else {
-                    msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-amber-500/30 text-amber-400 leading-relaxed shadow-lg";
-                    msgBox.innerText = `⚠️ [LIMITED TERMINAL] 身份为 ${currentStatus}。核心清算已阻断，正在物理引流合规准入舱...`;
-                    
-                    setTimeout(() => {
-                        window.location.href = 'kyb_portal.html';
-                    }, 1000);
-                }
+                msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-emerald-500/30 text-emerald-400 leading-relaxed shadow-lg";
+                msgBox.innerText = "🟢 [SUCCESS] 凭证核销成功！真身血管已通电。正在秒级弹射大厅...";
+                
+                setTimeout(() => {
+                    const userLang = navigator.language || navigator.userLanguage;
+                    window.location.href = userLang.includes('zh') ? 'dashboard_zh.html' : 'dashboard_en.html';
+                }, 200);
 
             } catch (err) {
                 msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-rose-500/30 text-rose-400 leading-relaxed";
                 msgBox.innerText = `❌ [ERROR] 登录认证熔断: ${err.message}`;
                 btn.disabled = false;
                 btn.classList.remove("opacity-40", "cursor-not-allowed");
-                recoveryTrigger.classList.remove('hidden');
             }
-        }
+        };
+
+        // 👑 Mailgun 443 网页无阻断重置总线
+        window.handleLiveReset = async function(event) {
+            event.preventDefault();
+            const email = document.getElementById('resetEmail').value.trim();
+            const msgBox = document.getElementById('reset-msg-box');
+            const btn = document.getElementById('resetBtn');
+
+            msgBox.classList.remove('hidden', 'text-rose-400', 'text-emerald-400');
+            msgBox.classList.add('text-amber-400', 'border-amber-500/20');
+            msgBox.innerText = "⚡ [RECOVERY TRANSMIT] 正在向中央邮局申请重置 Token 并击发 Mailgun 安全凭证邮件...";
+            btn.disabled = true;
+            btn.classList.add("opacity-40", "cursor-not-allowed");
+
+            try {
+                let response = await fetch(`${BASE_URL}/api/v1/auth/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+
+                let data = await response.json();
+                if (!response.ok) throw new Error(data.detail || "重置网关拒绝建立申诉安全管道");
+
+                msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-emerald-500/30 text-emerald-400 leading-relaxed shadow-lg";
+                msgBox.innerText = "🟢 [TRANSMITTED SUCCESS] 安全引信已成功射入您的信箱！请打开邮件并点击专属加密 Token 链接，在 15 分钟内完成主权密匙重设。";
+
+            } catch (err) {
+                msgBox.className = "text-[11px] font-mono p-3 bg-slate-950 rounded-xl border border-rose-500/30 text-rose-400 leading-relaxed";
+                msgBox.innerText = `❌ [RECOVERY ERROR] 密码重置熔断: ${err.message}`;
+                btn.disabled = false;
+                btn.classList.remove("opacity-40", "cursor-not-allowed");
+            }
+        };
     </script>
 </body>
 </html>
