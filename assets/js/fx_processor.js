@@ -226,6 +226,8 @@ export async function submitFxConversion() {
     // =====================================================================
     // 📦 组装 Payload Body：刚性追加 exchange_id，满血契约对齐
     // =====================================================================
+    // 拨乱反正：通过后端源码证实，result.exchange_id 才是大厂真正的 UUID 契约！
+    const realAirwallexUuid = modalConfirm ? (modalConfirm.dataset.exchangeId || "") : "";
     const payloadBody = {
         "sell_currency": sellCurrency,
         "sell_amount": sellAmount,
@@ -233,10 +235,10 @@ export async function submitFxConversion() {
         "fx_rate": fxRate,
         "routing_via": routingVia,
         "quote_timestamp": quoteTimestamp,
-        "exchange_id": exchangeId, // 👈 🎯 绝杀 409 的终极对账钢印
+        "exchange_id": realAirwallexUuid, // 👈 🎯 绝杀 409 的终极对账钢印
         "provider_options": {
             "quote_contract": {
-                "quote_id": airwallexQuoteId, // 🎯 修正：将流氓的 exchangeId 替换为真正大厂认识的 UUID 契约！,
+                "quote_id": realAirwallexUuid, // 🎯 修正：将流氓的 exchangeId 替换为真正大厂认识的 UUID 契约！,
                 "base_currency": sellCurrency,
                 "dealt_side": "sell"
             }
