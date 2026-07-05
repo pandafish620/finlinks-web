@@ -101,6 +101,9 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
                 modalConfirm.dataset.routingVia = result.provider_key || "AIRWALLEX";
                 modalConfirm.dataset.exchangeId = result.exchange_id || "";
                 modalConfirm.dataset.sellAmount = sellAmount.toString();
+                // 👑 ⚡ 【补焊资产指纹】：精准向 DOM 灌注大厂下发的换汇契约核心 UUID
+                const realUuid = result.provider_options?.quote_contract?.quote_id || result.quote_id || "";
+                modalConfirm.dataset.airwallexQuoteId = realUuid;
             }
 
             // 视图切换：隐藏第一窗输入框，平滑展开第二窗确认按钮
@@ -153,6 +156,7 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
                     if (modalConfirm) {
                         modalConfirm.dataset.currentRate = "0";
                         modalConfirm.dataset.exchangeId = "";
+                        modalConfirm.dataset.airwallexQuoteId = ""; // 👈 同步清洗
                     }
                 }
             }, 100);
@@ -194,6 +198,8 @@ export async function submitFxConversion() {
     const routingVia = modalConfirm ? (modalConfirm.dataset.routingVia || "AIRWALLEX").toUpperCase().trim() : "AIRWALLEX";
     
     const exchangeId = modalConfirm ? (modalConfirm.dataset.exchangeId || "") : "";
+    // 👑 ⚡ 【补焊资产提取】：顺向从 dataset 中打捞无损的 Airwallex 契约核心 UUID
+    const airwallexQuoteId = modalConfirm ? (modalConfirm.dataset.airwallexQuoteId || "") : "";
 
     const pushAuditLog = window.pushAuditLog;
 
@@ -204,8 +210,8 @@ export async function submitFxConversion() {
     }
 
     // 防御过期的合同执行扣杀
-    if (!exchangeId && routingVia === "AIRWALLEX") {
-        if (typeof pushAuditLog === "function") pushAuditLog(`[EXECUTE DENIED] 🚨 缺乏合规的交割契约 ID，拒绝向中台打流！`);
+    if (!airwallexQuoteId && routingVia === "AIRWALLEX") {
+        if (typeof pushAuditLog === "function") pushAuditLog(`[EXECUTE DENIED] 🚨 缺乏合规的大厂交割契约 ID，拒绝向中台打流！`);
         alert("错误: 锁价契约凭证已作废，请重新询价。");
         return;
     }
@@ -230,7 +236,7 @@ export async function submitFxConversion() {
         "exchange_id": exchangeId, // 👈 🎯 绝杀 409 的终极对账钢印
         "provider_options": {
             "quote_contract": {
-                "quote_id": exchangeId,
+                "quote_id": airwallexQuoteId, // 🎯 修正：将流氓的 exchangeId 替换为真正大厂认识的 UUID 契约！,
                 "base_currency": sellCurrency,
                 "dealt_side": "sell"
             }
