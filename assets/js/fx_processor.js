@@ -233,12 +233,8 @@ export async function submitFxConversion() {
     // =====================================================================
     // 拨乱反正：通过后端源码证实，result.exchange_id 才是大厂真正的 UUID 契约！
     // 1. 从暂存盘里打捞两个指纹（确保变量极性洁净）
-    const rawExchangeId = modalConfirm ? (modalConfirm.dataset.exchangeId || "") : "";
-    const rawQuoteId = modalConfirm ? (modalConfirm.dataset.quoteId || "") : "";
-
-    // 2. 核心确权：通过 DBeaver 拦截确诊，rawExchangeId 手里攥着的才是真正的 36 位大厂 UUID 契约！
-    const realAirwallexUuid = rawExchangeId; 
-    const platformFinlinksCode = rawQuoteId; // FXALL-QT- 只是 Finlinks 自己的内部流水号
+    const realAirwallexUuid = modalConfirm ? (modalConfirm.dataset.exchangeId || "") : "";
+    const platformFinlinksCode = modalConfirm ? (modalConfirm.dataset.quoteId || "") : "";
 
     const payloadBody = {
         "sell_currency": sellCurrency,
