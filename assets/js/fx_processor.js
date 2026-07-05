@@ -94,18 +94,20 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
                 elQuoteTimestamp.value = result.quote_timestamp || Math.floor(Date.now() / 1000);
             }
 
+
             // 💾 将核心资产契约数据暂存在 DOM 数据集里，供下一步的 POST 实弹扣杀
             const modalConfirm = document.getElementById("fx-modal-confirm");
             if (modalConfirm) {
                 modalConfirm.dataset.currentRate = displayRate.toString(); 
                 modalConfirm.dataset.routingVia = result.provider_key || "AIRWALLEX";
-                modalConfirm.dataset.exchangeId = result.exchange_id || "";
+                
+                // 🗺️ 极性归位：直接保留后端吐出来的那个真 UUID 字符串（虽然它叫 exchange_id）
+                modalConfirm.dataset.exchangeId = result.exchange_id || ""; 
+                // 🗺️ 极性归位：将内部交易码锁进影子状态机
+                modalConfirm.dataset.quoteId = result.quote_id || ""; 
+                
                 modalConfirm.dataset.sellAmount = sellAmount.toString();
-                // 👑 ⚡ 【补焊资产指纹】：精准向 DOM 灌注大厂下发的换汇契约核心 UUID
-                const realUuid = result.provider_options?.quote_contract?.quote_id || result.quote_id || "";
-                modalConfirm.dataset.awxquoteid = realUuid;
             }
-
             // 视图切换：隐藏第一窗输入框，平滑展开第二窗确认按钮
             const modalInput = document.getElementById("fx-modal-input");
             if (modalInput) modalInput.classList.add("pointer-events-none", "opacity-0");
@@ -156,7 +158,7 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
                     if (modalConfirm) {
                         modalConfirm.dataset.currentRate = "0";
                         modalConfirm.dataset.exchangeId = "";
-                        modalConfirm.dataset.airwallexQuoteId = ""; // 👈 同步清洗
+                        modalConfirm.dataset.quoteId = "";
                     }
                 }
             }, 100);
@@ -197,9 +199,13 @@ export async function submitFxConversion() {
     const fxRate = modalConfirm ? parseFloat(modalConfirm.dataset.currentRate || "0") : 0;
     const routingVia = modalConfirm ? (modalConfirm.dataset.routingVia || "AIRWALLEX").toUpperCase().trim() : "AIRWALLEX";
     
-    const exchangeId = modalConfirm ? (modalConfirm.dataset.exchangeId || "") : "";
-    // 👑 ⚡ 【补焊资产提取】：顺向从 dataset 中打捞无损的 Airwallex 契约核心 UUID
-    const airwallexQuoteId = modalConfirm ? (modalConfirm.dataset.awxquoteid || "") : "";
+    // 👑 ⚡ 【最高主权极性调正】：顺向打捞暂存区里的两个指纹
+    const rawExchangeId = modalConfirm ? (modalConfirm.dataset.exchangeId || "") : "";
+    const rawQuoteId = modalConfirm ? (modalConfirm.dataset.quoteId || "") : "";
+
+    // 🎯 核心拨乱反正：rawExchangeId 里装的才是真正大厂要的 36 位 UUID 凭证！
+    const realAirwallexUuid = rawExchangeId;
+    const platformFinlinksCode = rawQuoteId;
 
     const pushAuditLog = window.pushAuditLog;
 
@@ -227,7 +233,14 @@ export async function submitFxConversion() {
     // 📦 组装 Payload Body：刚性追加 exchange_id，满血契约对齐
     // =====================================================================
     // 拨乱反正：通过后端源码证实，result.exchange_id 才是大厂真正的 UUID 契约！
-    const realAirwallexUuid = modalConfirm ? (modalConfirm.dataset.exchangeId || "") : "";
+    // 1. 从暂存盘里打捞两个指纹（确保变量极性洁净）
+    const rawExchangeId = modalConfirm ? (modalConfirm.dataset.exchangeId || "") : "";
+    const rawQuoteId = modalConfirm ? (modalConfirm.dataset.quoteId || "") : "";
+
+    // 2. 核心确权：通过 DBeaver 拦截确诊，rawExchangeId 手里攥着的才是真正的 36 位大厂 UUID 契约！
+    const realAirwallexUuid = rawExchangeId; 
+    const platformFinlinksCode = rawQuoteId; // FXALL-QT- 只是 Finlinks 自己的内部流水号
+
     const payloadBody = {
         "sell_currency": sellCurrency,
         "sell_amount": sellAmount,
@@ -235,7 +248,7 @@ export async function submitFxConversion() {
         "fx_rate": fxRate,
         "routing_via": routingVia,
         "quote_timestamp": quoteTimestamp,
-        "exchange_id": realAirwallexUuid, // 👈 🎯 绝杀 409 的终极对账钢印
+        "exchange_id": platformFinlinksCode, // 👈 🎯 绝杀 409 的终极对账钢印
         "provider_options": {
             "quote_contract": {
                 "quote_id": realAirwallexUuid, // 🎯 修正：将流氓的 exchangeId 替换为真正大厂认识的 UUID 契约！,
