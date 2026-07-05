@@ -198,14 +198,6 @@ export async function submitFxConversion() {
     const modalConfirm = document.getElementById("fx-modal-confirm");
     const fxRate = modalConfirm ? parseFloat(modalConfirm.dataset.currentRate || "0") : 0;
     const routingVia = modalConfirm ? (modalConfirm.dataset.routingVia || "AIRWALLEX").toUpperCase().trim() : "AIRWALLEX";
-    
-    // 🎯 1. 刚性打捞：直接提取，不重复加 const 关键词，彻底绝杀 Identifier already been declared 报错
-    const _finalExchangeId = modalConfirm ? (modalConfirm.dataset.exchangeId || "") : "";
-    const _finalQuoteId = modalConfirm ? (modalConfirm.dataset.quoteId || "") : "";
-
-    // 🎯 2. 核心极性归位对轧
-    const realAirwallexUuid = _finalExchangeId;      // 36位大厂真UUID
-    const platformFinlinksCode = _finalQuoteId;   // FXALL-QT- 内部流水号
 
     const pushAuditLog = window.pushAuditLog;
     // 接下来保持你原有的风控校验和防超时期锁死逻辑不动...
