@@ -199,16 +199,15 @@ export async function submitFxConversion() {
     const fxRate = modalConfirm ? parseFloat(modalConfirm.dataset.currentRate || "0") : 0;
     const routingVia = modalConfirm ? (modalConfirm.dataset.routingVia || "AIRWALLEX").toUpperCase().trim() : "AIRWALLEX";
     
-    // 👑 ⚡ 【最高主权极性调正】：顺向打捞暂存区里的两个指纹
-    const rawExchangeId = modalConfirm ? (modalConfirm.dataset.exchangeId || "") : "";
-    const rawQuoteId = modalConfirm ? (modalConfirm.dataset.quoteId || "") : "";
+    // 🎯 1. 刚性打捞：直接提取，不重复加 const 关键词，彻底绝杀 Identifier already been declared 报错
+    const _finalExchangeId = modalConfirm ? (modalConfirm.dataset.exchangeId || "") : "";
+    const _finalQuoteId = modalConfirm ? (modalConfirm.dataset.quoteId || "") : "";
 
-    // 🎯 核心拨乱反正：rawExchangeId 里装的才是真正大厂要的 36 位 UUID 凭证！
-    const realAirwallexUuid = rawExchangeId;
-    const platformFinlinksCode = rawQuoteId;
+    // 🎯 2. 核心极性归位对轧
+    const realAirwallexUuid = _finalExchangeId;      // 36位大厂真UUID
+    const platformFinlinksCode = _finalQuoteId;   // FXALL-QT- 内部流水号
 
     const pushAuditLog = window.pushAuditLog;
-
     // 接下来保持你原有的风控校验和防超时期锁死逻辑不动...
     if (!sellAmount || fxRate <= 0) {
         if (typeof pushAuditLog === "function") pushAuditLog(`[EXECUTE DENIED] 🚨 固价合同校验失败 (Rate: ${fxRate})，拒绝向中台打流！`);
