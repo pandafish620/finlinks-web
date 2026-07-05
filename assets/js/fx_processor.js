@@ -206,13 +206,6 @@ export async function submitFxConversion() {
         return;
     }
 
-    // 防御过期的合同执行扣杀
-    if (!realAirwallexUuid && routingVia === "AIRWALLEX") {
-        if (typeof pushAuditLog === "function") pushAuditLog(`[EXECUTE DENIED] 🚨 缺乏合规的大厂交割契约 ID，拒绝向中台打流！`);
-        alert("错误: 锁价契约凭证已作废，请重新询价。");
-        return;
-    }
-
     const elSubmitBtn = document.getElementById("fx-submit-btn");
     if (elSubmitBtn) {
         elSubmitBtn.setAttribute("disabled", "true");
