@@ -103,7 +103,7 @@ export async function triggerLiveQuote(pushAuditLog, showPremiumNotification) {
                 modalConfirm.dataset.sellAmount = sellAmount.toString();
                 // 👑 ⚡ 【补焊资产指纹】：精准向 DOM 灌注大厂下发的换汇契约核心 UUID
                 const realUuid = result.provider_options?.quote_contract?.quote_id || result.quote_id || "";
-                modalConfirm.dataset.airwallexQuoteId = realUuid;
+                modalConfirm.dataset.awxquoteid = realUuid;
             }
 
             // 视图切换：隐藏第一窗输入框，平滑展开第二窗确认按钮
@@ -199,7 +199,7 @@ export async function submitFxConversion() {
     
     const exchangeId = modalConfirm ? (modalConfirm.dataset.exchangeId || "") : "";
     // 👑 ⚡ 【补焊资产提取】：顺向从 dataset 中打捞无损的 Airwallex 契约核心 UUID
-    const airwallexQuoteId = modalConfirm ? (modalConfirm.dataset.airwallexQuoteId || "") : "";
+    const airwallexQuoteId = modalConfirm ? (modalConfirm.dataset.awxquoteid || "") : "";
 
     const pushAuditLog = window.pushAuditLog;
 
@@ -259,10 +259,10 @@ export async function submitFxConversion() {
     console.log("📡 [FINLINKS V5.4.6 FINAL] 前后端全合流，契约 Payload 发射:", payloadBody);
 
     try {
+        // 👑 满血并线：直接丢入纯 Object 载荷，将反序列化主权完美移交给 finlinks_client 乐高地基！
         const response = await client("ledger/fx/convert", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payloadBody)
+            body: payloadBody // 🎯 修正：直接传对象肉身！
         });
 
         const data = await response.json();
