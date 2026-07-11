@@ -344,7 +344,7 @@ const GLOBAL_CORRIDOR_MATRIX = {
     "USD": { status: "active", channel: "BANK", label: "US Bank Account (Fedwire/ACH)", ph: { acc: "Account Number", bcode: "Bank Code", routing: "9-digit Routing Number", swift: "SWIFT BIC" } },
     "GBP": { status: "active", channel: "BANK", label: "UK Bank Account (Sort Code/FPS)", ph: { acc: "Account Number", bcode: "Sort Code (6 digits)", routing: "Not Required", swift: "SWIFT BIC" } },
     "AUD": { status: "active", channel: "BANK", label: "Australia Bank Account (BSB)", ph: { acc: "Account Number", bcode: "BSB Code (6 digits)", routing: "Not Required", swift: "Not Required" } },
-
+    "NGN": { status: "active", channel: "BANK", label: "Nigeria Bank Account (NUBAN Engine)", ph: { acc: "10-digit NUBAN Account Number (e.g., 0123456789)", bcode: "3-digit Central Bank Code (e.g., Wema Bank fill 044)", routing: "Not Required", swift: "Not Required" } },
     // 🇪🇺 欧洲与 🌏 亚太：新增灰度预热特权阻断节点
     "EUR": { status: "coming_soon", channel: "BANK", label: "Eurozone Local Clearing (SEPA)", ph: { acc: "IBAN Number (Starts with Country Code)", bcode: "Not Required (Embedded in IBAN)", routing: "Not Required", swift: "BIC/SWIFT Code Required" } },
     "JPY": { status: "coming_soon", channel: "BANK", label: "Japan Zengin Clearing System", ph: { acc: "Account Number (7 digits)", bcode: "Bank Code + Branch Code", routing: "Account Category (Checking/Savings)", swift: "Not Required" } },
@@ -359,7 +359,6 @@ const GLOBAL_CORRIDOR_MATRIX = {
     "MXN": { status: "coming_soon", channel: "LATAM", label: "Mexico Local (SPEI)", ph: { acc: "18-digit CLABE Account Number", bcode: "3-digit Bank Code", routing: "Not Required", swift: "Not Required" } },
     
     // 📱 西非移动货币集团（PawaPay/Flutterwave 托管大网）➔ 首发激活状态
-    "NGN": { status: "active", channel: "MOBILE", label: "Nigeria Mobile Money / Local Bank" },
     "KES": { status: "active", channel: "MOBILE", label: "Kenya M-Pesa / Mobile Money" },
     "UGX": { status: "active", channel: "MOBILE", label: "Uganda Mobile Money" },
     "GHS": { status: "active", channel: "MOBILE", label: "Ghana Mobile Money" },
