@@ -257,22 +257,28 @@
                         <div class="grid grid-cols-2 gap-4">
                             <select id="payout-curr" onchange="if(typeof window.adaptPayoutFormByGeopolitical === 'function') window.adaptPayoutFormByGeopolitical();" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
                                 <option value="" disabled selected>选择结算币种...</option>
-                                <option value="USD">USD (美元 Fedwire / ACH 本地清算)</option>
-                                <option value="EUR">EUR (欧元区 SEPA 实时清算总线)</option>
-                                <option value="GBP">GBP (英镑 Fast Payments 快速网络)</option>
-                                <option value="NGN">NGN (尼日利亚奈拉 - NUBAN 影子总账)</option>
-                                <option value="BRL">BRL (巴西雷亚尔 - Pix 实时网关)</option>
-                                <option value="MXN">MXN (墨西哥比索 - SPEI 核心网)</option>
-                                <option value="TRY">TRY (土耳其里拉 - 国际 IBAN 清算)</option>
-                                <option value="KES">KES (肯尼亚先令 - M-Pesa 移动放款)</option>
-                                <option value="UGX">UGX (乌加达先令 - MTN 移动打款)</option>
-                                <option value="TZS">TZS - 坦桑尼亚先令 (东非 Vodacom/Tigo 移动钱包)</option>
-                                <option value="GHS">GHS (加纳塞地 - Vodafone Mobile Money)</option>
-                                <option value="RWF">RWF (卢旺达法郎 - 东非 MTN 核心网)</option>
-                                <option value="ZMW">ZMW (赞比亚克瓦查 - Airtel/MTN 移动钱包)</option>
-                                <option value="ZAR">ZAR (南非兰特 - EFT 银行结算大闸)</option>
-                                <option value="MWK">MWK (马拉维克瓦查 - Airtel / TNM 移动钱包)</option>
-                                <option value="MUR">MUR (毛里求斯卢比 - MCB / SBM 离岸银行网络)</option>
+                                                                <optgroup label="已激活满血通道 (Active Corridors)">
+                                    <option value="USD">USD (美元 Fedwire / ACH 本地清算)</option>
+                                    <option value="GBP">GBP (英镑 Fast Payments 快速网络)</option>
+                                    <option value="AUD">AUD (澳元 BECS 自持本地清算)</option>
+                                    <option value="NGN">NGN (尼日利亚奈拉 - NUBAN 影子总账)</option>
+                                    <option value="KES">KES (肯尼亚先令 - M-Pesa 移动放款)</option>
+                                    <option value="UGX">UGX (乌干达先令 - MTN 移动打款)</option>
+                                    <option value="GHS">GHS (加纳塞地 - Vodafone Mobile Money)</option>
+                                    <option value="TZS">TZS (坦桑尼亚先令 - 东非移动钱包)</option>
+                                    <option value="RWF">RWF (卢旺达法郎 - 东非 MTN 核心网)</option>
+                                    <option value="ZMW">ZMW (赞比亚克瓦查 - Airtel/MTN 钱包)</option>
+                                    <option value="MWK">MWK (马拉维克瓦查 - Airtel / TNM 钱包)</option>
+                                </optgroup>
+                                                                <optgroup label="👑 VIP 灰度预热通道 (Premium Beta Control)">
+                                    <option value="EUR">EUR (欧元区 SEPA 实时清算总线) ⚡</option>
+                                    <option value="BRL">BRL (巴西雷亚尔 - Pix 实时本地结算)</option>
+                                    <option value="MXN">MXN (墨西哥比索 - SPEI 核心清算网)</option>
+                                    <option value="JPY">JPY (日本 - Zengin 全局全自动寻址系统)</option>
+                                    <option value="IDR">IDR (印尼盾 - BI-FAST 跨国结算总线)</option>
+                                    <option value="PHP">PHP (菲律宾比索 - InstaPay 本地极速下发)</option>
+                                    <option value="THB">THB (泰国铢 - PromptPay 国家级统一收付网)</option>
+                                </optgroup>
                             </select>
                             <input type="number" id="payout-amount" placeholder="清算金额 (Amount)" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-rose-500">
                         </div>
@@ -609,31 +615,7 @@
                 }, 400);
             });
         };
-
-        // ⚖️ 零信任复式总账自动化对账
-        window.triggerMockReconciliation = async function() {
-            const vaultCurrency = localStorage.getItem("FINLINKS_LAST_ACTIVE_CURRENCY");
-            const payinCurr = document.getElementById("collectionCurrency")?.value;
-            const payoutCurr = document.getElementById("payout-curr")?.value;
-            const finalCurrency = (vaultCurrency || payinCurr || payoutCurr || "NGN").toUpperCase().trim();
-
-            window.pushAuditLog(`[AUDIT START] 零信任对账引擎点火：正在提取金库凭证，刚性轧差 [${finalCurrency}] 影子总账...`);
-            try {
-                const response = await client(`/ledger/reconcile?currency=${finalCurrency}`, { method: "POST" });
-                const data = await response.json();
-                if (response.status === 200) {
-                    window.pushAuditLog(`[RECON SUCCESS] 🟢 [${finalCurrency}] 内部流水轧差大胜！结构体自愈成功。`);
-                    if (typeof window.fetchBalances === "function") {
-                        await window.fetchBalances();
-                    }
-                } else {
-                    window.pushAuditLog(`[RECON REJECTED] 中台对账熔断: ${data.detail || "条件不满足"}`);
-                }
-            } catch (error) {
-                window.pushAuditLog(`[RECON CRITICAL] 物理对账通信链路猝死: ${error.message}`);
-            }
-        };
-
+        
         // 并线点火初始化
         (async function() {
             const activeMerchantId = localStorage.getItem("FINLINKS_ACTIVE_MID") || "admin";

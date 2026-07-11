@@ -74,16 +74,19 @@ export async function handleLivePayoutDisbursal(fetchBalances) {
     const cleanSwift = elSwift && elSwift.value.trim() ? elSwift.value.trim() : (currency === "NGN" ? "" : "BOFAUS3N");
     const cleanRouting = elRouting && elRouting.value.trim() ? elRouting.value.trim() : (currency === "NGN" ? "" : "021000021");
 
+    // 🌍 跨国异构分流总线：识别是否走西非移动货币大网（NGN/KES等），其余（美英澳欧日巴墨东南亚）一律无缝切入 Airwallex 传统银行网关
+    const isMobileMoney = ["NGN", "KES", "UGX", "GHS", "TZS", "ZMW", "MWK", "RWF"].includes(currency);
+
     const basePayload = {
-        "sell_currency": currency.toUpperCase().trim(), 
+        "sell_currency": currency, 
         "sell_amount": amount,
-        "buy_currency": currency.toUpperCase().trim(),  
+        "buy_currency": currency,  
         "fx_rate": 1.0,            
-        "routing_via": "FLUTTERWAVE",
+        "routing_via": isMobileMoney ? "FLUTTERWAVE" : "AIRWALLEX", 
         "quote_timestamp": 0.0,
         "beneficiary_name": beneficiaryName,        
         "beneficiary_account": beneficiaryAccount,  
-        "channel_type": "MOBILE_MONEY",
+        "channel_type": isMobileMoney ? "MOBILE_MONEY" : "BANK_TRANSFER", 
         "bank_code": cleanBankCode,
         "phone_number": cleanPhone
     };
@@ -101,14 +104,25 @@ export async function handleLivePayoutDisbursal(fetchBalances) {
         if (previewRes.status !== 200 || previewData.status !== "preview") {
             const errMsg = typeof previewData.detail === 'object' 
                 ? JSON.stringify(previewData.detail) 
-                : (previewData.detail || previewData.msg || "离岸钱包可用头寸不足或格式排异");
+                : (previewData.detail || previewData.msg || "");
                 
             if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[PAYOUT REJECTED] ❌ 中台拒签预检: ${errMsg}`);
             
+            // 👑 核心合流拦截器：如果捕捉到外盘 AM 尚未开通该通道的圣旨，直接在前端转化为高逼格的 VIP 申请弹窗
+            if (errMsg.includes("beneficiary_type_unsupported") || previewData.code === "beneficiary_type_unsupported") {
+                if (typeof window.showPremiumComingSoonModal === "function") {
+                    window.showPremiumComingSoonModal(currency);
+                } else {
+                    alert(`【VIP通道预热中】FinLinks 正在为您调谐 ${currency} 离岸中央清算大闸，请联系您的账户经理（AM）开通该血管权限。`);
+                }
+                return;
+            }
+            
+            // 其余常规资产不足等物理报错，走原有的全暗黑错误弹窗
             showNotificationModal({
                 type: "error",
                 title: "代付预检拦截 / PREVIEW REJECTED",
-                message: `错误明细: ${errMsg}`
+                message: `错误明细: ${errMsg || "离岸外盘可用头寸不足或格式排异"}`
             });
             return;
         }

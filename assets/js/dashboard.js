@@ -333,25 +333,122 @@ function switchTab(tabId) {
 function pushAuditLog(message) { if (typeof window.pushAuditLog === "function") window.pushAuditLog(message); }
 
 // 📄 追加到 assets/js/dashboard.js 中，激活大厅表单的极性动态切换
+// =====================================================================
+// 🌍 FinLinks 全球主权币种路由元数据矩阵（含灰度 Feature Flag）
+// =====================================================================
+// =====================================================================
+// 🌍 FinLinks 全球主权币种路由元数据矩阵（2026年7月完全体含灰度 Feature Flag）
+// =====================================================================
+const GLOBAL_CORRIDOR_MATRIX = {
+    // 🏦 第一梯队：首发已打通满血绿轨（Web2 传统大行通道）
+    "USD": { status: "active", channel: "BANK", label: "US Bank Account (Fedwire/ACH)", ph: { acc: "Account Number", bcode: "Bank Code", routing: "9-digit Routing Number", swift: "SWIFT BIC" } },
+    "GBP": { status: "active", channel: "BANK", label: "UK Bank Account (Sort Code/FPS)", ph: { acc: "Account Number", bcode: "Sort Code (6 digits)", routing: "Not Required", swift: "SWIFT BIC" } },
+    "AUD": { status: "active", channel: "BANK", label: "Australia Bank Account (BSB)", ph: { acc: "Account Number", bcode: "BSB Code (6 digits)", routing: "Not Required", swift: "Not Required" } },
+
+    // 🇪🇺 欧洲与 🌏 亚太：新增灰度预热特权阻断节点
+    "EUR": { status: "coming_soon", channel: "BANK", label: "Eurozone Local Clearing (SEPA)", ph: { acc: "IBAN Number (Starts with Country Code)", bcode: "Not Required (Embedded in IBAN)", routing: "Not Required", swift: "BIC/SWIFT Code Required" } },
+    "JPY": { status: "coming_soon", channel: "BANK", label: "Japan Zengin Clearing System", ph: { acc: "Account Number (7 digits)", bcode: "Bank Code + Branch Code", routing: "Account Category (Checking/Savings)", swift: "Not Required" } },
+    
+    // 东南亚代付长廊（ASEAN Payout Corridors）➔ 强行拉满技术大厂逼格
+    "IDR": { status: "coming_soon", channel: "BANK", label: "Indonesia Local (BI-FAST / SKN)", ph: { acc: "Bank Account Number", bcode: "3-digit Bank Clearing Code", routing: "Not Required", swift: "Not Required" } },
+    "PHP": { status: "coming_soon", channel: "BANK", label: "Philippines Local (InstaPay / PESONet)", ph: { acc: "Account Number", bcode: "Bank Identifier Code (BIC)", routing: "Not Required", swift: "Not Required" } },
+    "THB": { status: "coming_soon", channel: "BANK", label: "Thailand Local (PromptPay / Bahtnet)", ph: { acc: "Account Number or Proxy ID", bcode: "Bank Code (3 digits)", routing: "Not Required", swift: "Not Required" } },
+
+    // 💃 拉美双雄：灰度预热特权阻断节点
+    "BRL": { status: "coming_soon", channel: "LATAM", label: "Brazil Local (TED/PIX)", ph: { acc: "Bank Account Number", bcode: "3-digit ISPB / Bank Code", routing: "CPF or CNPJ Tax ID Required", swift: "Not Required" } },
+    "MXN": { status: "coming_soon", channel: "LATAM", label: "Mexico Local (SPEI)", ph: { acc: "18-digit CLABE Account Number", bcode: "3-digit Bank Code", routing: "Not Required", swift: "Not Required" } },
+    
+    // 📱 西非移动货币集团（PawaPay/Flutterwave 托管大网）➔ 首发激活状态
+    "NGN": { status: "active", channel: "MOBILE", label: "Nigeria Mobile Money / Local Bank" },
+    "KES": { status: "active", channel: "MOBILE", label: "Kenya M-Pesa / Mobile Money" },
+    "UGX": { status: "active", channel: "MOBILE", label: "Uganda Mobile Money" },
+    "GHS": { status: "active", channel: "MOBILE", label: "Ghana Mobile Money" },
+    "TZS": { status: "active", channel: "MOBILE", label: "Tanzania Mobile Money" },
+    "ZMW": { status: "active", channel: "MOBILE", label: "Zambia Mobile Money" },
+    "MWK": { status: "active", channel: "MOBILE", label: "Malawi Mobile Money" },
+    "RWF": { status: "active", channel: "MOBILE", label: "Rwanda Mobile Money" }
+};
+
+// 👑 [UI REFACTOR] 灰度预热特权拦截大闸
+window.showPremiumComingSoonModal = function(currency) {
+    const oldOverlay = document.getElementById("finlinks-premium-lock-overlay");
+    if (oldOverlay) oldOverlay.remove();
+
+    if (typeof window.pushAuditLog === "function") {
+        window.pushAuditLog(`[UI INTERCEPT] 🔒 操盘手试图扣动未开通新兴法域 [${currency}]，特权拦截仓就地锁死。`);
+    }
+
+    const modalHtml = `
+        <div id="finlinks-premium-lock-overlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center z-[9999] font-sans">
+            <div class="bg-slate-900 border border-amber-500/30 w-full max-w-md p-6 rounded-xl shadow-2xl space-y-5 animate-in fade-in zoom-in duration-150">
+                <div class="flex items-center space-x-3 border-b border-slate-800 pb-3">
+                    <div class="w-9 h-9 bg-amber-500/10 text-amber-400 rounded-lg flex items-center justify-center text-lg font-bold border border-amber-500/20">👑</div>
+                    <div>
+                        <h3 class="text-amber-400 font-bold text-sm tracking-wide">VIP 通道首发权限申请</h3>
+                        <p class="text-[10px] text-slate-500 font-mono">Corridor Access Control: ${currency} Matrix</p>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed font-sans">
+                    尊敬的操盘手，<strong>${currency}（新法域本地清算总线）</strong>目前处于内部灰度小范围跑量测试阶段。为确保多租户隔离舱头寸安全与拉美/亚洲内盘高管辖合规轧差，该高额出港通道目前仅对特批白名单商户开放。
+                </p>
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 font-mono text-[11px] text-slate-400 space-y-1">
+                    <div>• 接入网关: AIRWALLEX LATAM/ASIA BUS</div>
+                    <div>• 清算极性: 刚性自愈 (TED / SPEI / ZENGIN)</div>
+                    <div>• 准入条件: 日流水 > 50,000 USD 或完成高级法团审计</div>
+                </div>
+                <div class="flex space-x-3">
+                    <button onclick="document.getElementById('finlinks-premium-lock-overlay').remove()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-lg transition tracking-wide">
+                        返回账本大厅
+                    </button>
+                    <button onclick="document.getElementById('finlinks-premium-lock-overlay').remove(); window.pushAuditLog('[VIP REQUEST] 操盘手已一键向客户经理发起 ${currency} 白名单申请工单。'); alert('申请已提交！您的客户经理（Relationship Manager）将在1小时内与您联系对接贸易流水评审。');" class="flex-1 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-lg transition tracking-wide shadow-lg shadow-amber-500/10">
+                        一键申请开通 VIP 血管
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+};
+
+// 📄 原位覆盖：动态根据地缘法域调谐表单占位符与显隐状态
 window.adaptPayoutFormByGeopolitical = function() {
-    const currency = document.getElementById("payout-curr")?.value || "";
+    const currency = (document.getElementById("payout-curr")?.value || "NGN").toUpperCase().trim();
     const bankGroup = document.getElementById("payout-bank-group");
     const mobileGroup = document.getElementById("payout-mobile-group");
     
     if (!bankGroup || !mobileGroup) return;
 
-    // 🌍 6国合拢修正：全量补齐 PawaPay 新通车的赞比亚 ZMW、马拉维 MWK、卢旺达 RWF，无损通过前台表单调谐大闸
-    if (["KES", "UGX", "GHS", "TZS", "ZMW", "MWK", "RWF"].includes(currency.toUpperCase().trim())) {
+    // 缓存最后一次选中的活跃币种
+    localStorage.setItem("FINLINKS_LAST_ACTIVE_CURRENCY", currency);
+
+    const conf = GLOBAL_CORRIDOR_MATRIX[currency] || { status: "active", channel: "MOBILE" };
+
+    // 1. 灰度拦截：如果是 Coming Soon 节点，直接唤起 VIP 弹窗
+    if (conf.status === "coming_soon") {
+        window.showPremiumComingSoonModal(currency);
+    }
+
+    // 2. 显隐分流
+    if (conf.channel === "MOBILE") {
         mobileGroup.classList.remove("hidden"); 
         bankGroup.classList.add("hidden");    
-        if (typeof window.pushAuditLog === "function") {
-            window.pushAuditLog(`[UI ROUTER] 📱 币种已切换至 [${currency}]，已自动调谐至移动货币(Mobile Money)放款矩阵。`);
-        }
+        pushAuditLog(`[UI ROUTER] 📱 币种已切换至 [${currency}]，已自动调谐至移动货币 Mobile Money 矩阵。`);
     } else {
         bankGroup.classList.remove("hidden"); 
         mobileGroup.classList.add("hidden");  
-        if (typeof window.pushAuditLog === "function") {
-            window.pushAuditLog(`[UI ROUTER] 🏦 币种已切换至 [${currency}]，已自动调谐至标准跨境银行网关清算矩阵。`);
+        pushAuditLog(`[UI ROUTER] 🏦 币种已切换至 [${currency}]，已自动调谐至全球标准主权银行网关。`);
+        
+        // 3. 像素级正畸：根据币种特性动态洗净 Input 的 Placeholder，防止商户填错
+        if (conf.ph) {
+            const accNode = document.getElementById("payout-acc");
+            const bcodeNode = document.getElementById("payout-bank-code");
+            const routingNode = document.getElementById("payout-routing-number");
+            const swiftNode = document.getElementById("payout-swift-code");
+
+            if (accNode && conf.ph.acc) accNode.placeholder = conf.ph.acc;
+            if (bcodeNode && conf.ph.bcode) bcodeNode.placeholder = conf.ph.bcode;
+            if (routingNode && conf.ph.routing) routingNode.placeholder = conf.ph.routing;
+            if (swiftNode && conf.ph.swift) swiftNode.placeholder = conf.ph.swift;
         }
     }
 };
