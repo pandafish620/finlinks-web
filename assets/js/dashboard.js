@@ -367,6 +367,8 @@ const GLOBAL_CORRIDOR_MATRIX = {
     "MWK": { status: "active", channel: "MOBILE", label: "Malawi Mobile Money" },
     "RWF": { status: "active", channel: "MOBILE", label: "Rwanda Mobile Money" }
 };
+// 👑 [GLOBAL ELEVATION] 破除模块化壁垒，将币种矩阵刚性提权至全局全局 window 对象，绝杀跨文件 ReferenceError
+window.GLOBAL_CORRIDOR_MATRIX = GLOBAL_CORRIDOR_MATRIX;
 
 // 👑 [UI REFACTOR] 灰度预热特权拦截大闸
 window.showPremiumComingSoonModal = function(currency) {

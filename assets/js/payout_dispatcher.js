@@ -74,8 +74,8 @@ export async function handleLivePayoutDisbursal(fetchBalances) {
     const cleanSwift = elSwift && elSwift.value.trim() ? elSwift.value.trim() : (currency === "NGN" ? "" : "BOFAUS3N");
     const cleanRouting = elRouting && elRouting.value.trim() ? elRouting.value.trim() : (currency === "NGN" ? "" : "021000021");
 
-    // 📡 动态拉取主权法域全局配置字典（拒绝任何形式的硬编码）
-    const corridorConf = GLOBAL_CORRIDOR_MATRIX[currency] || { status: "active", channel: "MOBILE" };
+    // 🟢 请原位修正为从最高特权区 window 读取：
+    const corridorConf = (window.GLOBAL_CORRIDOR_MATRIX && window.GLOBAL_CORRIDOR_MATRIX[currency]) || { status: "active", channel: "MOBILE" };
     
     // 🧭 根据字典里的 channel 配置，精确解耦分配清算网关和结算极性
     const targetRoutingVia = (currency === "NGN" || corridorConf.channel === "MOBILE") ? "FLUTTERWAVE" : "AIRWALLEX";
