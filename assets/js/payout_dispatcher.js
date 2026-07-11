@@ -74,23 +74,27 @@ export async function handleLivePayoutDisbursal(fetchBalances) {
     const cleanSwift = elSwift && elSwift.value.trim() ? elSwift.value.trim() : (currency === "NGN" ? "" : "BOFAUS3N");
     const cleanRouting = elRouting && elRouting.value.trim() ? elRouting.value.trim() : (currency === "NGN" ? "" : "021000021");
 
-    // 🌍 跨国异构分流总线：识别是否走西非移动货币大网（NGN/KES等），其余（美英澳欧日巴墨东南亚）一律无缝切入 Airwallex 传统银行网关
-    const isMobileMoney = ["NGN", "KES", "UGX", "GHS", "TZS", "ZMW", "MWK", "RWF"].includes(currency);
+    // 📡 动态拉取主权法域全局配置字典（拒绝任何形式的硬编码）
+    const corridorConf = GLOBAL_CORRIDOR_MATRIX[currency] || { status: "active", channel: "MOBILE" };
+    
+    // 🧭 根据字典里的 channel 配置，精确解耦分配清算网关和结算极性
+    const targetRoutingVia = (currency === "NGN" || corridorConf.channel === "MOBILE") ? "FLUTTERWAVE" : "AIRWALLEX";
+    const targetChannelType = (corridorConf.channel === "MOBILE") ? "MOBILE_MONEY" : "BANK_TRANSFER";
 
     const basePayload = {
         "sell_currency": currency, 
         "sell_amount": amount,
         "buy_currency": currency,  
         "fx_rate": 1.0,            
-        "routing_via": isMobileMoney ? "FLUTTERWAVE" : "AIRWALLEX", 
+        "routing_via": targetRoutingVia, 
         "quote_timestamp": 0.0,
         "beneficiary_name": beneficiaryName,        
         "beneficiary_account": beneficiaryAccount,  
-        "channel_type": isMobileMoney ? "MOBILE_MONEY" : "BANK_TRANSFER", 
+        "channel_type": targetChannelType, 
         "bank_code": cleanBankCode,
         "phone_number": cleanPhone
     };
-
+    
     try {
         console.log("📡 [PAYOUT STAGE-1 PREVIEW] 发射预检合规载荷Body:", basePayload);
         
