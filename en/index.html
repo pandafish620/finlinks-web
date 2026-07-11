@@ -374,9 +374,94 @@
         </div>
     </section>
 
-    <footer class="py-10 border-t border-slate-200/80 bg-wise-warm text-center text-[11px] text-slate-400 font-mono leading-relaxed">
-        <p>&copy; 2026 FinLinks Tech. All rights reserved.</p>
-    </footer>
+    <style>
+  .site-footer {
+    background-color: #f9fbfd; /* 微灰底色，区分主体内容与页脚 */
+    border-top: 1px solid #e5e7eb; /* 极细上边框，增加科技精致感 */
+    padding: 40px 20px; /* 上下留空 40px，左右刚性留空 20px */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #4b5563; /* 深灰字体，比纯黑更有高级感 */
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .site-footer .footer-container {
+    max-width: 1000px; /* 限制最大宽度，防止大屏上文字拉得太长 */
+    margin: 0 auto; /* 刚性水平居中 */
+  }
+
+  .site-footer .footer-section {
+    margin-bottom: 16px; /* 段落与段落之间增加纵向呼吸感 */
+  }
+
+  .site-footer .footer-section strong {
+    color: #111827; /* 强调标题加深，提升层次感 */
+    font-weight: 600;
+  }
+
+  .site-footer .footer-links {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-style: solid;
+    border-color: #e5e7eb;
+    border-width: 1px 0 0 0; /* 顶部分割线 */
+  }
+
+  .site-footer .footer-links a {
+    color: #2563eb; /* 科技蓝链接 */
+    text-decoration: none;
+    margin-right: 12px;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .site-footer .footer-links a:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+  }
+
+  .site-footer .footer-links span {
+    color: #d1d5db; /* 竖线分隔符淡化 */
+    margin-right: 12px;
+  }
+</style>
+
+<footer style="background-color: #fafafa; border-top: 1px solid #eaeaea; padding: 45px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; text-align: left !important;">
+  <div class="footer-container" style="max-width: 1050px; margin: 0 auto; padding: 0 25px; box-sizing: border-box;">
+    
+    <div style="margin-bottom: 24px;">
+      <p style="font-size: 13.5px; color: #1a1a1a; font-weight: 600; margin: 0 0 8px 0; letter-spacing: -0.2px;">
+        © 2026 Finlinks Technology Ltd. All rights reserved.
+      </p>
+      <p style="font-size: 12.5px; color: #4a4a4a; line-height: 1.6; margin: 0;">
+        Finlinks Technology Ltd is a private limited company registered in England and Wales (Company Number: 17333538).<br>
+        <span style="color: #1a1a1a; font-weight: 500;">Registered Office:</span> 128, City Road, London, EC1V 2NX, United Kingdom.
+      </p>
+    </div>
+
+    <div style="margin-bottom: 24px; border-left: 3px solid #dcdcdc; padding-left: 18px; margin-left: 2px;">
+      <p style="font-size: 12px; color: #555555; line-height: 1.65; margin: 0; text-align: justify;">
+        <span style="color: #222222; font-weight: 700; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.8px; display: block; margin-bottom: 6px;">Regulatory Disclaimer</span>
+        Finlinks Technology Ltd operates strictly as a financial technology architecture and software middleware provider. Finlinks is not a licensed bank, Electronic Money Institution (EMI), or Money Services Business (MSB). All monetary transmission, cross-border foreign exchange clearing, and multi-currency ledger servicing are provided exclusively by, and executed through, our globally integrated, regulated financial institution partners.
+      </p>
+    </div>
+
+    <div style="margin-bottom: 28px;">
+      <p style="font-size: 12px; color: #555555; line-height: 1.65; margin: 0;">
+        <span style="color: #222222; font-weight: 700;">Compliance & AML:</span> We strictly adhere to the United Kingdom and global anti-money laundering (AML), Know Your Business (KYB), and counter-terrorist financing standards. Access to routing services is subject to mandatory compliance vetting and risk assessment.
+      </p>
+    </div>
+
+    <div style="border-top: 1px solid #e8e8e8; margin-bottom: 22px;"></div>
+
+    <div style="font-size: 12.5px; margin: 0; padding: 0;">
+      <a href="/en/terms.html" style="color: #0066cc; text-decoration: none; margin-right: 24px; font-weight: 500;">Terms of Service</a>
+      <a href="/en/privacy.html" style="color: #0066cc; text-decoration: none; margin-right: 24px; font-weight: 500;">Privacy Policy</a>
+      <a href="/en/cookie.html" style="color: #0066cc; text-decoration: none; font-weight: 500;">Cookie Policy</a>
+    </div>
+
+  </div>
+</footer>
 
     <script type="module">
         const FX_MATRICES = {
