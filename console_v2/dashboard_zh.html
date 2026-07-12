@@ -264,6 +264,25 @@
                         <span class="block font-bold text-xs text-emerald-400 font-mono tracking-wider">// 单笔即时交割特区</span>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">扣款源头持仓账户 (Funding Source Wallet)</label>
+                                <select id="payout-source-wallet" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
+                                    <optgroup label="核心结算金库 (G10 & Major Vaults)">
+                                        <option value="USD" selected>USD 账户影子头寸 (Master Asset Pool)</option>
+                                        <option value="GBP">GBP 英镑快速清算池 (UK Vault)</option>
+                                        <option value="EUR">EUR 欧元区统一结算池 (EU Vault)</option>
+                                        <option value="AUD">AUD 澳元自持本地清算池 (Aussie Vault)</option>
+                                        <option value="JPY">JPY 日本全自动寻址头寸 (Zen Pool)</option>
+                                    </optgroup>
+                                    <optgroup label="新兴市场及地缘深水区 (Emerging & Africa Vaults)">
+                                        <option value="NGN">NGN 非洲主权本币池 (Nigeria Vault)</option>
+                                        <option value="BRL">BRL 巴西 Pix 实时结算头寸 (LatAm Vault)</option>
+                                        <option value="MXN">MXN 墨西哥 SPEI 核心清算池 (Mexican Vault)</option>
+                                        <option value="KES">KES 肯尼亚先令移动金库 (M-Pesa Pool)</option>
+                                        <option value="UGX">UGX 乌干达先令核心网头寸 (MTN Pool)</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
                                 <label class="block text-[10px] font-bold text-slate-500">受益人全称 (Beneficiary Name)</label>
                                 <input type="text" id="payout-name" placeholder="收款人合法全称 (如 Jacky Xiaoyu Zhang)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
                             </div>
