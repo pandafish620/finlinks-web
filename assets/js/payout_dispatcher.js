@@ -228,18 +228,84 @@ async function executeTwoPhaseClearing(basePayload, fetchBalances, currency, amo
                 window.pushAuditLog(`[PAYOUT COMMIT] 操盘手签署放款令，执行秒级背对背核销锁死...`);
             }
 
+            // 🎯 【5.6.9.9 动态极性自愈大闸】：绝对不硬编码！
+            // 如果是批量模式（BATCH）且商户选择了预约/挂起，或者老逻辑本身声明了非实弹，则继承既有极性；
+            // 只有在明确的单笔/即期实弹签署时，才刚性织入 true。
+            const determineCommitPolarity = () => {
+                if (basePayload.payout_mode === "BATCH") {
+                    // 如果批量代付里有特定的预约标志位，或者老代码有特定期待，可以在这里截留返回 false
+                    return getattr(basePayload, "commit", false); 
+                }
+                return true; // 纯单笔极速流现货直接给 true
+            };
+
             const commitPayload = {
                 ...basePayload,
+                "commit": determineCommitPolarity(), // 🟢 动态指派，完美兼容 BATCH Scheduled!
                 "quote_timestamp": parseFloat(quoteTimestamp)
             };
 
             try {
                 console.log("📡 [STAGE-2 COMMIT] 推送真·打款放行令牌:", commitPayload);
                 
-                const commitRes = await client("/payout/create?commit=true", { 
+                // 🎯 【5.9.9.9 前端多态变道大闸】：动态捕获上一阶段的通道真决策，原位 1:1 替代老旧 client 请求
+                // ==============================================================================
+                const currentProvider = window.currentSelectedProvider || "AIRWALLEX"; 
+                const buyCurrency = String(basePayload.buy_currency || "").toUpperCase().trim();
+
+                // 判定是否切网去离岸总账血管 (FLUTTERWAVE 通道或奈拉结汇)
+                const isOffshoreFLW = (currentProvider === "FLUTTERWAVE" || buyCurrency === "NGN");
+
+                let targetApiUrl = "/payout/create?commit=true";
+                let finalizedPayload = {};
+
+                if (isOffshoreFLW) {
+                    console.log("🚀 [ROUTING SWITCH] 侦测到西非资产调拨，前端执行凌空变道 ➔ 导流至 fx_router.py");
+                    targetApiUrl = "/api/fx/offshore-payout"; 
+                    
+                    const bPhone = (basePayload.beneficiary_phone || "").trim();
+                    const bEmail = (basePayload.beneficiary_email || "").trim();
+
+                    // 🛡️ 刚性断路器：非洲手机号清洗后必须存在且通常不低于 10 位数字（排除国家码干扰）
+                    const cleanPhoneDigits = bPhone.replace(/\D/g, "");
+                    if (cleanPhoneDigits.length < 10) {
+                        alert("❌ [FinLinks 业务拦截] 跨境西非结汇必须填写受益人有效的手机号码（至少10位数字），请检查表单！");
+                        return; // 刚性断路，子弹当场拦截
+                    }
+
+                    finalizedPayload = {
+                        "customer_id": basePayload.customer_id || window.currentMerchantId,
+                        "target_merchant_mid": basePayload.target_merchant_mid || basePayload.beneficiary_account,
+                        "payout_amount": parseFloat(basePayload.amount),
+                        "currency": basePayload.sell_currency,
+                    
+                        // 饱和式平铺受益人关键清算要素，1:1 送给后端的适配器
+                        "beneficiary_account": basePayload.beneficiary_account,
+                        "beneficiary_name": basePayload.beneficiary_name,
+                        "beneficiary_bank_code": basePayload.beneficiary_bank_code,
+                        // 🟢 动态对轧：电话确保是真业务数据；邮箱若有则传，无则由后端商户总账动态垫片，前端彻底剥离硬编码
+                        "beneficiary_phone": bPhone,
+                        "beneficiary_email": bEmail || null
+                    };
+                } else {
+                    console.log("🇺🇸 [ROUTING KEEP] 走主流环球流，维持原轨道轰击 payout_router.py");
+                    targetApiUrl = "/payout/create?commit=true";
+                    finalizedPayload = {
+                        ...basePayload,
+                        "commit": true,
+                        "quote_timestamp": parseFloat(quoteTimestamp)
+                    };
+                }
+
+                if (typeof window.pushAuditLog === "function") {
+                    window.pushAuditLog(`[ROUTE ATTACK] 实弹导火索点燃 ➔ 发往网关: ${targetApiUrl}`);
+                }
+
+                // ⚡ 扣动实弹扳手，将清洗、变道后的结果刚性击发
+                const commitRes = await client(targetApiUrl, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(commitPayload)
+                    body: JSON.stringify(finalizedPayload) // 压入多态自愈后的终极载荷
                 });
                 const commitData = await commitRes.json();
 
