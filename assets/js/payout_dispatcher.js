@@ -158,12 +158,17 @@ async function executeTwoPhaseClearing(basePayload, fetchBalances, currency, amo
         });
         const previewData = await previewRes.json();
 
-        if (previewRes.status !== 200 || previewData.status !== "preview") {
+        // 🎯 【5.6.7 契约极性自愈大闸】：完美兼容历史 "preview" 字面量与全新平价直发的 "PREVIEW_SUCCESS" 状态
+        const isPreviewValid = previewData.status === "preview" || previewData.status === "PREVIEW_SUCCESS" || previewData.status === "success";
+
+        if (previewRes.status !== 200 || !isPreviewValid) {
             const errMsg = typeof previewData.detail === 'object' 
                 ? JSON.stringify(previewData.detail) 
                 : (previewData.detail || previewData.msg || "");
                 
-            if (typeof window.pushAuditLog === "function") window.pushAuditLog(`[PREVIEW REJECTED] ❌ 中台拒签预检: ${errMsg}`);
+            if (typeof window.pushAuditLog === "function") {
+                window.pushAuditLog(`[PREVIEW REJECTED] ❌ 中台拒签预检: ${errMsg}`);
+            }
             
             if (errMsg.includes("beneficiary_type_unsupported") || previewData.code === "beneficiary_type_unsupported") {
                 if (typeof window.showPremiumComingSoonModal === "function") {
