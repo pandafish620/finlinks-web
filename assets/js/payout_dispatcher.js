@@ -91,7 +91,7 @@ export async function handleSinglePayoutDisbursal(fetchBalances) {
     const basePayload = {
         "payout_mode": "SINGLE", 
         "sell_currency": currency,        // 🧱 100% 还原你原代码的本位币设置，防总账资产极性倒挂
-        "sell_amount": amount,           // 🧱 100% 还原
+        "amount": amount,                 // 🧱 100% 还原
         "buy_currency": currency,        // 🧱 100% 还原
         "fx_rate": 1.0,                  // 🧱 100% 还原
         "routing_via": targetRoutingVia, 
