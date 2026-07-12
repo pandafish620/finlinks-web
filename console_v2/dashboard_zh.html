@@ -247,49 +247,70 @@
             <section id="pane-payout" class="tab-pane hidden space-y-6">
                 <div>
                     <h1 class="text-2xl font-extrabold tracking-tight text-rose-400">代付工作台 (Payout Control)</h1>
-                    <p class="text-slate-400 text-xs mt-1">向离岸本地银行或电子钱包下发跨境代付清算指令。</p>
+                    <p class="text-slate-400 text-xs mt-1">向离岸本地银行或电子钱包下发跨境单笔/批量放款清算指令。</p>
                 </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-xl">
-                    <span class="block font-bold text-sm text-slate-300 mb-4">单笔代付下发表单</span>
-                    <div class="space-y-3">
-                        <input type="text" id="payout-name" placeholder="受益人姓名 (Beneficiary Name)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-rose-500">
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <select id="payout-curr" onchange="if(typeof window.adaptPayoutFormByGeopolitical === 'function') window.adaptPayoutFormByGeopolitical();" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none">
-                                <option value="" disabled selected>选择结算币种...</option>
-                                                                <optgroup label="已激活满血通道 (Active Corridors)">
-                                    <option value="USD">USD (美元 Fedwire / ACH 本地清算)</option>
-                                    <option value="GBP">GBP (英镑 Fast Payments 快速网络)</option>
-                                    <option value="AUD">AUD (澳元 BECS 自持本地清算)</option>
-                                    <option value="NGN">NGN (尼日利亚奈拉 - NUBAN 影子总账)</option>
-                                    <option value="KES">KES (肯尼亚先令 - M-Pesa 移动放款)</option>
-                                    <option value="UGX">UGX (乌干达先令 - MTN 移动打款)</option>
-                                    <option value="GHS">GHS (加纳塞地 - Vodafone Mobile Money)</option>
-                                    <option value="TZS">TZS (坦桑尼亚先令 - 东非移动钱包)</option>
-                                    <option value="RWF">RWF (卢旺达法郎 - 东非 MTN 核心网)</option>
-                                    <option value="ZMW">ZMW (赞比亚克瓦查 - Airtel/MTN 钱包)</option>
-                                    <option value="MWK">MWK (马拉维克瓦查 - Airtel / TNM 钱包)</option>
-                                </optgroup>
-                                                                <optgroup label="👑 VIP 灰度预热通道 (Premium Beta Control)">
-                                    <option value="EUR">EUR (欧元区 SEPA 实时清算总线) ⚡</option>
-                                    <option value="BRL">BRL (巴西雷亚尔 - Pix 实时本地结算)</option>
-                                    <option value="MXN">MXN (墨西哥比索 - SPEI 核心清算网)</option>
-                                    <option value="JPY">JPY (日本 - Zengin 全局全自动寻址系统)</option>
-                                    <option value="IDR">IDR (印尼盾 - BI-FAST 跨国结算总线)</option>
-                                    <option value="PHP">PHP (菲律宾比索 - InstaPay 本地极速下发)</option>
-                                    <option value="THB">THB (泰国铢 - PromptPay 国家级统一收付网)</option>
-                                </optgroup>
-                            </select>
-                            <input type="number" id="payout-amount" placeholder="清算金额 (Amount)" class="bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-rose-500">
-                        </div>
+                <div class="w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-6 space-y-6">
+                    <div class="flex items-center space-x-2 border-b border-slate-800 pb-px">
+                        <button id="tab-btn-single" onclick="switchPayoutTab('SINGLE')" class="px-4 py-2 text-xs font-bold tracking-wide border-b-2 border-emerald-500 text-emerald-400 transition duration-150">
+                            ⚡ SINGLE PAYOUT (单笔极速网络)
+                        </button>
+                        <button id="tab-btn-batch" onclick="switchPayoutTab('BATCH')" class="px-4 py-2 text-xs font-bold tracking-wide border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition duration-150">
+                            📦 BATCH PAYOUT (大货批量放款仓)
+                        </button>
+                    </div>
 
-                        <div id="payout-bank-group" class="space-y-3">
-                            <input type="text" id="payout-acc" placeholder="请输入受益人银行账户 / NUBAN / IBAN / CLABE" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none font-mono">
-                            <input type="text" id="payout-bank-code" placeholder="银行/分行编码 (Bank/Sort Code，如尼日利亚网关填 044)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none font-mono">
-                        </div>
-
-                        <div id="payout-mobile-group" class="hidden">
-                            <input type="text" id="payout-phone" placeholder="付款人本地电子钱包手机号 (格式如 +254... / +233...)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none font-mono">
+                    <div id="payout-panel-single" class="space-y-4 animate-in fade-in duration-150">
+                        <span class="block font-bold text-xs text-emerald-400 font-mono tracking-wider">// 单笔即时交割特区</span>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-500">受益人全称 (Beneficiary Name)</label>
+                                <input type="text" id="payout-name" placeholder="收款人合法全称 (如 Jacky Xiaoyu Zhang)" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-500">收款账号 / IBAN / CLABE (Account Number)</label>
+                                <input type="text" id="payout-acc" placeholder="请输入银行卡号或国际通用账号流水" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-500">结算币种 (Currency)</label>
+                                <select id="payout-curr" onchange="if(typeof window.adaptPayoutFormByGeopolitical === 'function') window.adaptPayoutFormByGeopolitical();" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                                    <option value="" disabled selected>选择结算币种...</option>
+                                    <optgroup label="已激活满血通道 (Active Corridors)">
+                                        <option value="USD">USD (美元 Fedwire / ACH 本地清算)</option>
+                                        <option value="GBP">GBP (英镑 Fast Payments 快速网络)</option>
+                                        <option value="AUD">AUD (澳元 BECS 自持本地清算)</option>
+                                        <option value="NGN">NGN (尼日利亚奈拉 - NUBAN 影子总账)</option>
+                                        <option value="KES">KES (肯尼亚先令 - M-Pesa 移动放款)</option>
+                                        <option value="UGX">UGX (乌干达先令 - MTN 移动打款)</option>
+                                        <option value="GHS">GHS (加纳塞地 - Vodafone Mobile Money)</option>
+                                        <option value="TZS">TZS (坦桑尼亚先令 - 东非移动钱包)</option>
+                                        <option value="RWF">RWF (卢旺达法郎 - 东非 MTN 核心网)</option>
+                                        <option value="ZMW">ZMW (赞比亚克瓦查 - Airtel/MTN 钱包)</option>
+                                        <option value="MWK">MWK (马拉维克瓦查 - Airtel / TNM 钱包)</option>
+                                    </optgroup>
+                                    <optgroup label="👑 VIP 灰度预热通道 (Premium Beta Control)">
+                                        <option value="EUR">EUR (欧元区 SEPA 实时清算总线) ⚡</option>
+                                        <option value="BRL">BRL (巴西雷亚尔 - Pix 实时本地结算)</option>
+                                        <option value="MXN">MXN (墨西哥比索 - SPEI 核心清算网)</option>
+                                        <option value="JPY">JPY (日本 - Zengin 全局全自动寻址系统)</option>
+                                        <option value="IDR">IDR (印尼盾 - BI-FAST 跨国结算总线)</option>
+                                        <option value="PHP">PHP (菲律宾比索 - InstaPay 本地极速下发)</option>
+                                        <option value="THB">THB (泰国铢 - PromptPay 国家级统一收付网)</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-500">下发金额 (Amount)</label>
+                                <input type="number" id="payout-amount" placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-emerald-500">
+                            </div>
+                            <div class="space-y-1" id="payout-bank-group">
+                                <label class="block text-[10px] font-bold text-slate-500">银行清算编码 (Bank Code / Sort Code / ABA 9位路由码)</label>
+                                <input type="text" id="payout-bank-code" placeholder="美国本地代付请刚性填入 9位 联储路由号，如 021000021" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
+                            </div>
+                            <div class="space-y-1 hidden" id="payout-mobile-group">
+                                <label class="block text-[10px] font-bold text-slate-500">付款人本地电子钱包手机号</label>
+                                <input type="text" id="payout-phone" value="+2348012345678" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
+                            </div>
                         </div>
 
                         <div class="hidden">
@@ -299,7 +320,32 @@
                             <input type="text" id="payout-routing-number" value="">
                         </div>
 
-                        <button onclick="executeLivePayoutDisbursal()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-2 rounded text-xs tracking-wider transition shadow-lg shadow-rose-600/10">核销并下发代付信号</button>
+                        <button onclick="executeLiveSinglePayoutDisbursal()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded text-xs tracking-wider transition shadow-lg shadow-emerald-500/10 uppercase">
+                            确认核销并签署单笔极速出金令 (SINGLE)
+                        </button>
+                    </div>
+
+                    <div id="payout-panel-batch" class="hidden space-y-4 animate-in fade-in duration-150">
+                        <span class="block font-bold text-xs text-indigo-400 font-mono tracking-wider">// 大货资金批量池仓</span>
+                        <div class="text-xs font-mono space-y-4">
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-500">大货批次摘要描述 (Batch Description)</label>
+                                <input type="text" id="batch-description" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500" placeholder="示例：2026年7月离岸员工薪酬包/大货货款代发">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-[10px] font-bold text-slate-500">上传物理结算清单 (Upload Settlement Sheet)</label>
+                                <div class="border border-dashed border-slate-800 bg-slate-950 rounded-lg p-8 text-center hover:border-indigo-500 transition cursor-pointer" onclick="document.getElementById('batch-file-input').click()">
+                                    <p class="text-slate-400 text-xs">点击或将 CSV / XLSX 清单拖拽至此区域上传</p>
+                                    <p class="text-[10px] text-slate-600 italic mt-1.5">标准列要素必须包含: name, account, bank_code, amount</p>
+                                    <input type="file" id="batch-file-input" class="hidden" accept=".csv,.xlsx" onchange="if(typeof window.handleBatchFilePreParse === 'function') window.handleBatchFilePreParse(this)">
+                                </div>
+                            </div>
+                            <div id="batch-preview-area" class="hidden border border-slate-800/80 rounded bg-slate-950 p-3 text-[11px] text-emerald-400 bg-emerald-950/10 border-emerald-500/20"></div>
+                        </div>
+
+                        <button onclick="executeLiveBatchPayoutDisbursal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded text-xs tracking-wider transition shadow-lg shadow-indigo-600/10 uppercase">
+                            确认核销并签署大货批量放款令 (BATCH)
+                        </button>
                     </div>
                 </div>
             </section>

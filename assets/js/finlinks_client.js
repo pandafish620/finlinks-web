@@ -15,7 +15,13 @@ export async function client(endpoint, options = {}) {
     let cleanPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
 
     // 🧱 核心勾稽纠偏算法：根据后端 main.py 挂载路由的灰度代差，执行自适应血管变轨，绝杀 404
-    if (!cleanPath.startsWith('/ledger') && !cleanPath.startsWith('/api/') && !cleanPath.startsWith('/feishu/')) {
+    // 🎯 【5.6.0 终审拨乱反正】：刚性追加 !cleanPath.startsWith('/payout') 拦截特区
+    // 彻底绝杀 Payout 核心业务流量被底层垫片误导、强行串舱坠入复式总账（/ledger）的技术债悲剧！
+    if (!cleanPath.startsWith('/ledger') && 
+        !cleanPath.startsWith('/payout') && 
+        !cleanPath.startsWith('/api/') && 
+        !cleanPath.startsWith('/feishu/')) {
+        
         cleanPath = `/ledger${cleanPath}`; // 🟢 动态注入复式总账主动脉血管前缀
     }
 

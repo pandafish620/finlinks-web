@@ -11,7 +11,8 @@ import { submitAdvancedKYB } from './kyb_handler.js';
 // 🔌 FinLinks 5.2.0 动力合流：从完全体发动机中引入真实的主权清算血管
 // =====================================================================
 import { triggerLiveQuote, submitFxConversion } from './fx_processor.js';
-import { handleLivePayoutDisbursal } from './payout_dispatcher.js';
+// 🎯 【5.6.0 终审并线】：引入分流后的单笔极速与大货批量双翼隔离代付调度器
+import { handleSinglePayoutDisbursal, handleBatchPayoutDisbursal } from './payout_dispatcher.js';
 import { handleLivePayinCallback } from './payin_handler.js'; // 👑 🏁 增量并线收单入金特种驱动
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -79,10 +80,19 @@ document.addEventListener("DOMContentLoaded", () => {
         submitFxConversion();
     };
 
-    // ⚡ 积木 3：自主出金放款代付触点通电（传入核心平账刷盘算子组）
-    window.executeLivePayoutDisbursal = () => handleLivePayoutDisbursal(() => {
-        fetchBalances();
-        fetchTransactionHistory(); // 代付信号下发大胜后，流水大厅同步冲刷重绘！
+    // ⚡ 积木 3：【SINGLE 与 BATCH 双翼隔离】代付触点全线通电
+    // =====================================================================
+    
+    // 1. 单笔极速放款电闸（供 SINGLE 选项卡上的确认按钮点击调用）
+    window.executeLiveSinglePayoutDisbursal = () => handleSinglePayoutDisbursal(async () => {
+        await fetchBalances();
+        await fetchTransactionHistory(); // 大胜后，影子账本与流水大厅同步冲刷重绘！
+    });
+
+    // 2. 大货批量放款电闸（供 BATCH 选项卡上的确认按钮点击调用）
+    window.executeLiveBatchPayoutDisbursal = () => handleBatchPayoutDisbursal(async () => {
+        await fetchBalances();
+        await fetchTransactionHistory();
     });
 
     // =====================================================================
