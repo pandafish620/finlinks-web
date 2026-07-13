@@ -277,7 +277,7 @@ async function executeTwoPhaseClearing(basePayload, fetchBalances, currency, amo
 
                 if (isOffshoreFLW) {
                     console.log("🚀 [ROUTING SWITCH] 侦测到西非资产调拨，前端执行凌空变道 ➔ 导流至 fx_router.py");
-                    targetApiUrl = "/api/fx/offshore-payout"; 
+                    targetApiUrl = "/ledger/fx/offshore-payout"; 
                     
                     const bPhone = (basePayload.beneficiary_phone || "").trim();
                     const bEmail = (basePayload.beneficiary_email || "").trim();
