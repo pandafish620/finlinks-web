@@ -60,8 +60,18 @@ export async function handleSinglePayoutDisbursal(fetchBalances) {
         ? (elPhone && elPhone.value ? elPhone.value.trim() : "")
         : (accEl && accEl.value ? accEl.value.trim() : "");
 
-    const cleanBankCode = elBankCode && elBankCode.value.trim() ? elBankCode.value.trim() : "044"; 
-    const cleanPhone = elPhone && elPhone.value.trim() ? elPhone.value.trim() : "+2348012345678"; 
+    // 🎯 增量正畸：根据币种极性，动态切换清算编码打捞节点
+    const isNGN = (buyCurrency === "NGN");
+    const elBankSelect = document.getElementById("payout-bank-code-select");
+    const elEmail = document.getElementById("payout-email");
+
+    const cleanBankCode = isNGN
+        ? (elBankSelect ? elBankSelect.value : "044")
+        : (elBankInput && elBankInput.value.trim() ? elBankInput.value.trim() : "021000021");
+
+    // 彻底剥离死锁的默认测试桩数据，抓取真实活体输入
+    const cleanPhone = elPhone && elPhone.value.trim() ? elPhone.value.trim() : ""; 
+    const cleanEmail = elEmail && elEmail.value.trim() ? elEmail.value.trim() : "";
 
     if (!amount || amount <= 0 || !beneficiaryName || !beneficiaryAccount) {
         showNotificationModal({
@@ -82,17 +92,18 @@ export async function handleSinglePayoutDisbursal(fetchBalances) {
 
     const basePayload = {
         "payout_mode": "SINGLE", 
-        "sell_currency": sellCurrency,     // 🟢 正畸：动态指派源头
+        "sell_currency": sellCurrency,
         "amount": amount,                
-        "buy_currency": buyCurrency,       // 🟢 正畸：动态指派目的地
+        "buy_currency": buyCurrency,
         "fx_rate": 1.0,                  
         "routing_via": targetRoutingVia, 
         "quote_timestamp": 0.0,          
         "beneficiary_name": beneficiaryName,        
         "beneficiary_account": beneficiaryAccount,  
         "channel_type": targetChannelType, 
-        "bank_code": cleanBankCode,
-        "phone_number": cleanPhone
+        "beneficiary_bank_code": cleanBankCode,
+        "beneficiary_phone": cleanPhone,
+        "beneficiary_email": cleanEmail
     };
     
     await executeTwoPhaseClearing(basePayload, fetchBalances, buyCurrency, amount, beneficiaryName, beneficiaryAccount);

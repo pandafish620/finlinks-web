@@ -302,10 +302,6 @@
                                         <option value="KES">KES (肯尼亚先令 - M-Pesa 移动放款)</option>
                                         <option value="UGX">UGX (乌干达先令 - MTN 移动打款)</option>
                                         <option value="GHS">GHS (加纳塞地 - Vodafone Mobile Money)</option>
-                                        <option value="TZS">TZS (坦桑尼亚先令 - 东非移动钱包)</option>
-                                        <option value="RWF">RWF (卢旺达法郎 - 东非 MTN 核心网)</option>
-                                        <option value="ZMW">ZMW (赞比亚克瓦查 - Airtel/MTN 钱包)</option>
-                                        <option value="MWK">MWK (马拉维克瓦查 - Airtel / TNM 钱包)</option>
                                     </optgroup>
                                     <optgroup label="👑 VIP 灰度预热通道 (Premium Beta Control)">
                                         <option value="EUR">EUR (欧元区 SEPA 实时清算总线) ⚡</option>
@@ -315,6 +311,10 @@
                                         <option value="IDR">IDR (印尼盾 - BI-FAST 跨国结算总线)</option>
                                         <option value="PHP">PHP (菲律宾比索 - InstaPay 本地极速下发)</option>
                                         <option value="THB">THB (泰国铢 - PromptPay 国家级统一收付网)</option>
+                                        <option value="TZS">TZS (坦桑尼亚先令 - 东非移动钱包)</option>
+                                        <option value="RWF">RWF (卢旺达法郎 - 东非 MTN 核心网)</option>
+                                        <option value="ZMW">ZMW (赞比亚克瓦查 - Airtel/MTN 钱包)</option>
+                                        <option value="MWK">MWK (马拉维克瓦查 - Airtel / TNM 钱包)</option>
                                     </optgroup>
                                 </select>
                             </div>
@@ -322,19 +322,32 @@
                                 <label class="block text-[10px] font-bold text-slate-500">下发金额 (Amount)</label>
                                 <input type="number" id="payout-amount" placeholder="0.00" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 font-mono focus:outline-none focus:border-emerald-500">
                             </div>
+                            
                             <div class="space-y-1" id="payout-bank-group">
-                                <label class="block text-[10px] font-bold text-slate-500">银行清算编码 (Bank Code / Sort Code / ABA 9位路由码)</label>
+                                <label class="block text-[10px] font-bold text-slate-500" id="payout-bank-label">银行清算编码 (Bank Code / Sort Code / ABA 9位路由码)</label>
+                                <select id="payout-bank-code-select" class="hidden w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+                                    <option value="044">Access Bank (044) - 默认</option>
+                                    <option value="058">GTBank (058)</option>
+                                    <option value="057">Zenith Bank (057)</option>
+                                    <option value="011">First Bank (011)</option>
+                                    <option value="033">United Bank for Africa (033)</option>
+                                </select>
                                 <input type="text" id="payout-bank-code" placeholder="美国本地代付请刚性填入 9位 联储路由号，如 021000021" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
                             </div>
+
                             <div class="space-y-1 hidden" id="payout-mobile-group">
-                                <label class="block text-[10px] font-bold text-slate-500">付款人本地电子钱包手机号</label>
-                                <input type="text" id="payout-phone" value="+2348012345678" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
+                                <label class="block text-[10px] font-bold text-slate-500">受益人本地电子钱包手机号 (西非清算刚性必填) <span class="text-red-500">*</span></label>
+                                <input type="text" id="payout-phone" placeholder="例如: +2348012345678" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
+                            </div>
+
+                            <div class="space-y-1 hidden" id="payout-email-group">
+                                <label class="block text-[10px] font-bold text-slate-500">受益人电子邮箱 (选填)</label>
+                                <input type="email" id="payout-email" placeholder="customer@example.com" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-mono">
                             </div>
                         </div>
 
                         <div class="hidden">
-                            <input type="email" id="payout-email" value="merchant_white_label@finlinks.io">
-                            <input type="text" id="payout-address" value="126 Joel Ogunnaike Street, Ikeja">
+                            <input type="text" id="payout-address" value="Lagos, Nigeria">
                             <input type="text" id="payout-swift-code" value="">
                             <input type="text" id="payout-routing-number" value="">
                         </div>
@@ -681,6 +694,45 @@
             });
         };
         
+        // ==============================================================================
+        // 🛰️ 【FinLinks 6.5.0 前端多态自适应闪变总线】挂载点
+        // 🎯 物理功能：像素级绑定 payout-curr 极性，对轧地缘清算要素，支持未来全币种展期
+        // ==============================================================================
+        window.adaptPayoutFormByGeopolitical = function() {
+            const currSelect = document.getElementById("payout-curr");
+            if (!currSelect) return;
+
+            const selectedCurrency = currSelect.value.toUpperCase().trim();
+            console.log(`📡 [GEOPOLITICAL SWITCH] 检测到币种极性切换 ➔ [${selectedCurrency}]`);
+
+            const bankLabel = document.getElementById("payout-bank-label");
+            const bankInput = document.getElementById("payout-bank-code");
+            const bankSelect = document.getElementById("payout-bank-code-select");
+            const mobileGroup = document.getElementById("payout-mobile-group");
+            const emailGroup = document.getElementById("payout-email-group");
+            const phoneInput = document.getElementById("payout-phone");
+
+            if (selectedCurrency === "NGN") {
+                console.log("🇳🇬 [FORM ACTIVE] 切入西非主权清算流，动态变换核心组件形态...");
+                if (bankLabel) bankLabel.innerText = "目标银行代码 (NIBSS Bank Code) *";
+                if (bankInput) bankInput.classList.add("hidden");
+                if (bankSelect) bankSelect.classList.remove("hidden");
+                if (mobileGroup) mobileGroup.classList.remove("hidden");
+                if (emailGroup) emailGroup.classList.remove("hidden");
+                if (phoneInput && phoneInput.value === "+2348012345678") {
+                    phoneInput.value = ""; 
+                }
+                if (phoneInput) phoneInput.placeholder = "+2348012345678";
+            } else {
+                console.log(`🇺🇸 [FORM RESTORE] 还原通用跨国电汇清算形态 [${selectedCurrency}]...`);
+                if (bankLabel) bankLabel.innerText = "银行清算编码 (Bank Code / Sort Code / ABA 9位路由码)";
+                if (bankInput) bankInput.classList.remove("hidden");
+                if (bankSelect) bankSelect.classList.add("hidden");
+                if (mobileGroup) mobileGroup.classList.add("hidden");
+                if (emailGroup) emailGroup.classList.add("hidden");
+                if (phoneInput) phoneInput.value = "";
+            }
+        };
         // 并线点火初始化
         (async function() {
             const activeMerchantId = localStorage.getItem("FINLINKS_ACTIVE_MID") || "admin";
