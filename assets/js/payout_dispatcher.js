@@ -99,8 +99,10 @@ export async function handleSinglePayoutDisbursal(fetchBalances) {
         "routing_via": targetRoutingVia, 
         "quote_timestamp": 0.0,          
         "beneficiary_name": beneficiaryName,        
-        "beneficiary_account": beneficiaryAccount,  
-        "channel_type": targetChannelType, 
+        "beneficiary_account": beneficiaryAccount,
+        "type": (targetChannelType === "BANK_TRANSFER") ? "bank" : "wallet",
+        "channel_type": targetChannelType,
+        "bank_code": cleanBankCode,
         "beneficiary_bank_code": cleanBankCode,
         "beneficiary_phone": cleanPhone,
         "beneficiary_email": cleanEmail
@@ -187,6 +189,9 @@ async function executeTwoPhaseClearing(basePayload, fetchBalances, currency, amo
         const quoteTimestamp = previewData.quote_timestamp || Math.floor(Date.now() / 1000);
         const chosenProvider = previewData.sor_routing?.executed_via || (previewData.payout_route && previewData.payout_route.assigned_provider) || "AIRWALLEX";
         const appliedRate = previewData.sor_routing?.applied_rate || (previewData.payout_route && previewData.payout_route.exchange_rate) || 1.0;
+
+        // 👑 核心正畸：抓到外盘真报价的瞬间，立刻反向灌满 basePayload 骨骼，绝杀 1:1 假账！
+        basePayload.fx_rate = parseFloat(appliedRate);
 
         if (typeof window.pushAuditLog === "function") {
             window.pushAuditLog(`[SOR RATIFIED] 比价决策锁定！通道: [${chosenProvider}] | 执行价: ${appliedRate}`);
