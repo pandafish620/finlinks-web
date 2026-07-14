@@ -247,6 +247,12 @@ async function executeTwoPhaseClearing(basePayload, fetchBalances, currency, amo
                 window.pushAuditLog(`[PAYOUT COMMIT] 操盘手签署放款令，执行秒级背对背核销锁死...`);
             }
 
+            // 👑 1. 提取到顶层：全局刚性硬化打捞线，确保 customer_id 在任何分支都有底牌
+            const storageMid = localStorage.getItem("FINLINKS_ACTIVE_MID");
+            const safeCustomerId = (storageMid && storageMid !== "null" && storageMid.trim() !== "") 
+                ? storageMid.trim() 
+                : (window.currentMerchantId || "admin");
+
             // 👑 修复 Bug 1：彻底洗净 Python 的 getattr，换回原生 JS 安全三元组
             const determineCommitPolarity = () => {
                 if (basePayload.payout_mode === "BATCH") {
@@ -285,12 +291,6 @@ async function executeTwoPhaseClearing(basePayload, fetchBalances, currency, amo
                         alert("❌ [FinLinks 业务拦截] 跨境西非结汇必须填写受益人有效的手机号码（至少10位数字），请检查表单！");
                         return; 
                     }
-
-                    // 👑 修复 Bug 2：前端最强硬化打捞线，确保 customer_id 无论如何都不可能为 Null 
-                    const storageMid = localStorage.getItem("FINLINKS_ACTIVE_MID");
-                    const safeCustomerId = (storageMid && storageMid !== "null" && storageMid.trim() !== "") 
-                        ? storageMid.trim() 
-                        : (window.currentMerchantId || "admin");
 
                     finalizedPayload = {
                         "customer_id": safeCustomerId, // 📢 100% 满血入闸
