@@ -189,9 +189,11 @@ async function executeTwoPhaseClearing(basePayload, fetchBalances, currency, amo
         const quoteTimestamp = previewData.quote_timestamp || Math.floor(Date.now() / 1000);
         const chosenProvider = previewData.sor_routing?.executed_via || (previewData.payout_route && previewData.payout_route.assigned_provider) || "AIRWALLEX";
         const appliedRate = previewData.sor_routing?.applied_rate || (previewData.payout_route && previewData.payout_route.exchange_rate) || 1.0;
-
+        
+        // 👑 1. 刚性提取第一阶段外盘真报价汇率（防止 Scope 踩踏，用安全浮点格式锁死）
+        const realAppliedRate = parseFloat(previewData.sor_routing?.applied_rate || (previewData.payout_route && previewData.payout_route.exchange_rate) || appliedRate || 1.0);
         // 👑 核心正畸：抓到外盘真报价的瞬间，立刻反向灌满 basePayload 骨骼，绝杀 1:1 假账！
-        basePayload.fx_rate = parseFloat(appliedRate);
+        basePayload.fx_rate = realAppliedRate;
 
         if (typeof window.pushAuditLog === "function") {
             window.pushAuditLog(`[SOR RATIFIED] 比价决策锁定！通道: [${chosenProvider}] | 执行价: ${appliedRate}`);
@@ -205,6 +207,12 @@ async function executeTwoPhaseClearing(basePayload, fetchBalances, currency, amo
         const confirmBtn = document.getElementById("order-confirm-btn");
 
         if (!modal || !bodyEl) return;
+        
+        // 👑 3. 算力轧平弹窗显示金额（纠正你的截图问题 1：扣减美元金额错乱）
+        // 扣减源币金额：即为用户填写的 amount
+        const sourceAmountUSD = parseFloat(basePayload.amount);
+        // 目标下发奈拉金额：美金扣减额 * 实弹报价汇率
+        const deliveryAmountNGN = sourceAmountUSD * realAppliedRate;
 
         titleEl.innerText = `💸 离岸代付终审核销中心 [模式: ${basePayload.payout_mode}]`;
         bodyEl.innerHTML = `
@@ -251,7 +259,7 @@ async function executeTwoPhaseClearing(basePayload, fetchBalances, currency, amo
             const storageMid = localStorage.getItem("FINLINKS_ACTIVE_MID");
             const safeCustomerId = (storageMid && storageMid !== "null" && storageMid.trim() !== "") 
                 ? storageMid.trim() 
-                : (window.currentMerchantId || "admin");
+                : (window.currentMerchantId || "admin@finlinks.io");
 
             // 👑 修复 Bug 1：彻底洗净 Python 的 getattr，换回原生 JS 安全三元组
             const determineCommitPolarity = () => {
@@ -291,6 +299,7 @@ async function executeTwoPhaseClearing(basePayload, fetchBalances, currency, amo
                         alert("❌ [FinLinks 业务拦截] 跨境西非结汇必须填写受益人有效的手机号码（至少10位数字），请检查表单！");
                         return; 
                     }
+                    
 
                     finalizedPayload = {
                         "customer_id": safeCustomerId, // 📢 100% 满血入闸
@@ -298,7 +307,7 @@ async function executeTwoPhaseClearing(basePayload, fetchBalances, currency, amo
                         "payout_amount": parseFloat(basePayload.amount),
                         "currency": basePayload.sell_currency,
                         // 👑 绝杀 1:1：强制把第一阶段已经反向灌入 basePayload 里的真实汇率透传给后端
-                        "fx_rate": parseFloat(basePayload.fx_rate || appliedRate || 1.0),
+                        "fx_rate": realAppliedRate,
                         "beneficiary_account": basePayload.beneficiary_account,
                         "beneficiary_name": basePayload.beneficiary_name,
                         "beneficiary_bank_code": basePayload.beneficiary_bank_code,
@@ -311,6 +320,7 @@ async function executeTwoPhaseClearing(basePayload, fetchBalances, currency, amo
                     targetApiUrl = "/payout/create?commit=true";
                     finalizedPayload = {
                         ...basePayload,
+                        "customer_id": safeCustomerId,
                         "commit": true,
                         "quote_timestamp": parseFloat(quoteTimestamp)
                     };
