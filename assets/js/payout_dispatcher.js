@@ -297,7 +297,8 @@ async function executeTwoPhaseClearing(basePayload, fetchBalances, currency, amo
                         "target_merchant_mid": basePayload.beneficiary_account || basePayload.target_merchant_mid,
                         "payout_amount": parseFloat(basePayload.amount),
                         "currency": basePayload.sell_currency,
-                    
+                        // 👑 绝杀 1:1：强制把第一阶段已经反向灌入 basePayload 里的真实汇率透传给后端
+                        "fx_rate": parseFloat(basePayload.fx_rate || appliedRate || 1.0),
                         "beneficiary_account": basePayload.beneficiary_account,
                         "beneficiary_name": basePayload.beneficiary_name,
                         "beneficiary_bank_code": basePayload.beneficiary_bank_code,
