@@ -237,39 +237,37 @@ async function executeTwoPhaseClearing(basePayload, fetchBalances, currency, amo
         }, 500);
 
         confirmBtn.onclick = async function() {
-            clearInterval(payoutTimerInterval);
+            // 预防未定义全局定时器变量抛错的防滑垫片
+            if (typeof payoutTimerInterval !== 'undefined') {
+                clearInterval(payoutTimerInterval);
+            }
             modal.classList.add("opacity-0", "pointer-events-none");
 
             if (typeof window.pushAuditLog === "function") {
                 window.pushAuditLog(`[PAYOUT COMMIT] 操盘手签署放款令，执行秒级背对背核销锁死...`);
             }
 
-            // 🎯 【5.6.9.9 动态极性自愈大闸】：绝对不硬编码！
-            // 如果是批量模式（BATCH）且商户选择了预约/挂起，或者老逻辑本身声明了非实弹，则继承既有极性；
-            // 只有在明确的单笔/即期实弹签署时，才刚性织入 true。
+            // 👑 修复 Bug 1：彻底洗净 Python 的 getattr，换回原生 JS 安全三元组
             const determineCommitPolarity = () => {
                 if (basePayload.payout_mode === "BATCH") {
-                    // 如果批量代付里有特定的预约标志位，或者老代码有特定期待，可以在这里截留返回 false
-                    return getattr(basePayload, "commit", false); 
+                    return (basePayload.commit !== undefined && basePayload.commit !== null) 
+                        ? basePayload.commit 
+                        : false; 
                 }
-                return true; // 纯单笔极速流现货直接给 true
+                return true; 
             };
 
             const commitPayload = {
                 ...basePayload,
-                "commit": determineCommitPolarity(), // 🟢 动态指派，完美兼容 BATCH Scheduled!
+                "commit": determineCommitPolarity(), 
                 "quote_timestamp": parseFloat(quoteTimestamp)
             };
 
             try {
                 console.log("📡 [STAGE-2 COMMIT] 推送真·打款放行令牌:", commitPayload);
                 
-                // 🎯 【5.9.9.9 前端多态变道大闸】：动态捕获上一阶段的通道真决策，原位 1:1 替代老旧 client 请求
-                // ==============================================================================
                 const currentProvider = window.currentSelectedProvider || "AIRWALLEX"; 
                 const buyCurrency = String(basePayload.buy_currency || "").toUpperCase().trim();
-
-                // 判定是否切网去离岸总账血管 (FLUTTERWAVE 通道或奈拉结汇)
                 const isOffshoreFLW = (currentProvider === "FLUTTERWAVE" || buyCurrency === "NGN");
 
                 let targetApiUrl = "/payout/create?commit=true";
@@ -282,28 +280,32 @@ async function executeTwoPhaseClearing(basePayload, fetchBalances, currency, amo
                     const bPhone = (basePayload.beneficiary_phone || "").trim();
                     const bEmail = (basePayload.beneficiary_email || "").trim();
 
-                    // 🛡️ 刚性断路器：非洲手机号清洗后必须存在且通常不低于 10 位数字（排除国家码干扰）
                     const cleanPhoneDigits = bPhone.replace(/\D/g, "");
                     if (cleanPhoneDigits.length < 10) {
                         alert("❌ [FinLinks 业务拦截] 跨境西非结汇必须填写受益人有效的手机号码（至少10位数字），请检查表单！");
-                        return; // 刚性断路，子弹当场拦截
+                        return; 
                     }
 
+                    // 👑 修复 Bug 2：前端最强硬化打捞线，确保 customer_id 无论如何都不可能为 Null 
+                    const storageMid = localStorage.getItem("FINLINKS_ACTIVE_MID");
+                    const safeCustomerId = (storageMid && storageMid !== "null" && storageMid.trim() !== "") 
+                        ? storageMid.trim() 
+                        : (window.currentMerchantId || "admin");
+
                     finalizedPayload = {
-                        "customer_id": basePayload.customer_id || window.currentMerchantId,
-                        "target_merchant_mid": basePayload.target_merchant_mid || basePayload.beneficiary_account,
+                        "customer_id": safeCustomerId, // 📢 100% 满血入闸
+                        "target_merchant_mid": basePayload.beneficiary_account || basePayload.target_merchant_mid,
                         "payout_amount": parseFloat(basePayload.amount),
                         "currency": basePayload.sell_currency,
                     
-                        // 饱和式平铺受益人关键清算要素，1:1 送给后端的适配器
                         "beneficiary_account": basePayload.beneficiary_account,
                         "beneficiary_name": basePayload.beneficiary_name,
                         "beneficiary_bank_code": basePayload.beneficiary_bank_code,
-                        // 🟢 动态对轧：电话确保是真业务数据；邮箱若有则传，无则由后端商户总账动态垫片，前端彻底剥离硬编码
                         "beneficiary_phone": bPhone,
                         "beneficiary_email": bEmail || null
                     };
                 } else {
+                    
                     console.log("🇺🇸 [ROUTING KEEP] 走主流环球流，维持原轨道轰击 payout_router.py");
                     targetApiUrl = "/payout/create?commit=true";
                     finalizedPayload = {
